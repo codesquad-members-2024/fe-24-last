@@ -1,0 +1,12 @@
+{
+    "type": "module",
+    "scripts": {
+        "start": "export MongoDB=mongodb+srv://96limshyun:vI1QcxipDQv7xLt6@cluster0.t4amrc9.mongodb.net/ && nodemon app.js"
+    },
+    "dependencies": {
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.5",
+        "express": "^4.19.2",
+        "mongoose": "^8.4.1"
+    }
+}
