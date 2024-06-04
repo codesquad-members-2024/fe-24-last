@@ -1,9 +1,10 @@
 import "./App.css";
+import Pages from "./pages/Pages";
 
 function App() {
   return (
     <>
-      <div contentEditable style={{ border: '1px solid #ccc', padding: '10px', minHeight: '100px', minWidth: '100px'}}></div>
+      <Pages/>
     </>
   );
 }
