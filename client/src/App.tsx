@@ -67,7 +67,7 @@ const updateArticleRequestById = async (id: number, blocks: Block[]) => {
 const renderBlock = (
   block: Block,
   index: number,
-  handleInput: (e: React.FormEvent<HTMLElement>, index: number, itemIndex?: number) => void
+  handleInput: (e: React.KeyboardEvent<HTMLElement>, index: number, itemIndex?: number) => void
 ) => {
   switch (block.type) {
     case 'header':
@@ -76,7 +76,7 @@ const renderBlock = (
         <Tag
           contentEditable
           suppressContentEditableWarning
-          onInput={(e) => handleInput(e as React.FormEvent<HTMLElement>, index)}
+          onKeyDown={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index)}
         >
           {block.content}
         </Tag>
@@ -86,7 +86,7 @@ const renderBlock = (
         <p
           contentEditable
           suppressContentEditableWarning
-          onInput={(e) => handleInput(e as React.FormEvent<HTMLElement>, index)}
+          onKeyDown={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index)}
         >
           {block.content}
         </p>
@@ -99,7 +99,7 @@ const renderBlock = (
               key={itemIndex}
               contentEditable
               suppressContentEditableWarning
-              onInput={(e) => handleInput(e as React.FormEvent<HTMLElement>, index, itemIndex)}
+              onKeyDown={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index, itemIndex)}
             >
               {item}
             </li>
@@ -113,7 +113,7 @@ const renderBlock = (
           <p
             contentEditable
             suppressContentEditableWarning
-            onInput={(e) => handleInput(e as React.FormEvent<HTMLElement>, index)}
+            onKeyDown={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index)}
           >
             {block.alt}
           </p>
@@ -125,7 +125,7 @@ const renderBlock = (
 };
 
 const BlockRenderer: React.FC<BlockRendererProps> = ({ blocks, handleContentChange }) => {
-  const handleInput = (e: React.FormEvent<HTMLElement>, blockIndex: number, itemIndex?: number) => {
+  const handleInput = (e: React.KeyboardEvent<HTMLElement>, blockIndex: number, itemIndex?: number) => {
     const newBlocks = [...blocks];
     const block = newBlocks[blockIndex];
 
@@ -168,7 +168,7 @@ export default function App() {
 
   const throttledFetch = useCallback(
     throttle((updatedBlocks: Block[]) => {
-      updateArticleRequestById(FIRST_PAGE, updatedBlocks).then(({ content }) => setBlocks(content));
+      updateArticleRequestById(FIRST_PAGE, updatedBlocks);
     }, 1500),
     []
   );
@@ -176,7 +176,6 @@ export default function App() {
   const handleContentChange = (updatedBlock: Block, index: number) => {
     const newBlocks = [...blocks];
     newBlocks[index] = updatedBlock;
-    setBlocks(newBlocks);
     throttledFetch(newBlocks);
   };
 
