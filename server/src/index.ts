@@ -10,6 +10,8 @@ const app: Express = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 mongoose
   .connect('mongodb://localhost:27017/mydatabase')
@@ -46,10 +48,12 @@ app.get('/api/article/:articleId', async (req: Request, res: Response) => {
 app.patch('/api/article/:articleId', async (req: Request, res: Response) => {
   try {
     const { articleId } = req.params;
+    const articleIdNumber = Number(articleId);
+    console.log(req.body);
     const { content } = req.body;
 
-    const updatedArticle = await Article.findByIdAndUpdate(
-      articleId,
+    const updatedArticle = await Article.findOneAndUpdate(
+      { id: articleIdNumber },
       {
         content,
         updatedAt: new Date(),
@@ -73,13 +77,28 @@ app.listen(port, () => {
 });
 
 const initializeDb = async () => {
+  await Article.deleteMany();
   const articleCount = await Article.countDocuments();
 
   if (articleCount === 0) {
     try {
       await Article.insertMany({
         id: 1,
-        content: '테스트 내용\n테스트 내용2\n테스트 내용3',
+        content: [
+          {
+            type: 'header',
+            level: 2,
+            content: 'Hello World',
+          },
+          {
+            type: 'paragraph',
+            content: 'This is a simple paragraph.',
+          },
+          {
+            type: 'list',
+            items: ['First item', 'Second item', 'Third item'],
+          },
+        ],
         updatedAt: '2024-06-03T19:00:00+09:00',
       });
       console.log('article successfully initialized');
