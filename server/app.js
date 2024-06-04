@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import pagesRouter from "./routes/pagesRoute.js";
 import PageSchema from "./model/pages.js";
+import "dotenv/config";
 import cors from "cors";
 
 const app = express();
@@ -9,11 +10,10 @@ const port = 3000;
 
 app.use(cors());
 
-const mongoURI =
-"mongodb+srv://96limshyun:vI1QcxipDQv7xLt6@cluster0.t4amrc9.mongodb.net/"; // env 이동예정
+const mongoURL = process.env.MONGODB_URL;
 
 mongoose
-  .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("MongoDB Connected"))
   .catch((err) => console.log(err));
 
