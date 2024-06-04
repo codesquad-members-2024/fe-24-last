@@ -1,6 +1,6 @@
 # fe-24-last
 
-## 1주차 페어 프로그래밍 [마롱, 새턴]
+## 1주차 페어 프로그래밍 [마롱 marron, 새턴 saturn]
 
 - React + TypeScript + Vite 설정
 - mongoDB 설정
