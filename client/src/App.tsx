@@ -1,5 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { throttle } from 'lodash';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { debounce } from 'lodash';
+import styled from 'styled-components';
 
 interface BlockBase {
   type: string;
@@ -31,8 +32,13 @@ type Block = HeaderBlock | ParagraphBlock | ListBlock | ImageBlock;
 
 interface BlockRendererProps {
   blocks: Block[];
+  setBlocks: (blocks: Block[]) => void;
+  handleFetch: (blocks: Block[]) => void;
   handleContentChange: (block: Block, index: number) => void;
 }
+
+const SERVER = import.meta.env.VITE_SERVER;
+const FIRST_PAGE = 1;
 
 const sendArticleRequestById = async (id: number) => {
   try {
@@ -64,6 +70,10 @@ const updateArticleRequestById = async (id: number, blocks: Block[]) => {
   }
 };
 
+const stopEnterDefaultEvent = (e: React.KeyboardEvent<HTMLElement>) => {
+  if (e.key === 'Enter') e.preventDefault();
+};
+
 const renderBlock = (
   block: Block,
   index: number,
@@ -76,7 +86,8 @@ const renderBlock = (
         <Tag
           contentEditable
           suppressContentEditableWarning
-          onKeyDown={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index)}
+          onKeyUp={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index)}
+          onKeyDown={(e) => stopEnterDefaultEvent(e as React.KeyboardEvent<HTMLElement>)}
         >
           {block.content}
         </Tag>
@@ -86,7 +97,9 @@ const renderBlock = (
         <p
           contentEditable
           suppressContentEditableWarning
-          onKeyDown={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index)}
+          onKeyUp={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index)}
+          onKeyDown={(e) => stopEnterDefaultEvent(e as React.KeyboardEvent<HTMLElement>)}
+          style={{ backgroundColor: 'aliceblue' }}
         >
           {block.content}
         </p>
@@ -99,7 +112,8 @@ const renderBlock = (
               key={itemIndex}
               contentEditable
               suppressContentEditableWarning
-              onKeyDown={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index, itemIndex)}
+              onKeyUp={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index, itemIndex)}
+              onKeyDown={(e) => stopEnterDefaultEvent(e as React.KeyboardEvent<HTMLElement>)}
             >
               {item}
             </li>
@@ -113,7 +127,7 @@ const renderBlock = (
           <p
             contentEditable
             suppressContentEditableWarning
-            onKeyDown={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index)}
+            onKeyUp={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index)}
           >
             {block.alt}
           </p>
@@ -124,12 +138,49 @@ const renderBlock = (
   }
 };
 
-const BlockRenderer: React.FC<BlockRendererProps> = ({ blocks, handleContentChange }) => {
+const addNewBlock = (blocks: Block[], blockIndex: number) => {
+  const previousArr = blocks.slice(0, blockIndex + 1);
+  const nextArr = blocks.slice(blockIndex + 1);
+  const array = [...previousArr, { type: 'paragraph', content: 'test' } as ParagraphBlock, ...nextArr];
+
+  return array;
+};
+
+const isBlankBlock = (block: Block) => {
+  if (!(block.type === 'paragraph')) return false;
+
+  const { content } = block;
+  return content === '';
+};
+
+const removeBlock = (blocks: Block[], blockIndex: number) => {
+  const previousArr = blocks.slice(0, blockIndex);
+  const nextArr = blocks.slice(blockIndex + 1);
+  const removedArray = [...previousArr, ...nextArr];
+
+  return removedArray;
+};
+
+const BlockRenderer: React.FC<BlockRendererProps> = ({ blocks, setBlocks, handleFetch, handleContentChange }) => {
   const handleInput = (e: React.KeyboardEvent<HTMLElement>, blockIndex: number, itemIndex?: number) => {
-    const newBlocks = [...blocks];
+    let newBlocks = [...blocks];
     const block = newBlocks[blockIndex];
 
-    if (itemIndex === undefined) {
+    if (e.key === 'Backspace' && isBlankBlock(block)) {
+      newBlocks = removeBlock(blocks, blockIndex);
+      setBlocks(newBlocks);
+      handleFetch(newBlocks);
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      newBlocks = addNewBlock(blocks, blockIndex);
+      setBlocks(newBlocks);
+      handleFetch(newBlocks);
+      return;
+    }
+
+    if (!itemIndex || itemIndex < 1) {
       if ('content' in block) {
         const updatedBlock = { ...block, content: e.currentTarget.textContent || '' };
         newBlocks[blockIndex] = updatedBlock as typeof block;
@@ -148,27 +199,31 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ blocks, handleContentChan
   };
 
   return (
-    <div>
+    <BlocksWrapper>
       {blocks.map((block, index) => (
         <div key={index}>{renderBlock(block, index, handleInput)}</div>
       ))}
-    </div>
+    </BlocksWrapper>
   );
 };
 
-const SERVER = import.meta.env.VITE_SERVER;
-const FIRST_PAGE = 1;
-
 export default function App() {
   const [blocks, setBlocks] = useState<Block[]>([]);
+  const clientBlocksRef = useRef<Block[]>([]);
 
   useEffect(() => {
-    sendArticleRequestById(FIRST_PAGE).then(({ content }) => setBlocks(content));
+    sendArticleRequestById(FIRST_PAGE).then(({ content }) => {
+      setBlocks(content);
+      clientBlocksRef.current = content;
+    });
   }, []);
 
-  const throttledFetch = useCallback(
-    throttle((updatedBlocks: Block[]) => {
-      updateArticleRequestById(FIRST_PAGE, updatedBlocks);
+  const debouncedFetch = useCallback(
+    debounce((updatedBlocks: Block[]) => {
+      updateArticleRequestById(FIRST_PAGE, updatedBlocks).then(({ content }) => {
+        setBlocks(content);
+        clientBlocksRef.current = content;
+      });
     }, 1500),
     []
   );
@@ -176,12 +231,37 @@ export default function App() {
   const handleContentChange = (updatedBlock: Block, index: number) => {
     const newBlocks = [...blocks];
     newBlocks[index] = updatedBlock;
-    throttledFetch(newBlocks);
+    clientBlocksRef.current[index] = updatedBlock;
+    setBlocks(clientBlocksRef.current);
+    debouncedFetch(clientBlocksRef.current);
   };
 
   return (
-    <div>
-      <BlockRenderer blocks={blocks} handleContentChange={handleContentChange} />
-    </div>
+    <Wrapper>
+      <ContentBox>
+        <BlockRenderer
+          blocks={blocks}
+          setBlocks={setBlocks}
+          handleFetch={debouncedFetch}
+          handleContentChange={handleContentChange}
+        />
+      </ContentBox>
+    </Wrapper>
   );
 }
+
+const Wrapper = styled.div`
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+`;
+
+const ContentBox = styled.div`
+  width: 708px;
+  display: flex;
+`;
+
+const BlocksWrapper = styled.div`
+  width: 100%;
+`;
