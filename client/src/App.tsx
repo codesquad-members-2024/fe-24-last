@@ -141,7 +141,7 @@ const renderBlock = (
 const addNewBlock = (blocks: Block[], blockIndex: number) => {
   const previousArr = blocks.slice(0, blockIndex + 1);
   const nextArr = blocks.slice(blockIndex + 1);
-  const array = [...previousArr, { type: 'paragraph', content: 'test' } as ParagraphBlock, ...nextArr];
+  const array = [...previousArr, { type: 'paragraph', content: '' } as ParagraphBlock, ...nextArr];
 
   return array;
 };
