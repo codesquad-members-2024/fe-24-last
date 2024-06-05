@@ -1,5 +1,5 @@
 {
   "env": {
-      "MONGODB_URL": "mongodb+srv://kelly7kim:Tly1mBvIIHdjOD06@cluster0.fwmk66h.mongodb.net/"
+    "MONGODB_URL": "mongodb+srv://kelly7kim:Tly1mBvIIHdjOD06@cluster0.fwmk66h.mongodb.net/"
   }
 }
