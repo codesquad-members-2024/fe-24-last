@@ -10,6 +10,7 @@ function Pages() {
     </Wrapper>
   );
 }
+
 const Wrapper = styled.div`
   display: flex;
 `;
