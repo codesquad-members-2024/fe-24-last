@@ -13,8 +13,17 @@ const app = express();
 const port = 4000;
 
 app.use(cors());
-app.use(express.json());
 app.use(bodyParser.json());
+
+const initData = async() => {
+    // await Pages.deleteMany({});
+    try {
+        const dbCount = await Pages.countDocuments();
+        if (!dbCount) await Pages.insertMany(data);
+    } catch (error) {
+        console.error("insertMany 에러:", error);
+    }
+}
 
 mongoose
     .connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -28,18 +37,7 @@ db.once("open", async() => {
     await initData()
 });
 
-const initData = async() => {
-    // await Pages.deleteMany({});
-    try {
-        const dbCount = await Pages.countDocuments();
-        if (!dbCount) await Pages.insertMany(data);
-    } catch (error) {
-        console.error("insertMany 에러:", error);
-    }
-}
-
 app.use("/", pagesListRouter);
-
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

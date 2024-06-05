@@ -1,25 +1,52 @@
-import { Link } from "react-router-dom";
-import { getPagesData } from "../services/pageService";
-import { useEffect } from "react";
+import usePageList from "../hooks/usePageList";
+import PageListCard from "../components/PageListCard/PageListCard";
+import { FormOutlined } from "@ant-design/icons";
+import * as S from "../styles/SideBarStyle";
+import Loading from "./Loading";
+import NewPageBtn from "../components/NewPageBtn/NewPageBtn";
+interface ChildrenType {
+    type: String;
+    content: String;
+}
+
+interface BlockType {
+    type: String;
+    content: String;
+    children: [ChildrenType] | [];
+}
+
+export interface PageType {
+    _id: string;
+    title: String;
+    blocklist: [BlockType] | [];
+    parent_id: String | null;
+}
 
 const SideBar = () => {
-    useEffect(() => {
-        const test = async () => {
-            const result = await getPagesData();
-            console.log(result)
-        };
-        test();
-    }, []);
+    const { data, isLoading } = usePageList();
+
     return (
-        <>
-            <div>SideBar</div>
-            <Link to="/page/1">
-                <li>1번 페이지</li>
-            </Link>
-            <Link to="/page/2">
-                <li>2번 페이지</li>
-            </Link>
-        </>
+        <S.SideBarContainer>
+            <S.SideBarHeader>
+                <S.TitleBox>Notion</S.TitleBox>
+                <NewPageBtn parentId={null} iconComponent={FormOutlined} />
+            </S.SideBarHeader>
+            <S.PageCardWrap>
+                {isLoading ? (
+                    <Loading />
+                ) : (
+                    data
+                        .filter((page: PageType) => !page.parent_id)
+                        .map((page: PageType) => (
+                            <PageListCard
+                                key={page._id}
+                                page={page}
+                                pages={data}
+                            />
+                        ))
+                )}
+            </S.PageCardWrap>
+        </S.SideBarContainer>
     );
 };
 

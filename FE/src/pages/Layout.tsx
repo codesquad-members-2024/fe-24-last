@@ -1,14 +1,15 @@
 import { Outlet } from "react-router-dom";
 import SideBar from "./SideBar";
+import * as S from "../styles/LayoutStyle"
 
 const Layout = () => {
     return (
-        <div>
+        <S.LayoutWrap>
             <SideBar />
-            <div>
+            <S.ContentWrap>
                 <Outlet />
-            </div>
-        </div>
+            </S.ContentWrap>
+        </S.LayoutWrap>
     );
 };
 

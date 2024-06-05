@@ -13,29 +13,41 @@ const getPagesData = async () => {
     }
 };
 
-const postNewPage = async () => {
+const postNewPage = async (parentId: string | null) => {
     try {
-        const response = await fetch(serverURL + "pagesList", {
+        const response = await fetch(serverURL + "newPage", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                title: "",
+                title: "untitled",
                 blocklist: [],
-                parent_id: null,
+                parent_id: !!parentId ? parentId : null,
             }),
         });
-        if (!response.ok) {
-            throw new Error(`요청이 잘못되었습니다. 상태 코드: ${response.status}`);
-        } else {
-            console.log("성공");
-            const data = await response.json();
-            return data;
-        }
+        if (!response.ok) throw new Error(`요청이 잘못되었습니다. 상태 코드: ${response.status}`);
+
+        const newPageData = await response.json();
+        return newPageData;
     } catch (error) {
-        console.error("Failed to submit new Pages:", error);
+        console.error("Failed!! error:", error);
     }
 };
 
-export { getPagesData, postNewPage };
+const deletePage = async (id: string) => {
+    try {
+        const response = await fetch(`${serverURL}delete/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        if (!response.ok) throw new Error(`요청이 잘못되었습니다. 상태 코드: ${response.status}`);
+        console.log("성공!")
+    } catch (error) {
+        console.error("Failed!! error:", error);
+    }
+};
+
+export { getPagesData, postNewPage, deletePage };
