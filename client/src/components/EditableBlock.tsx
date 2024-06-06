@@ -1,6 +1,6 @@
 import { Block, HeaderBlock, ImageBlock, ListBlock, ParagraphBlock } from '../constants';
 
-interface EditableBlockProps {
+export interface EditableBlockProps {
   block: Block;
   index: number;
   handleInput: (e: React.KeyboardEvent<HTMLElement>, index: number, itemIndex?: number) => void;
