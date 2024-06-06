@@ -3,12 +3,12 @@ import useCreatePage from "../../hooks/useCreatePage";
 import { useNavigate } from "react-router-dom";
 interface NewPageBtnProps {
     parentId: string | null;
-    iconComponent: React.ElementType;
+    iconComponent: React.ReactNode;
 }
 
 const NewPageBtn = ({
     parentId,
-    iconComponent: IconComponent,
+    iconComponent,
 }: NewPageBtnProps) => {
     const navigate = useNavigate()
     const { mutate } = useCreatePage();
@@ -22,7 +22,7 @@ const NewPageBtn = ({
     }
     return (
         <BtnContainer onClick={handleCreatePage}>
-            <IconComponent />
+            {iconComponent}
         </BtnContainer>
     );
 };

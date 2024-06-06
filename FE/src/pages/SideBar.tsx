@@ -29,7 +29,7 @@ const SideBar = () => {
         <S.SideBarContainer>
             <S.SideBarHeader>
                 <S.TitleBox>Notion</S.TitleBox>
-                <NewPageBtn parentId={null} iconComponent={FormOutlined} />
+                <NewPageBtn parentId={null} iconComponent={<FormOutlined/>} />
             </S.SideBarHeader>
             <S.PageCardWrap>
                 {isLoading ? (
