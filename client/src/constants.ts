@@ -25,3 +25,10 @@ export interface ImageBlock extends BlockBase {
 }
 
 export type Block = HeaderBlock | ParagraphBlock | ListBlock | ImageBlock;
+
+export interface BlockControllerProps {
+  blocks: Block[];
+  setBlocks: (blocks: Block[]) => void;
+  handleFetch: (blocks: Block[]) => void;
+  handleContentChange: (block: Block, index: number) => void;
+}

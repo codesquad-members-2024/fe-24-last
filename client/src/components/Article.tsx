@@ -1,42 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { sendArticleRequestById, updateArticleRequestById } from '../api/fetchArticle';
-import { Block } from '../constants';
-import { debounce } from 'lodash';
 import BlockController from './BlockController';
-
-const FIRST_PAGE = 1;
+import useArticle from '../hooks/useArticle';
 
 export default function Article() {
-  const [blocks, setBlocks] = useState<Block[]>([]);
-  const clientBlocksRef = useRef<Block[]>([]);
-
-  useEffect(() => {
-    sendArticleRequestById(FIRST_PAGE).then(({ content }) => {
-      setBlocks(content);
-    });
-  }, []);
-
-  useEffect(() => {
-    clientBlocksRef.current = blocks;
-  }, [blocks]);
-
-  const debouncedFetch = useCallback(
-    debounce((updatedBlocks: Block[]) => {
-      updateArticleRequestById(FIRST_PAGE, updatedBlocks).then(({ content }) => {
-        setBlocks(content);
-      });
-    }, 1000),
-    []
-  );
-
-  const handleContentChange = (updatedBlock: Block, index: number) => {
-    const newBlocks = [...blocks];
-    newBlocks[index] = updatedBlock;
-    clientBlocksRef.current[index] = updatedBlock;
-    setBlocks(clientBlocksRef.current);
-    debouncedFetch(clientBlocksRef.current);
-  };
+  const { blocks, setBlocks, debouncedFetch, handleContentChange } = useArticle();
 
   return (
     <Wrapper>

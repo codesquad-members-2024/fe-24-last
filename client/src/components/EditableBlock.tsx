@@ -9,6 +9,7 @@ interface EditableBlockProps {
 const stopEnterDefaultEvent = (e: React.KeyboardEvent<HTMLElement>) => {
   if (e.key === 'Enter') e.preventDefault();
 };
+
 const HeaderTag = ({ block, index, handleInput }: EditableBlockProps & { block: HeaderBlock }) => {
   const Tag = `h${block.level}` as keyof JSX.IntrinsicElements;
   return (
@@ -27,8 +28,8 @@ const ParagraphTag = ({ block, index, handleInput }: EditableBlockProps & { bloc
   <p
     contentEditable
     suppressContentEditableWarning
-    onKeyUp={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index)}
-    onKeyDown={(e) => stopEnterDefaultEvent(e as React.KeyboardEvent<HTMLElement>)}
+    onKeyUp={(e) => handleInput(e, index)}
+    onKeyDown={(e) => stopEnterDefaultEvent(e)}
     style={{ backgroundColor: 'aliceblue' }}
   >
     {block.content}
@@ -42,8 +43,8 @@ const ListTag = ({ block, index, handleInput }: EditableBlockProps & { block: Li
         key={itemIndex}
         contentEditable
         suppressContentEditableWarning
-        onKeyUp={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index, itemIndex)}
-        onKeyDown={(e) => stopEnterDefaultEvent(e as React.KeyboardEvent<HTMLElement>)}
+        onKeyUp={(e) => handleInput(e, index, itemIndex)}
+        onKeyDown={(e) => stopEnterDefaultEvent(e)}
       >
         {item}
       </li>
@@ -54,11 +55,7 @@ const ListTag = ({ block, index, handleInput }: EditableBlockProps & { block: Li
 const ImageTag = ({ block, index, handleInput }: EditableBlockProps & { block: ImageBlock }) => (
   <div>
     <img src={block.url} alt={block.alt} />
-    <p
-      contentEditable
-      suppressContentEditableWarning
-      onKeyUp={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index)}
-    >
+    <p contentEditable suppressContentEditableWarning onKeyUp={(e) => handleInput(e, index)}>
       {block.alt}
     </p>
   </div>
