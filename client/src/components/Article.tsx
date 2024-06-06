@@ -1,29 +1,32 @@
-import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { fetchArticleById } from '../api/fetchArticle';
-import EditableBlock from './EditableBlock';
-
-const FIRST_PAGE = 1;
+import BlockController from './BlockController';
+import useArticle from '../hooks/useArticle';
 
 export default function Article() {
-  const [articleBlocks, setArticleBlocks] = useState<string[]>([]);
-
-  useEffect(() => {
-    fetchArticleById(FIRST_PAGE).then((data) => {
-      const contents = data.content.split('\n');
-      setArticleBlocks(contents);
-    });
-  }, []);
+  const { blocks, setBlocks, debouncedFetch, handleContentChange } = useArticle();
 
   return (
-    <ArticleContainer>
-      {articleBlocks && articleBlocks.map((articleBlock) => <EditableBlock>{articleBlock}</EditableBlock>)}
-    </ArticleContainer>
+    <Wrapper>
+      <ContentBox>
+        <BlockController
+          blocks={blocks}
+          setBlocks={setBlocks}
+          handleFetch={debouncedFetch}
+          handleContentChange={handleContentChange}
+        />
+      </ContentBox>
+    </Wrapper>
   );
 }
 
-const ArticleContainer = styled.div`
-  background-color: aliceblue;
+const Wrapper = styled.div`
   width: 100vw;
   height: 100vh;
+  display: flex;
+  justify-content: center;
+`;
+
+const ContentBox = styled.div`
+  width: 708px;
+  display: flex;
 `;
