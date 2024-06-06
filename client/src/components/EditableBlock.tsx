@@ -1,26 +1,76 @@
-import { ReactNode } from 'react';
-import styled from 'styled-components';
+import { Block, HeaderBlock, ImageBlock, ListBlock, ParagraphBlock } from '../constants';
 
 interface EditableBlockProps {
-  className?: string;
-  handleKeyUp?: () => void;
-  children: ReactNode;
+  block: Block;
+  index: number;
+  handleInput: (e: React.KeyboardEvent<HTMLElement>, index: number, itemIndex?: number) => void;
 }
 
-export default function EditableBlock({ className, handleKeyUp = () => {}, children }: EditableBlockProps) {
+const stopEnterDefaultEvent = (e: React.KeyboardEvent<HTMLElement>) => {
+  if (e.key === 'Enter') e.preventDefault();
+};
+const HeaderTag = ({ block, index, handleInput }: EditableBlockProps & { block: HeaderBlock }) => {
+  const Tag = `h${block.level}` as keyof JSX.IntrinsicElements;
   return (
-    <StyledEditableBlock onKeyUp={handleKeyUp} contentEditable="true">
-      <StyledText>{children}</StyledText>
-    </StyledEditableBlock>
+    <Tag
+      contentEditable
+      suppressContentEditableWarning
+      onKeyUp={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index)}
+      onKeyDown={(e) => stopEnterDefaultEvent(e as React.KeyboardEvent<HTMLElement>)}
+    >
+      {block.content}
+    </Tag>
   );
+};
+
+const ParagraphTag = ({ block, index, handleInput }: EditableBlockProps & { block: ParagraphBlock }) => (
+  <p
+    contentEditable
+    suppressContentEditableWarning
+    onKeyUp={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index)}
+    onKeyDown={(e) => stopEnterDefaultEvent(e as React.KeyboardEvent<HTMLElement>)}
+    style={{ backgroundColor: 'aliceblue' }}
+  >
+    {block.content}
+  </p>
+);
+
+const ListTag = ({ block, index, handleInput }: EditableBlockProps & { block: ListBlock }) => (
+  <ul>
+    {block.items.map((item, itemIndex) => (
+      <li
+        key={itemIndex}
+        contentEditable
+        suppressContentEditableWarning
+        onKeyUp={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index, itemIndex)}
+        onKeyDown={(e) => stopEnterDefaultEvent(e as React.KeyboardEvent<HTMLElement>)}
+      >
+        {item}
+      </li>
+    ))}
+  </ul>
+);
+
+const ImageTag = ({ block, index, handleInput }: EditableBlockProps & { block: ImageBlock }) => (
+  <div>
+    <img src={block.url} alt={block.alt} />
+    <p
+      contentEditable
+      suppressContentEditableWarning
+      onKeyUp={(e) => handleInput(e as React.KeyboardEvent<HTMLElement>, index)}
+    >
+      {block.alt}
+    </p>
+  </div>
+);
+
+export default function EditableBlock({ block, index, handleInput }: EditableBlockProps) {
+  const blockTag = {
+    header: <HeaderTag block={block as HeaderBlock} index={index} handleInput={handleInput} />,
+    paragraph: <ParagraphTag block={block as ParagraphBlock} index={index} handleInput={handleInput} />,
+    list: <ListTag block={block as ListBlock} index={index} handleInput={handleInput} />,
+    image: <ImageTag block={block as ImageBlock} index={index} handleInput={handleInput} />,
+  };
+
+  return blockTag[block.type];
 }
-
-const StyledEditableBlock = styled.div`
-  max-width: 100%;
-  width: 100%;
-  padding: 3px 2px;
-`;
-
-const StyledText = styled.span`
-  font-weight: 400;
-`;
