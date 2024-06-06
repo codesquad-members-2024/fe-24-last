@@ -32,6 +32,7 @@ const PageListCard = ({ page, pages, depth = 0 }: PageListCardProps) => {
                 <S.ToggleLinkWrap>
                     <S.ToggleBtn
                         onClick={handleToggle}
+                        aria-label="toggle-button"
                         $isOpen={isOpen}
                         $depth={depth}
                     ></S.ToggleBtn>
@@ -43,11 +44,11 @@ const PageListCard = ({ page, pages, depth = 0 }: PageListCardProps) => {
                     <ModalComponent
                         callBack={handleDeletePage}
                         iconComponent={<MinusOutlined />}
-                        message="정말 삭제하시겠습니끼?"
+                        message="정말 삭제하시겠습니까?"
                     />
                     <NewPageBtn
                         parentId={page._id}
-                        iconComponent={PlusOutlined}
+                        iconComponent={<PlusOutlined />}
                     />
                 </S.ControlBox>
             </S.CardContainer>
