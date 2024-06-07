@@ -1,9 +1,38 @@
 import styled from "styled-components";
+import { FormOutlined, CheckOutlined } from "@ant-design/icons";
+import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+
+interface Page {
+  _id: string;
+  title: string;
+  blocklist: [];
+  parent_id: string;
+}
 
 export function SideBar() {
+  const [pages, setPages] = useState<Page[]>([]);
+
+  useEffect(() => {
+    const fetchPages = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/pages`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch pages");
+        }
+        const data = await response.json();
+        setPages(data);
+      } catch (error) {
+        console.error("Error fetching pages:", error);
+      }
+    };
+
+    fetchPages();
+  }, []);
+
   const handleNewPage = async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/pages", {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/pages`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -27,15 +56,24 @@ export function SideBar() {
       <Wrapper>
         <StyledTopBox>
           <UserInfo>사용자 이름</UserInfo>
-          <NewPageButton onClick={handleNewPage}>+</NewPageButton>
+          <NewPageButton onClick={handleNewPage}>
+            <FormOutlined />
+          </NewPageButton>
         </StyledTopBox>
-        <StyledMidleBox>
-          <div>개인 페이지</div>
-          <></>
-        </StyledMidleBox>
+        <StyledMiddleBox>
+          <div className="mypages">개인 페이지</div>
+          <StyledPages>
+            {pages.map((page) => (
+              <StyledLink to={`/${page._id}`} state={page} key={page._id}>
+                {page.title || "제목 없음"}
+              </StyledLink>
+            ))}
+          </StyledPages>
+        </StyledMiddleBox>
         <StyledBottomBox>
           <TemplateButton>
-            <div>✔️ 할 일 목록 템플릿</div>
+            <CheckOutlined />
+            <div>할 일 목록 템플릿</div>
           </TemplateButton>
         </StyledBottomBox>
       </Wrapper>
@@ -76,10 +114,18 @@ const NewPageButton = styled.div`
   cursor: pointer;
 `;
 
-const StyledMidleBox = styled.div`
-  div {
-    padding: 0 15px;
+const StyledMiddleBox = styled.div`
+  padding: 0 15px;
+  .mypages {
+    color: gray;
+    margin-bottom: 10px;
   }
+`;
+
+const StyledPages = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 `;
 
 const StyledBottomBox = styled.div`
@@ -88,6 +134,13 @@ const StyledBottomBox = styled.div`
   align-items: center;
   margin-bottom: 100px;
 `;
+
 const TemplateButton = styled.div`
+  display: flex;
   padding: 0 15px;
+`;
+
+const StyledLink = styled(Link)`
+  color: unset;
+  text-decoration: unset;
 `;
