@@ -13,6 +13,19 @@ pagesRouter.get("/api/pages", async (req, res) => {
   }
 });
 
+pagesRouter.get("/api/pages/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const page = await Page.findById(id);
+    if (!page) {
+      return res.status(404).json({ message: "Page not found" });
+    }
+    res.json(page);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 pagesRouter.post("/api/pages", async (req, res) => {
   console.log(req.body);
   try {
