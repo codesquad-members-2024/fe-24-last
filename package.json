@@ -1,0 +1,18 @@
+{
+	"name": "fe-24-last",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"babel": "npx babel jsx/main.js --out-file src/main.js"
+	},
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@babel/cli": "^7.24.7",
+		"@babel/core": "^7.24.7",
+		"@babel/plugin-transform-react-jsx": "^7.24.7",
+		"@babel/preset-env": "^7.24.7"
+	}
+}
