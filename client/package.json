@@ -12,6 +12,7 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.3.7",
     "@types/lodash": "^4.17.4",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
