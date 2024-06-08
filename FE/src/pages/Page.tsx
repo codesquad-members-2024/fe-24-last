@@ -1,17 +1,33 @@
-import { useLocation, useParams } from "react-router-dom"
-
+import { useLocation, useParams } from "react-router-dom";
+import styled from "styled-components";
+import { PageType } from "./SideBar";
+import BlockEditor from "../components/BlockEditor/BlockEditor";
+import TitleEditor from "../components/TitleEditor/TitleEditor";
 const Page = () => {
     const { id } = useParams();
     const location = useLocation();
-    const state = location.state || {};
-    // state 전개 연산자로 분리
-  return (
-    <div>
-      <div>{state.title}</div>
-      <div>{id}번 페이지입니다.</div>
-    </div>
-  )
-}
+    const state: PageType = location.state || {};
+    const { blocklist } = state;
 
-// export default React.memo(Page)
-export default Page
+    return (
+        <PageContainer>
+            <TitleEditor id={id} title={state.title}/>
+            {blocklist &&
+                blocklist.map((currentBlock, idx) => (
+                    <BlockEditor
+                        key={idx}
+                        id={id}
+                        type={currentBlock.type}
+                        content={currentBlock.content}
+                    />
+                ))}
+        </PageContainer>
+    );
+};
+
+export default Page;
+
+const PageContainer = styled.div`
+    max-width: 100%;
+    height: 100%;
+`;

@@ -5,7 +5,6 @@ const SideBarContainer = styled.section`
     height: 100%;
     background-color: #F7F7F5;
     border-right: 1px solid #E1E1DF;
-    position: fixed;
     top: 0;
     left: 0;
     overflow-y: auto;

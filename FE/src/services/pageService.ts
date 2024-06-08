@@ -50,4 +50,19 @@ const deletePage = async (id: string) => {
     }
 };
 
-export { getPagesData, postNewPage, deletePage };
+const patchTitle = async(tableName: string, title: any) => {
+    try {
+        const response = await fetch(serverURL + tableName, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(title),
+        });
+        if (!response.ok) throw new Error(`요청이 잘못되었습니다. 상태 코드: ${response.status}`);
+    } catch (error) {
+        console.error("Failed!! error:", error);
+    }
+}
+
+export { getPagesData, postNewPage, deletePage, patchTitle };
