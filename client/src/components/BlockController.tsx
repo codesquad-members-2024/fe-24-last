@@ -1,7 +1,7 @@
 import { BlockControllerProps } from '../constants';
-import styled from 'styled-components';
 import EditableBlock from './EditableBlock';
 import useBlockController from '../hooks/useBlockController';
+import { ColumnGap } from '../styles/themes';
 
 export default function BlockController(props: BlockControllerProps) {
   const { blocks } = props;
@@ -9,16 +9,12 @@ export default function BlockController(props: BlockControllerProps) {
   const showPopup = () => {};
 
   return (
-    <BlocksWrapper>
+    <ColumnGap>
       {blocks.map((block, index) => (
         <div key={index}>
           <EditableBlock block={block} index={index} handleInput={handleInput} showPopup={showPopup} />
         </div>
       ))}
-    </BlocksWrapper>
+    </ColumnGap>
   );
 }
-
-const BlocksWrapper = styled.div`
-  width: 100%;
-`;

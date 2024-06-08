@@ -30,40 +30,41 @@ export default function useBlockController({
   handleFetch,
   handleContentChange,
 }: BlockControllerProps) {
-  const handleInput = (e: KeyboardEvent<HTMLElement>, blockIndex: number, itemIndex?: number) => {
+  const handleInput = (
+    { key, currentTarget: { textContent } }: KeyboardEvent<HTMLElement>,
+    blockIndex: number,
+    itemIndex?: number
+  ) => {
     let newBlocks = [...blocks];
     const block = newBlocks[blockIndex];
 
-    if (e.key === 'Backspace' && isBlankBlock(block)) {
+    if (key === 'Backspace' && isBlankBlock(block)) {
       newBlocks = removeBlock(blocks, blockIndex);
       setBlocks(newBlocks);
       handleFetch(newBlocks);
       return;
     }
 
-    if (e.key === 'Enter') {
+    if (key === 'Enter') {
       newBlocks = addNewBlock(blocks, blockIndex);
       setBlocks(newBlocks);
       handleFetch(newBlocks);
       return;
     }
 
-    if (!itemIndex || itemIndex < 1) {
-      if ('content' in block) {
-        const updatedBlock = { ...block, content: e.currentTarget.textContent || '' };
-        newBlocks[blockIndex] = updatedBlock as typeof block;
-      }
-    } else {
-      if ('items' in block) {
-        const updatedItems = block.items.map((item, idx) =>
-          idx === itemIndex ? e.currentTarget.textContent || '' : item
-        );
-        const updatedBlock = { ...block, items: updatedItems };
-        newBlocks[blockIndex] = updatedBlock as typeof block;
-      }
+    if ((itemIndex === undefined || itemIndex < 0) && 'content' in block) {
+      newBlocks[blockIndex] = { ...block, content: textContent || '' } as typeof block;
+    }
+
+    if ('items' in block && block.items.length > 0) {
+      const updatedItems = block.items.map((item, idx) =>
+        idx === itemIndex ? { type: 'ol-item', content: textContent } : item
+      );
+      newBlocks[blockIndex] = { ...block, items: updatedItems } as typeof block;
     }
 
     handleContentChange(newBlocks[blockIndex], blockIndex);
   };
+
   return { handleInput };
 }

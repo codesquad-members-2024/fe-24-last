@@ -9,7 +9,7 @@ import articleRouter from './routes/articleRouter.js';
 
 dotenv.config();
 
-const MONGO_DB_URL = process.env.MONGO_DB_URL || "";
+const MONGO_DB_URL = process.env.MONGO_DB_URL || '';
 const app: Express = express();
 const port = process.env.PORT || 3000;
 
@@ -19,7 +19,7 @@ const __dirname = dirname(__filename);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/api/article", articleRouter);
+app.use('/api/article', articleRouter);
 
 mongoose
   .connect(MONGO_DB_URL)
@@ -56,8 +56,50 @@ const initializeDb = async () => {
             content: 'This is a simple paragraph.',
           },
           {
-            type: 'list',
-            items: ['First item', 'Second item', 'Third item'],
+            type: 'ordered-list',
+            items: [
+              {
+                type: 'ol-item',
+                content: 'First Item',
+              },
+              {
+                type: 'ol-item',
+                content: 'Second Item',
+              },
+              {
+                type: 'ol-item',
+                content: 'Third Item',
+              },
+            ],
+          },
+          {
+            type: 'ul-item',
+            content: 'First Item',
+          },
+          {
+            type: 'ul-item',
+            content: 'Second Item',
+          },
+          {
+            type: 'ul-item',
+            content: 'Third Item',
+          },
+          {
+            type: 'ordered-list',
+            items: [
+              {
+                type: 'ol-item',
+                content: 'First Item',
+              },
+              {
+                type: 'ol-item',
+                content: 'Second Item',
+              },
+              {
+                type: 'ol-item',
+                content: 'Third Item',
+              },
+            ],
           },
         ],
         updatedAt: '2024-06-03T19:00:00+09:00',

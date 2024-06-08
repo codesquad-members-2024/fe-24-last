@@ -13,9 +13,19 @@ export interface ParagraphBlock extends BlockBase {
   content: string;
 }
 
-export interface ListBlock extends BlockBase {
-  type: 'list';
-  items: string[];
+export interface UnorderedItemBlock extends BlockBase {
+  type: 'ul-item';
+  content: string;
+}
+
+export interface OrderedListBlock extends BlockBase {
+  type: 'ordered-list';
+  items: OrderedItemBlock[];
+}
+
+export interface OrderedItemBlock extends BlockBase {
+  type: 'ol-item';
+  content: string;
 }
 
 export interface ImageBlock extends BlockBase {
@@ -24,7 +34,7 @@ export interface ImageBlock extends BlockBase {
   alt: string;
 }
 
-export type Block = HeaderBlock | ParagraphBlock | ListBlock | ImageBlock;
+export type Block = HeaderBlock | ParagraphBlock | UnorderedItemBlock | OrderedListBlock | ImageBlock;
 
 export interface BlockControllerProps {
   blocks: Block[];

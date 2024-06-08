@@ -35,6 +35,7 @@ export default function useArticle() {
     setBlocks(clientBlocksRef.current);
     debouncedFetch(clientBlocksRef.current);
   };
+
   return {
     blocks,
     setBlocks,
