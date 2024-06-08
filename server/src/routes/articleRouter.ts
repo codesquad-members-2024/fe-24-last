@@ -1,5 +1,6 @@
-import express, { Request, Response, Router } from "express";
-import Article from "../models/Article.js";
+import express, { Request, Response, Router } from 'express';
+import Article from '../models/Article.js';
+import { CustomRequest } from '../index.js';
 
 const articleRouter: Router = express.Router();
 
@@ -40,6 +41,11 @@ articleRouter.patch('/:articleId', async (req: Request, res: Response) => {
 
     if (!updatedArticle) {
       return res.status(404).json({ message: 'Article not found' });
+    }
+
+    const io = (req as unknown as CustomRequest).io;
+    if (io) {
+      io.emit('articleUpdated', updatedArticle);
     }
 
     res.json(updatedArticle);

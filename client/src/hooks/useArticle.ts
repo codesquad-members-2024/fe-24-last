@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Block } from '../constants';
 import { sendArticleRequestById, updateArticleRequestById } from '../api/fetchArticle';
 import { debounce } from 'lodash';
+import { io } from 'socket.io-client';
 
 const FIRST_PAGE = 1;
 
@@ -10,9 +11,19 @@ export default function useArticle() {
   const clientBlocksRef = useRef<Block[]>([]);
 
   useEffect(() => {
+    const socket = io('http://localhost:3000');
+
+    socket.on('articleUpdated', (data) => {
+      setBlocks(data.content);
+    });
+
     sendArticleRequestById(FIRST_PAGE).then(({ content }) => {
       setBlocks(content);
     });
+
+    return () => {
+      socket.off('articleUpdated');
+    };
   }, []);
 
   useEffect(() => {
