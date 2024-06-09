@@ -2,8 +2,10 @@ import styled from "styled-components";
 import { FormOutlined, CheckOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { createNewPage } from "../services/api";
+import { fetchData } from "../services/api";
 
-interface Page {
+export interface Page {
   _id: string;
   title: string;
   blocklist: [];
@@ -16,12 +18,8 @@ export function SideBar() {
   useEffect(() => {
     const fetchPages = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/pages`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch pages");
-        }
-        const data = await response.json();
-        setPages(data);
+        const pages = await fetchData(`pages`);
+        setPages(pages);
       } catch (error) {
         console.error("Error fetching pages:", error);
       }
@@ -31,24 +29,7 @@ export function SideBar() {
   }, []);
 
   const handleNewPage = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/pages`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: "",
-          blocklist: [],
-          parent_id: "",
-        }),
-      });
-      if (!response.ok) {
-        console.log("실패 !");
-      }
-    } catch (error) {
-      console.error("Failed to submit new Pages:", error);
-    }
+    await createNewPage("");
   };
 
   return (
