@@ -1,9 +1,9 @@
 import styled from "styled-components";
 import { FormOutlined, CheckOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { createNewPage } from "../services/api";
 import { fetchData } from "../services/api";
+import PageList from "./PageList";
 
 export interface Page {
   _id: string;
@@ -36,7 +36,7 @@ export function SideBar() {
     <>
       <Wrapper>
         <StyledTopBox>
-          <UserInfo>사용자 이름</UserInfo>
+          <UserInfo>마롱의 노션</UserInfo>
           <NewPageButton onClick={handleNewPage}>
             <FormOutlined />
           </NewPageButton>
@@ -45,9 +45,7 @@ export function SideBar() {
           <div className="mypages">개인 페이지</div>
           <StyledPages>
             {pages.map((page) => (
-              <StyledLink to={`/${page._id}`} state={page} key={page._id}>
-                {page.title || "제목 없음"}
-              </StyledLink>
+              <PageList key={page._id} page={page} />
             ))}
           </StyledPages>
         </StyledMiddleBox>
@@ -77,21 +75,19 @@ const StyledTopBox = styled.div`
   height: 44px;
   display: flex;
   justify-content: space-between;
+  padding: 15px;
 `;
 
 const UserInfo = styled.div`
   height: 100%;
   display: flex;
   align-items: center;
-  padding: 0 10px;
 `;
 
 const NewPageButton = styled.div`
   height: 100%;
   display: flex;
   align-items: center;
-  padding: 0 15px;
-  font-size: 25px;
   cursor: pointer;
 `;
 
@@ -106,7 +102,6 @@ const StyledMiddleBox = styled.div`
 const StyledPages = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
 `;
 
 const StyledBottomBox = styled.div`
@@ -118,10 +113,6 @@ const StyledBottomBox = styled.div`
 
 const TemplateButton = styled.div`
   display: flex;
-  padding: 0 15px;
-`;
-
-const StyledLink = styled(Link)`
-  color: unset;
-  text-decoration: unset;
+  padding: 15px;
+  gap: 10px;
 `;
