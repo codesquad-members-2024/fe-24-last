@@ -9,6 +9,7 @@ export interface Block {
 }
 
 export interface Article {
+  _id: string;
   title: string;
   blocklist: [Block] | [];
   parent_id: string | null;

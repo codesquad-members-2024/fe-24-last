@@ -1,15 +1,18 @@
 import { Outlet } from "react-router-dom";
 import { SideBar } from "../components/SideBar";
 import styled from "styled-components";
+import { ArticlesProvider } from "../contexts/ArticlesProvider";
 
 function Layout() {
   return (
-    <LayoutWrap>
-      <SideBar />
-      <ContentWrap>
-        <Outlet />
-      </ContentWrap>
-    </LayoutWrap>
+    <ArticlesProvider>
+      <LayoutWrap>
+        <SideBar />
+        <ContentWrap>
+          <Outlet />
+        </ContentWrap>
+      </LayoutWrap>
+    </ArticlesProvider>
   );
 }
 

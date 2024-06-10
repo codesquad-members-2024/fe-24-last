@@ -1,36 +1,10 @@
 import styled from "styled-components";
 import { FormOutlined, CheckOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
-
-interface Page {
-  _id: string;
-  title: string;
-  blocklist: [];
-  parent_id: string;
-}
+import { useArticles } from "../contexts/ArticlesProvider";
 
 export function SideBar() {
-  const [pages, setPages] = useState<Page[]>([]);
-
-  useEffect(() => {
-    const fetchPages = async () => {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_SERVER_URL}/pages`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch pages");
-        }
-        const data = await response.json();
-        setPages(data);
-      } catch (error) {
-        console.error("Error fetching pages:", error);
-      }
-    };
-
-    fetchPages();
-  }, []);
+  const { articlesData } = useArticles();
 
   const handleNewPage = async () => {
     try {
@@ -65,7 +39,7 @@ export function SideBar() {
         <StyledMiddleBox>
           <div className="mypages">개인 페이지</div>
           <StyledPages>
-            {pages.map((page) => (
+            {articlesData.map((page) => (
               <StyledLink to={`/${page._id}`} state={page} key={page._id}>
                 {page.title || "제목 없음"}
               </StyledLink>
