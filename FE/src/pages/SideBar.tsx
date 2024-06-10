@@ -5,26 +5,25 @@ import * as S from "../styles/SideBarStyle";
 import Loading from "./Loading";
 import NewPageBtn from "../components/NewPageBtn/NewPageBtn";
 interface ChildrenType {
-    type: String;
-    content: String;
+    type: string;
+    content: string;
 }
 
-interface BlockType {
-    type: String;
-    content: String;
+export interface BlockType {
+    type: string;
+    content: string;
     children: [ChildrenType] | [];
 }
 
 export interface PageType {
     _id: string;
-    title: String;
+    title: string;
     blocklist: [BlockType] | [];
-    parent_id: String | null;
+    parent_id: string | null;
 }
 
 const SideBar = () => {
     const { data, isLoading } = usePageList();
-
     return (
         <S.SideBarContainer>
             <S.SideBarHeader>

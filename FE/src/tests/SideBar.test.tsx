@@ -6,7 +6,6 @@ import usePageList from "../hooks/usePageList";
 import { PageType } from "../pages/SideBar";
 import { QueryClient, QueryClientProvider } from "react-query";
 
-// UseQueryResult 인터페이스 정의
 interface UseQueryResult<TData = unknown, TError = unknown> {
     data: TData | undefined;
     isLoading: boolean;

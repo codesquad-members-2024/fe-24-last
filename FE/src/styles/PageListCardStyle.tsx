@@ -2,8 +2,12 @@ import styled from "styled-components";
 import { RightOutlined } from "@ant-design/icons";
 
 const ToggleLinkWrap = styled.div`
-    display: flex;
+    display: inline-block;
     gap: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 `;
 
 const ControlBox = styled.div`
@@ -45,6 +49,7 @@ const CardContainer = styled.div`
 
 const CustomLink = styled.span`
     cursor: pointer;
-`
+    margin-left: 5px;
+`;
 
 export {ToggleLinkWrap, ToggleBtn, CardContainer, ControlBox, CustomLink}
