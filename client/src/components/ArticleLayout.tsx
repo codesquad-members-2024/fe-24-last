@@ -1,63 +1,37 @@
 import styled from "styled-components";
-import { useCallback, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useQuery } from "react-query";
 import debounce from "../utils/debounce";
-import { useLocation, useParams } from "react-router-dom";
+import { fetchArticleById, updateArticleTitle } from "../services/api";
+import { useArticles } from "../contexts/ArticlesProvider";
 
 function ArticleLayout() {
   const { id } = useParams<{ id: string }>();
-  const location = useLocation();
-  const data = location.state;
-  console.log(data);
-  
-  const [title, setTitle] = useState("");
+  const { refetch: refetchArticles } = useArticles();
+  const {
+    data: currentArticle,
+    error,
+    isLoading,
+  } = useQuery(["article", id], () => fetchArticleById(id), {
+    enabled: !!id,
+  });
 
-  useEffect(() => {
-    const fetchId = async () => {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_SERVER_URL}/pages/${id}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch pages");
-        }
-        const data = await response.json();
-        setTitle(data.title);
-      } catch (error) {
-        console.error("Error fetching pages:", error);
-      }
-    };
-
-    fetchId();
-  }, [id]);
-
-  const saveTitle = useCallback(
-    debounce(async (newTitle: string) => {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_SERVER_URL}/pages/${id}`,
-          {
-            method: "PATCH",
-            body: JSON.stringify({ title: newTitle }),
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        const data = await response.json();
-        console.log("Success:", data);
-      } catch (error) {
-        console.error("Error:", error);
-      }
-    }, 1000),
-    [id]
-  );
+  const debouncedSaveTitle = debounce(async (newTitle: string) => {
+    try {
+      await updateArticleTitle(id, newTitle);
+      refetchArticles();
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }, 1000);
 
   const handleTitleChange = (e: React.FormEvent<HTMLDivElement>) => {
     const newTitle = e.currentTarget.innerText;
-    // setTitle(newTitle);
-    saveTitle(newTitle);
+    debouncedSaveTitle(newTitle);
   };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading page</div>;
 
   return (
     <Wrapper>
@@ -67,7 +41,7 @@ function ArticleLayout() {
         onInput={handleTitleChange}
         suppressContentEditableWarning
       >
-        {title}
+        {currentArticle.title}
       </StyledTitleBox>
       <StyledContent></StyledContent>
     </Wrapper>
