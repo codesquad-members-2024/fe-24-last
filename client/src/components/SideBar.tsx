@@ -1,9 +1,9 @@
 import styled from "styled-components";
 import { FormOutlined, CheckOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import { createNewPage } from "../services/api";
-import { fetchData } from "../services/api";
+import { createNewPage, fetchData } from "../services/api";
 import PageList from "./PageList";
+import { buildPageTree } from "../utils/buildTree";
 
 export interface Page {
   _id: string;
@@ -12,14 +12,18 @@ export interface Page {
   parent_id: string;
 }
 
+export interface PageTree extends Page {
+  children: PageTree[];
+}
+
 export function SideBar() {
-  const [pages, setPages] = useState<Page[]>([]);
+  const [pages, setPages] = useState<PageTree[]>([]);
 
   useEffect(() => {
     const fetchPages = async () => {
       try {
-        const pages = await fetchData(`pages`);
-        setPages(pages);
+        const pages: Page[] = await fetchData(`pages`);
+        setPages(buildPageTree(pages)); // 트리구조로 데이터 set
       } catch (error) {
         console.error("Error fetching pages:", error);
       }
@@ -32,31 +36,37 @@ export function SideBar() {
     await createNewPage("");
   };
 
+  const renderPageTree = (pages: PageTree[]) => {
+    return pages.map((page) => (
+      <PageList key={page._id} page={page}>
+        {page.children.length > 0 && (
+          <div style={{ paddingLeft: "10px" }}>
+            {renderPageTree(page.children)}
+          </div>
+        )}
+      </PageList>
+    ));
+  };
+
   return (
-    <>
-      <Wrapper>
-        <StyledTopBox>
-          <UserInfo>마롱의 노션</UserInfo>
-          <NewPageButton onClick={handleNewPage}>
-            <FormOutlined />
-          </NewPageButton>
-        </StyledTopBox>
-        <StyledMiddleBox>
-          <div className="mypages">개인 페이지</div>
-          <StyledPages>
-            {pages.map((page) => (
-              <PageList key={page._id} page={page} />
-            ))}
-          </StyledPages>
-        </StyledMiddleBox>
-        <StyledBottomBox>
-          <TemplateButton>
-            <CheckOutlined />
-            <div>할 일 목록 템플릿</div>
-          </TemplateButton>
-        </StyledBottomBox>
-      </Wrapper>
-    </>
+    <Wrapper>
+      <StyledTopBox>
+        <UserInfo>마롱의 노션</UserInfo>
+        <NewPageButton onClick={handleNewPage}>
+          <FormOutlined />
+        </NewPageButton>
+      </StyledTopBox>
+      <StyledMiddleBox>
+        <div className="mypages">개인 페이지</div>
+        <StyledPages>{renderPageTree(pages)}</StyledPages>
+      </StyledMiddleBox>
+      <StyledBottomBox>
+        <TemplateButton>
+          <CheckOutlined />
+          <div>할 일 목록 템플릿</div>
+        </TemplateButton>
+      </StyledBottomBox>
+    </Wrapper>
   );
 }
 

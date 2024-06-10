@@ -1,21 +1,21 @@
 import styled from "styled-components";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
-import { Link, useNavigate } from "react-router-dom";
-import { Page } from "./SideBar";
 import { createNewPage, deletePage } from "../services/api";
+import { PageTree } from "./SideBar";
 
 interface PageProps {
-  page: Page;
+  page: PageTree;
+  children?: React.ReactNode;
 }
 
-const PageList = ({ page }: PageProps) => {
+const PageList = ({ page, children }: PageProps) => {
   const [isHovered, setIsHovered] = useState(false);
-
   const navigate = useNavigate();
 
   const handleNewChildPage = async () => {
-    await createNewPage(`pages/${page._id}`);
+    await createNewPage(`${page._id}`);
   };
 
   const handleDeletePage = async () => {
@@ -23,20 +23,25 @@ const PageList = ({ page }: PageProps) => {
     navigate(-1);
   };
 
+  const handleNavPage = () => {
+    navigate(`/${page._id}`, { state: page });
+  };
+
   return (
-    <StyledLink
-      to={`/${page._id}`}
-      state={page}
-      key={page._id}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {page.title || "제목 없음"}
-      <IconContainer>
-        {isHovered && <MinusOutlined onClick={handleDeletePage} />}
-        {isHovered && <PlusOutlined onClick={handleNewChildPage} />}
-      </IconContainer>
-    </StyledLink>
+    <>
+      <StyledNav
+        onClick={handleNavPage}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div>{page.title || "제목 없음"}</div>
+        <IconContainer onClick={(e) => e.stopPropagation()}>
+          {isHovered && <MinusOutlined onClick={handleDeletePage} />}
+          {isHovered && <PlusOutlined onClick={handleNewChildPage} />}
+        </IconContainer>
+      </StyledNav>
+      {children}
+    </>
   );
 };
 
@@ -47,12 +52,13 @@ const IconContainer = styled.div`
   gap: 10px;
 `;
 
-const StyledLink = styled(Link)`
+const StyledNav = styled.div`
   display: flex;
   justify-content: space-between;
-  color: unset;
-  text-decoration: unset;
   padding: 5px 0;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
   &:hover {
     background-color: #eaeaea;
     border-radius: 5px;
