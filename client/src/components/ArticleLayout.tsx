@@ -1,9 +1,9 @@
-import styled from "styled-components";
 import { useParams } from "react-router-dom";
 import { useQuery } from "react-query";
 import debounce from "../utils/debounce";
 import { fetchArticleById, updateArticleTitle } from "../services/api";
 import { useArticles } from "../contexts/ArticlesProvider";
+import * as S from "../styles/ArticleLayout";
 
 function ArticleLayout() {
   const { id } = useParams<{ id: string }>();
@@ -34,40 +34,18 @@ function ArticleLayout() {
   if (error) return <div>Error loading page</div>;
 
   return (
-    <Wrapper>
-      <StyledTitleBox
+    <S.Wrapper>
+      <S.TitleBox
         contentEditable
         aria-placeholder="제목없음"
         onInput={handleTitleChange}
         suppressContentEditableWarning
       >
         {currentArticle.title}
-      </StyledTitleBox>
-      <StyledContent></StyledContent>
-    </Wrapper>
+      </S.TitleBox>
+      <S.Content></S.Content>
+    </S.Wrapper>
   );
 }
-
-const Wrapper = styled.div`
-  padding-bottom: 30vh;
-  padding-left: 100px;
-  padding-right: 100px;
-  flex-grow: 1;
-`;
-
-const StyledTitleBox = styled.h1`
-  width: 100%;
-  max-width: 900px;
-  height: 60px;
-  margin-top: 100px;
-  display: flex;
-  align-items: center;
-  &:empty:before {
-    content: attr(aria-placeholder);
-    color: gray;
-  }
-`;
-
-const StyledContent = styled.div``;
 
 export default ArticleLayout;
