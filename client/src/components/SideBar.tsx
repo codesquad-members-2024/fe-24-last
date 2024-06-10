@@ -2,26 +2,15 @@ import styled from "styled-components";
 import { FormOutlined, CheckOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { useArticles } from "../contexts/ArticlesProvider";
+import { createNewPage } from "../services/api";
 
 export function SideBar() {
-  const { articlesData } = useArticles();
+  const { articlesData, refetch: refetchArticles } = useArticles();
 
   const handleNewPage = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/pages`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: "",
-          blocklist: [],
-          parent_id: "",
-        }),
-      });
-      if (!response.ok) {
-        console.log("실패 !");
-      }
+      await createNewPage();
+      refetchArticles();
     } catch (error) {
       console.error("Failed to submit new Pages:", error);
     }
