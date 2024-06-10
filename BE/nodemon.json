@@ -1,0 +1,5 @@
+{
+    "env": {
+        "REACT_APP_MONGODB_URL": "mongodb+srv://96limshyun:vI1QcxipDQv7xLt6@cluster0.t4amrc9.mongodb.net/"
+    }
+}
