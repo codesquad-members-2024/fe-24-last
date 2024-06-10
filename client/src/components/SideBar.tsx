@@ -16,7 +16,9 @@ export function SideBar() {
   useEffect(() => {
     const fetchPages = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/pages`);
+        const response = await fetch(
+          `${import.meta.env.VITE_SERVER_URL}/pages`
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch pages");
         }
