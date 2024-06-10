@@ -1,17 +1,24 @@
 import mongoose, { Schema } from 'mongoose';
 
+const ItemSchema = new Schema(
+  {
+    type: { type: String, required: true },
+    content: { type: String, required: true },
+  },
+  { _id: false }
+);
+
 const BlockSchema = new Schema(
   {
     type: { type: String, required: true },
     content: { type: String },
     level: { type: Number },
-    items: { type: [String] },
     url: { type: String },
     alt: { type: String },
+    items: [ItemSchema],
   },
   { _id: false }
 );
-
 const articleSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
   content: { type: [BlockSchema], required: true },

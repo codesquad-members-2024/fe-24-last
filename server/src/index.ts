@@ -1,25 +1,25 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express } from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import Article from './models/Article.js';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 import articleRouter from './routes/articleRouter.js';
+import { createServer } from 'http';
+import { Server, ServerOptions, Socket } from 'socket.io';
+
+export interface CustomRequest extends Request {
+  io: Server;
+}
 
 dotenv.config();
 
-const MONGO_DB_URL = process.env.MONGO_DB_URL || "";
+const MONGO_DB_URL = process.env.MONGO_DB_URL || '';
 const app: Express = express();
 const port = process.env.PORT || 3000;
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/api/article", articleRouter);
 
 mongoose
   .connect(MONGO_DB_URL)
@@ -33,7 +33,40 @@ db.once('open', () => {
   initializeDb();
 });
 
-app.listen(port, () => {
+const server = createServer(app);
+
+const serverOptions: Partial<ServerOptions> = {
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
+};
+
+const io = new Server(server, serverOptions);
+
+io.on('connection', (socket: Socket) => {
+  console.log('a user connected');
+
+  socket.on('disconnect', () => {
+    console.log('user disconnected');
+  });
+
+  socket.on('message', (msg: string) => {
+    console.log('message: ' + msg);
+    io.emit('message', msg);
+  });
+});
+
+app.use(
+  '/api/article',
+  (req, res, next) => {
+    (req as unknown as CustomRequest).io = io;
+    next();
+  },
+  articleRouter
+);
+
+server.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
 });
 
@@ -56,8 +89,50 @@ const initializeDb = async () => {
             content: 'This is a simple paragraph.',
           },
           {
-            type: 'list',
-            items: ['First item', 'Second item', 'Third item'],
+            type: 'ordered-list',
+            items: [
+              {
+                type: 'ol-item',
+                content: 'First Item',
+              },
+              {
+                type: 'ol-item',
+                content: 'Second Item',
+              },
+              {
+                type: 'ol-item',
+                content: 'Third Item',
+              },
+            ],
+          },
+          {
+            type: 'ul-item',
+            content: 'First Item',
+          },
+          {
+            type: 'ul-item',
+            content: 'Second Item',
+          },
+          {
+            type: 'ul-item',
+            content: 'Third Item',
+          },
+          {
+            type: 'ordered-list',
+            items: [
+              {
+                type: 'ol-item',
+                content: 'First Item',
+              },
+              {
+                type: 'ol-item',
+                content: 'Second Item',
+              },
+              {
+                type: 'ol-item',
+                content: 'Third Item',
+              },
+            ],
           },
         ],
         updatedAt: '2024-06-03T19:00:00+09:00',
