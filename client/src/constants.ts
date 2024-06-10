@@ -42,3 +42,20 @@ export interface BlockControllerProps {
   handleFetch: (blocks: Block[]) => void;
   handleContentChange: (block: Block, index: number) => void;
 }
+
+export interface TeamspaceDescription {
+  id: number;
+  title: string;
+  articles: ArticleDescription[];
+}
+
+export interface ArticleDescription {
+  id: number;
+  title: string;
+  icon: string;
+}
+
+export interface UserDescription {
+  nickname: string;
+  isActive: boolean;
+}

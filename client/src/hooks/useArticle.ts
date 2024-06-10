@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Block } from '../constants';
 import { sendArticleRequestById, updateArticleRequestById } from '../api/fetchArticle';
-import { debounce } from 'lodash';
 import { io } from 'socket.io-client';
+import { debounce } from '../utils/timeoutUtils';
 
 const FIRST_PAGE = 1;
+const SERVER = import.meta.env.VITE_SERVER;
 
 export default function useArticle() {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const clientBlocksRef = useRef<Block[]>([]);
 
   useEffect(() => {
-    const socket = io('http://localhost:3000');
+    const socket = io(SERVER);
 
     socket.on('articleUpdated', (data) => {
       setBlocks(data.content);
