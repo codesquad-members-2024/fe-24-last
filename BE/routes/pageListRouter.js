@@ -60,4 +60,22 @@ pagesListRouter.patch("/api/page/title/:id", async (req, res) => {
     }
 });
 
+pagesListRouter.patch("/api/page/block/:id", async (req, res) => {
+    const { id } = req.params;
+    const { block } = req.body;
+    try {
+        const article = await PageSchema.findById(id);
+
+        if (!article) {
+            return res.status(404).json({ error: "Article not found" });
+        }
+
+        article.blocklist = [...block];
+        await article.save();
+        res.json({ message: "Title updated successfully", article });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
 export default pagesListRouter;

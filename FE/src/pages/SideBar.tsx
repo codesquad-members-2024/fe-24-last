@@ -24,7 +24,6 @@ export interface PageType {
 
 const SideBar = () => {
     const { data, isLoading } = usePageList();
-
     return (
         <S.SideBarContainer>
             <S.SideBarHeader>

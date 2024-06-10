@@ -1,6 +1,7 @@
+const DEBOUNCE_TIME = 700;
+
 const debounce = <T extends (...args: any[]) => Promise<void>>(
     callback: T,
-    delay: number
 ): ((...args: Parameters<T>) => void) => {
     let timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -11,7 +12,7 @@ const debounce = <T extends (...args: any[]) => Promise<void>>(
 
         timer = setTimeout(() => {
             callback(...args);
-        }, delay);
+        }, DEBOUNCE_TIME);
     };
 };
 

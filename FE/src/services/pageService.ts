@@ -4,7 +4,9 @@ const getPagesData = async () => {
     try {
         const response = await fetch(serverURL + "pagesList");
         if (!response.ok) {
-            throw new Error(`요청이 잘못되었습니다. 상태 코드: ${response.status}`);
+            throw new Error(
+                `요청이 잘못되었습니다. 상태 코드: ${response.status}`
+            );
         }
         const data = await response.json();
         return data;
@@ -22,11 +24,18 @@ const postNewPage = async (parentId: string | null) => {
             },
             body: JSON.stringify({
                 title: "untitled",
-                blocklist: [],
+                blocklist: [{
+                    type: "text",
+                    content: "",
+                    children: [],
+                    }],
                 parent_id: !!parentId ? parentId : null,
             }),
         });
-        if (!response.ok) throw new Error(`요청이 잘못되었습니다. 상태 코드: ${response.status}`);
+        if (!response.ok)
+            throw new Error(
+                `요청이 잘못되었습니다. 상태 코드: ${response.status}`
+            );
 
         const newPageData = await response.json();
         return newPageData;
@@ -43,14 +52,17 @@ const deletePage = async (id: string) => {
                 "Content-Type": "application/json",
             },
         });
-        if (!response.ok) throw new Error(`요청이 잘못되었습니다. 상태 코드: ${response.status}`);
-        console.log("성공!")
+        if (!response.ok)
+            throw new Error(
+                `요청이 잘못되었습니다. 상태 코드: ${response.status}`
+            );
+        console.log("성공!");
     } catch (error) {
         console.error("Failed!! error:", error);
     }
 };
 
-const patchTitle = async(tableName: string, title: any) => {
+const patchTitle = async (tableName: string, title: any) => {
     try {
         const response = await fetch(serverURL + tableName, {
             method: "PATCH",
@@ -59,10 +71,31 @@ const patchTitle = async(tableName: string, title: any) => {
             },
             body: JSON.stringify(title),
         });
-        if (!response.ok) throw new Error(`요청이 잘못되었습니다. 상태 코드: ${response.status}`);
+        if (!response.ok)
+            throw new Error(
+                `요청이 잘못되었습니다. 상태 코드: ${response.status}`
+            );
     } catch (error) {
         console.error("Failed!! error:", error);
     }
-}
+};
 
-export { getPagesData, postNewPage, deletePage, patchTitle };
+const patchBlock = async (tableName: string, block: any) => {
+    try {
+        const response = await fetch(serverURL + tableName, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(block),
+        });
+        if (!response.ok)
+            throw new Error(
+                `요청이 잘못되었습니다. 상태 코드: ${response.status}`
+            );
+    } catch (error) {
+        console.error("Failed!! error:", error);
+    }
+};
+
+export { getPagesData, postNewPage, deletePage, patchTitle, patchBlock };
