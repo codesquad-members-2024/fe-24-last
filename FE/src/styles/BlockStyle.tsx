@@ -15,7 +15,12 @@ const Block = styled.div<BlockProps>`
     max-width: 708px;
     outline: none;
     padding: 3px 0px;
-    margin: 0px auto
+    margin: 0px auto;
+    &:empty:before {
+        content: attr(aria-placeholder);
+        color: #aaa;
+        position: absolute;
+    }
 `;
 
 export default Block;
