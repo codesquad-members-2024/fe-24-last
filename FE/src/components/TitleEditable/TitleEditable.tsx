@@ -3,7 +3,7 @@ import { useTitleContext } from "../../hooks/useTitleContext";
 import { useQueryClient, useMutation } from "react-query";
 import { patchTitle } from "../../services/pageService";
 import debounce from "../../utils/debounce";
-import { useCallback} from "react";
+import React , { useCallback }from "react";
 
 interface TitleForm {
     title: string;
@@ -14,7 +14,7 @@ interface TitleEditorProps {
     title: string
 }
 
-const TitleEditor = ({ id, title }: TitleEditorProps) => {
+const TitleEditable = ({ id, title }: TitleEditorProps) => {
     const queryClient = useQueryClient();
     const { setCurrentTitle } = useTitleContext();
 
@@ -45,6 +45,7 @@ const TitleEditor = ({ id, title }: TitleEditorProps) => {
         <TitleView
             contentEditable
             suppressContentEditableWarning={true}
+            aria-placeholder="Untitled"
             onInput={handleInput}
         >
             {title}
@@ -52,7 +53,7 @@ const TitleEditor = ({ id, title }: TitleEditorProps) => {
     );
 };
 
-export default TitleEditor;
+export default React.memo(TitleEditable);
 
 const TitleView = styled.div`
     max-width: 708px;
@@ -61,4 +62,9 @@ const TitleView = styled.div`
     font-weight: bold;
     font-size: 45px;
     margin: 50px auto 0px;
+    &:empty:before {
+        content: attr(aria-placeholder);
+        color: #aaa;
+        position: absolute;
+    }
 `;

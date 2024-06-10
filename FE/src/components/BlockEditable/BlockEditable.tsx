@@ -10,10 +10,10 @@ interface BlockEditorProps {
     type: string;
     content: string;
     handleContentChange: (index: number, content: string) => void;
+    handleKeyDown: (e: React.KeyboardEvent<HTMLDivElement>, index: number) => void;
 }
 
-const BlockEditor = ({ index, id, type, content, handleContentChange }: BlockEditorProps) => {
-    const editorRef = useRef<HTMLDivElement>(null);
+const BlockEditable = ({ index, id, type, content, handleContentChange, handleKeyDown }: BlockEditorProps) => {
     const [isComposing, setIsComposing] = useState(false);
     const caretPositionRef = useRef<{
         startContainer: Node;
@@ -21,29 +21,24 @@ const BlockEditor = ({ index, id, type, content, handleContentChange }: BlockEdi
         endContainer: Node;
         endOffset: number;
     } | null>(null);
-
-    const handleInput = () => {
+    
+    const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
         saveCaretPosition(caretPositionRef);
-        if (!isComposing && editorRef.current && caretPositionRef.current) {
-            const newContent = editorRef.current.textContent ?? "";
+        if (!isComposing && e.currentTarget && caretPositionRef.current) {
+            const newContent = (e.currentTarget as HTMLDivElement).textContent ?? "";
             handleContentChange(index, newContent);
         }
     };
 
-    const handleCompositionEnd = () => {
+    const handleCompositionEnd = (e: React.FormEvent<HTMLDivElement>) => {
         setIsComposing(false);
-        if (editorRef.current) {
-            const newContent = editorRef.current.textContent ?? "";
-            handleContentChange(index, newContent);
-        }
+        const newContent = (e.currentTarget as HTMLDivElement).textContent ?? "";
+        handleContentChange(index, newContent);
     };
 
     useEffect(() => {
         const selection = window.getSelection();
         selection?.removeAllRanges();
-        if (editorRef.current) {
-            editorRef.current.blur();
-        }
         caretPositionRef.current = null;
     }, [id]);
 
@@ -55,12 +50,14 @@ const BlockEditor = ({ index, id, type, content, handleContentChange }: BlockEdi
 
     return (
         <Block
-            ref={editorRef}
+            data-position={index}
             contentEditable
             suppressContentEditableWarning={true}
             onCompositionStart={() => setIsComposing(true)}
             onCompositionEnd={handleCompositionEnd}
+            aria-placeholder="글을 작성하려면 '스페이스'키를, 명령어를 사용하려면 '/'키를 누르세요."
             onInput={handleInput}
+            onKeyDown={(e) => handleKeyDown(e, index)}
             $type={type as keyof typeof blockStyles}
         >
             {content}
@@ -68,4 +65,4 @@ const BlockEditor = ({ index, id, type, content, handleContentChange }: BlockEdi
     );
 };
 
-export default BlockEditor;
+export default BlockEditable;

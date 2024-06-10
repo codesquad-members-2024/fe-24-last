@@ -1,4 +1,4 @@
-const DEBOUNCE_TIME = 700;
+const DEBOUNCE_TIME = 1000;
 
 const debounce = <T extends (...args: any[]) => Promise<void>>(
     callback: T,
