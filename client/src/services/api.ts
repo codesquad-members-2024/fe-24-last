@@ -76,7 +76,7 @@ export const updateData = async (endpoint: string, newData: object) => {
  * @url ${server}/${endpoint}
  */
 
-export const deletePage = async (endpoint: string) => {
+export const deleteData = async (endpoint: string) => {
   try {
     const response = await fetch(`${server}/${endpoint}`, {
       method: "DELETE",
@@ -89,5 +89,36 @@ export const deletePage = async (endpoint: string) => {
     }
   } catch (error) {
     console.error("Error:", error);
+  }
+};
+
+/**
+ * 
+ * @param pageId 
+ * @param index 
+ * @url ${server}/pages/${pageId}/blocks
+ */
+export const createBlock = async (pageId: string, index: number) => {
+  try {
+    const response = await fetch(`${server}/pages/${pageId}/blocks`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: "text",
+        content: "",
+        index: index,
+        children: []
+      }),
+    });
+    if (!response.ok) {
+      throw new Error("실패 !");
+    }
+    return await response.json();
+
+  } catch (error) {
+    console.error("Failed to create block:", error);
+    throw error;
   }
 };
