@@ -1,22 +1,22 @@
 import express from "express";
-import Page from "../model/pages.js";
+import { Pages } from "../model/pages.js";
 
 const pagesRouter = express.Router();
 
-pagesRouter.get("/api/pages", async (req, res) => {
+pagesRouter.get("/", async (req, res) => {
   try {
-    // await Page.deleteMany({});
-    const pagesList = await Page.find();
+    // await Page.deleteMany({})
+    const pagesList = await Pages.find();
     res.json(pagesList);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-pagesRouter.get("/api/pages/:id", async (req, res) => {
+pagesRouter.get("/:id", async (req, res) => {
   try {
     const id = req.params.id;
-    const page = await Page.findById(id);
+    const page = await Pages.findById(id);
     if (!page) {
       return res.status(404).json({ message: "Page not found" });
     }
@@ -26,11 +26,11 @@ pagesRouter.get("/api/pages/:id", async (req, res) => {
   }
 });
 
-pagesRouter.post("/api/pages", async (req, res) => {
+pagesRouter.post("/", async (req, res) => {
   console.log(req.body);
   try {
     const pageData = req.body;
-    const newPage = new Page(pageData);
+    const newPage = new Pages(pageData);
     await newPage.save();
     res.status(200).json({ message: "추가 성공", data: newPage });
   } catch (error) {
@@ -38,7 +38,7 @@ pagesRouter.post("/api/pages", async (req, res) => {
   }
 });
 
-pagesRouter.patch("/api/pages/:id", async (req, res) => {
+pagesRouter.patch("/:id", async (req, res) => {
   const articleId = req.params.id;
   const { title } = req.body;
 
@@ -47,7 +47,7 @@ pagesRouter.patch("/api/pages/:id", async (req, res) => {
   }
 
   try {
-    const article = await Page.findById(articleId);
+    const article = await Pages.findById(articleId);
 
     if (!article) {
       return res.status(404).json({ error: "Article not found" });
