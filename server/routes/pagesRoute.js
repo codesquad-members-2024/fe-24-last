@@ -73,4 +73,19 @@ pagesRouter.patch("/:id", async (req, res) => {
 //   }
 // });
 
+pagesRouter.patch("/:id/block/:blockId", async (req, res) => {
+  const { id: articleId, blockId } = req.params;
+  const { content } = req.body;
+
+  try {
+    const article = await Pages.findById(articleId);
+    const block = article.blocklist.id(blockId);
+    block.content = content;
+    await article.save();
+    res.json({ message: "Block updated successfully", block });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default pagesRouter;

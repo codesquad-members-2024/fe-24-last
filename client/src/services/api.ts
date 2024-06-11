@@ -63,3 +63,31 @@ export const updateArticleTitle = async (
 
   return response.json();
 };
+
+export const updateBlockContent = async (
+  pageId: string | undefined,
+  blockId: string | undefined,
+  newContent: string
+) => {
+  const response = await fetch(
+    `${import.meta.env.VITE_SERVER_URL}/pages/${pageId}/block/${blockId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ content: newContent }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const errorResponse = await response.json();
+    throw new Error(
+      `Failed to update block content: ${
+        errorResponse.error || response.statusText
+      }`
+    );
+  }
+
+  return response.json();
+};
