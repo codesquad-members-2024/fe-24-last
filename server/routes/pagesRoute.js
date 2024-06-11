@@ -5,7 +5,7 @@ const pagesRouter = express.Router();
 
 pagesRouter.get("/api/pages", async (req, res) => {
   try {
-    // await Page.deleteMany({})
+    // await Page.deleteMany({});
     const pagesList = await Page.find();
     res.json(pagesList);
   } catch (error) {

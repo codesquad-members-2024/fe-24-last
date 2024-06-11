@@ -14,7 +14,13 @@ export async function createNewPage() {
     },
     body: JSON.stringify({
       title: "",
-      blocklist: [],
+      blocklist: [
+        {
+          type: "text",
+          content: "",
+          children: [],
+        },
+      ],
       parent_id: "",
     }),
   });

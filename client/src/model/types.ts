@@ -4,6 +4,7 @@ export interface BlockChildren {
 }
 
 export interface Block {
+  _id: string;
   type: string;
   content: string;
 }
