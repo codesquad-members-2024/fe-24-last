@@ -130,9 +130,7 @@ pagesRouter.patch("/api/pages/:id/blocks/:blockId", async (req, res) => {
     block.set(updatedBlockData);
     await page.save();
 
-    res
-      .status(200)
-      .json({ message: "Block updated successfully", data: block });
+    res.status(200).json({ message: "Block updated successfully", data: block });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -146,13 +144,13 @@ pagesRouter.delete("/api/pages/:id/blocks/:blockId", async (req, res) => {
     if (!page) {
       return res.status(404).json({ message: "Page not found" });
     }
-
-    const block = page.blocklist.id(blockId);
-    if (!block) {
+    
+    const blockIndex = page.blocklist.findIndex(block => block.id === blockId);
+    if (blockIndex === 0) {
       return res.status(404).json({ message: "Block not found" });
     }
 
-    block.remove();
+    page.blocklist.splice(blockIndex, 1);
     await page.save();
 
     res.status(200).json({ message: "Block deleted successfully" });
@@ -160,5 +158,6 @@ pagesRouter.delete("/api/pages/:id/blocks/:blockId", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 export default pagesRouter;
