@@ -8,18 +8,13 @@ import { useMutation, useQueryClient } from "react-query";
 import { patchBlock } from "../services/pageService";
 import debounce from "../utils/debounce";
 import moveCursorToStartEnd from "../utils/MoveCursorToStartEnd";
+import { keyEvent } from "../utils/keyEventUtil";
 import {
     DragDropContext,
     Draggable,
     Droppable,
     DropResult,
 } from "@hello-pangea/dnd";
-
-const newBlock: BlockType = {
-    type: "text",
-    content: "",
-    children: [],
-};
 
 const Page = () => {
     const { id } = useParams();
@@ -31,13 +26,7 @@ const Page = () => {
     const [blocks, setBlocks] = useState<BlockType[]>([]);
 
     const { mutate } = useMutation({
-        mutationFn: async ({
-            id,
-            blocks,
-        }: {
-            id: string | undefined;
-            blocks: BlockType[];
-        }) => {
+        mutationFn: async ({id, blocks}: {id: string | undefined, blocks: BlockType[]}) => {
             await patchBlock(`page/block/${id}`, { block: blocks });
         },
         onSuccess: () => {
@@ -52,95 +41,32 @@ const Page = () => {
         setBlocks(updatedBlocks);
     };
 
-    const handleKeyDown = (
-        e: React.KeyboardEvent<HTMLDivElement>,
-        index: number
-    ) => {
-        if (e.nativeEvent.isComposing) {
-            return;
-        }
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, index: number) => {
+        if (e.nativeEvent.isComposing) return;
 
-        const upDateBlock = [...blocks];
+        const updateBlock = [...blocks];
         const selection = window.getSelection();
         const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
-        const curBlock = document.querySelector<HTMLDivElement>(
-            `[data-position="${index}"]`
-        );
+        const curBlock = document.querySelector<HTMLDivElement>(`[data-position="${index}"]`);
 
         switch (e.key) {
             case "Enter":
-                e.preventDefault();
-                upDateBlock.splice(index + 1, 0, newBlock);
-                setBlocks(upDateBlock);
-                currentBlockIdx.current = index + 1;
+                keyEvent.enterEvent({e, setBlocks, updateBlock, currentBlockIdx, index})
                 break;
             case "Backspace":
-                if (index > 0 && !blocks[index].content) {
-                    e.preventDefault();
-                    upDateBlock.splice(index, 1);
-                    setBlocks(upDateBlock);
-                    currentBlockIdx.current = index - 1;
-                }
+                if (index > 0 && !blocks[index].content) keyEvent.backspaceEvent({e, index, updateBlock, setBlocks, currentBlockIdx})
                 break;
             case "ArrowUp":
-                if (index > 0) {
-                    e.preventDefault();
-                    const prevBlock = document.querySelector<HTMLDivElement>(
-                        `[data-position="${index - 1}"]`
-                    );
-                    if (prevBlock) {
-                        setTimeout(
-                            () => moveCursorToStartEnd(prevBlock, false),
-                            0
-                        );
-                        prevBlock.focus();
-                    }
-                }
+                if (index > 0) keyEvent.arrowUpEvent({e, index})
                 break;
             case "ArrowDown":
-                if (index < blocks.length - 1) {
-                    e.preventDefault();
-                    const nextBlock = document.querySelector<HTMLDivElement>(
-                        `[data-position="${index + 1}"]`
-                    );
-                    if (nextBlock) {
-                        moveCursorToStartEnd(nextBlock, false);
-                        nextBlock.focus();
-                    }
-                }
+                if (index < blocks.length - 1) keyEvent.arrowDownEvent({e, index})
                 break;
             case "ArrowRight":
-                if (
-                    range?.endOffset === curBlock?.textContent?.length &&
-                    index < blocks.length - 1
-                ) {
-                    e.preventDefault();
-                    const nextBlock = document.querySelector<HTMLDivElement>(
-                        `[data-position="${index + 1}"]`
-                    );
-                    if (nextBlock) {
-                        nextBlock.focus();
-                        setTimeout(
-                            () => moveCursorToStartEnd(nextBlock, true),
-                            0
-                        );
-                    }
-                }
+                if (range?.endOffset === curBlock?.textContent?.length && index < blocks.length - 1) keyEvent.arrowRightEvent({e, index})
                 break;
             case "ArrowLeft":
-                if (range?.startOffset === 0 && index > 0) {
-                    e.preventDefault();
-                    const prevBlock = document.querySelector<HTMLDivElement>(
-                        `[data-position="${index - 1}"]`
-                    );
-                    if (prevBlock) {
-                        prevBlock.focus();
-                        setTimeout(
-                            () => moveCursorToStartEnd(prevBlock, false),
-                            0
-                        );
-                    }
-                }
+                if (range?.startOffset === 0 && index > 0) keyEvent.arrowLeftEvent({e, index})
                 break;
         }
     };
@@ -271,11 +197,3 @@ const PageContainer = styled.div`
     max-width: 100%;
     height: 100%;
 `;
-
-
-// block은 Reducer state로 사용
-// 페이지 진입시 state.blockList를 Init 데이터로 저장? Init type을 따로 만들어서 저장(SET_INIT)
-// 리듀서로 handleKeyDown 분리 
-// handleKeyDown 자체를 dispatcher로 분리
-// e.key를 action으로 전달한다.
-
