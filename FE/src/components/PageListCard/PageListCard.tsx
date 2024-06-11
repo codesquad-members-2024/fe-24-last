@@ -71,4 +71,4 @@ const PageListCard = ({ page, pages, depth = 0 }: PageListCardProps) => {
     );
 };
 
-export default React.memo(PageListCard);
+export default PageListCard;

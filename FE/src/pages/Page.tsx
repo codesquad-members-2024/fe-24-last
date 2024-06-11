@@ -8,20 +8,27 @@ import { useMutation, useQueryClient } from "react-query";
 import { patchBlock } from "../services/pageService";
 import debounce from "../utils/debounce";
 import moveCursorToStartEnd from "../utils/MoveCursorToStartEnd";
+import {
+    DragDropContext,
+    Draggable,
+    Droppable,
+    DropResult,
+} from "@hello-pangea/dnd";
 
 const newBlock: BlockType = {
     type: "text",
     content: "",
     children: [],
 };
+
 const Page = () => {
     const { id } = useParams();
     const location = useLocation();
     const queryClient = useQueryClient();
     const state: PageType = location.state;
-    const [blocks, setBlocks] = useState<BlockType[]>([]);
     const prevBlock = useRef<BlockType[]>([]);
     const currentBlockIdx = useRef<number | null>(null);
+    const [blocks, setBlocks] = useState<BlockType[]>([]);
 
     const { mutate } = useMutation({
         mutationFn: async ({
@@ -82,11 +89,11 @@ const Page = () => {
                         `[data-position="${index - 1}"]`
                     );
                     if (prevBlock) {
-                        prevBlock.focus();
                         setTimeout(
                             () => moveCursorToStartEnd(prevBlock, false),
                             0
                         );
+                        prevBlock.focus();
                     }
                 }
                 break;
@@ -121,10 +128,7 @@ const Page = () => {
                 }
                 break;
             case "ArrowLeft":
-                if (
-                    range?.startOffset === 0 &&
-                    index > 0
-                ) {
+                if (range?.startOffset === 0 && index > 0) {
                     e.preventDefault();
                     const prevBlock = document.querySelector<HTMLDivElement>(
                         `[data-position="${index - 1}"]`
@@ -150,6 +154,20 @@ const Page = () => {
         ),
         [mutate]
     );
+
+    const handleOnDragEnd = (result: DropResult) => {
+        if (!result.destination) return;
+
+        const items = blocks;
+        const [reorderedItem] = items.splice(result.source.index, 1);
+        items.splice(result.destination.index, 0, reorderedItem);
+
+        setBlocks(items);
+        if (id) {
+            debouncedMutation({ id, blocks });
+            prevBlock.current = [...blocks];
+        }
+    };
 
     useEffect(() => {
         if (
@@ -198,19 +216,51 @@ const Page = () => {
     return (
         <PageContainer>
             <TitleEditable id={id} title={state.title} />
-            {blocks &&
-                blocks.length > 0 &&
-                blocks.map((currentBlock, idx) => (
-                    <BlockEditable
-                        key={idx}
-                        index={idx}
-                        id={id}
-                        type={currentBlock.type}
-                        content={currentBlock.content}
-                        handleContentChange={handleContentChange}
-                        handleKeyDown={handleKeyDown}
-                    />
-                ))}
+            <DragDropContext onDragEnd={handleOnDragEnd}>
+                <Droppable droppableId="droppable">
+                    {(provided) => (
+                        <div
+                            {...provided.droppableProps}
+                            ref={provided.innerRef}
+                        >
+                            {blocks &&
+                                blocks.length > 0 &&
+                                blocks.map((currentBlock, idx) => (
+                                    <Draggable
+                                        key={idx}
+                                        draggableId={String(idx)}
+                                        index={idx}
+                                    >
+                                        {(provided) => (
+                                            <div
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                style={{
+                                                    userSelect: 'none',
+                                                    backgroundColor: '#fff',
+                                                    color: '#333',
+                                                    ...provided.draggableProps.style,
+                                                }}
+                                            >
+                                                <BlockEditable
+                                                    key={idx}
+                                                    index={idx}
+                                                    id={id}
+                                                    type={currentBlock.type}
+                                                    content={currentBlock.content}
+                                                    handleContentChange={handleContentChange}
+                                                    handleKeyDown={handleKeyDown}
+                                                    dragHandleProps={provided.dragHandleProps}
+                                                />
+                                            </div>
+                                        )}
+                                    </Draggable>
+                                ))}
+                            {provided.placeholder}
+                        </div>
+                    )}
+                </Droppable>
+            </DragDropContext>
         </PageContainer>
     );
 };
@@ -223,6 +273,9 @@ const PageContainer = styled.div`
 `;
 
 
-// 커서 처음으로 이동하는 문제
-// 페이지 이동시 커서 위치 기억 문제
-// 한글 조합 문제
+// block은 Reducer state로 사용
+// 페이지 진입시 state.blockList를 Init 데이터로 저장? Init type을 따로 만들어서 저장(SET_INIT)
+// 리듀서로 handleKeyDown 분리 
+// handleKeyDown 자체를 dispatcher로 분리
+// e.key를 action으로 전달한다.
+
