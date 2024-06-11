@@ -62,16 +62,35 @@ pagesRouter.patch("/:id", async (req, res) => {
   }
 });
 
-// pagesRouter.delete("/api/pages", async (req, res) => {
-//   try {
-//     const pageData = req.body;
-//     const newPage = new Page(pageData);
-//     await newPage.save();
-//     res.status(200).json({ message: "삭제 성공", data: newPage });
-//   } catch(error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// });
+pagesRouter.delete("/api/pages", async (req, res) => {
+  try {
+    const pageData = req.body;
+    const newPage = new Page(pageData);
+    await newPage.save();
+    res
+      .status(200)
+      .json({ message: "Page deleted successfully", data: newPage });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+pagesRouter.post("/:id/block", async (req, res) => {
+  const { id: articleId } = req.params;
+  const { type, content, children } = req.body;
+
+  try {
+    const article = await Pages.findById(articleId);
+    const newBlock = { type, content, children };
+    article.blocklist.push(newBlock);
+    await article.save();
+    res
+      .status(201)
+      .json({ message: "Block added successfully", block: newBlock });
+  } catch {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 pagesRouter.patch("/:id/block/:blockId", async (req, res) => {
   const { id: articleId, blockId } = req.params;

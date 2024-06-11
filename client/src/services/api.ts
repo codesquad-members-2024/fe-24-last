@@ -42,10 +42,10 @@ export async function fetchArticleById(id: string | undefined) {
   return response.json();
 }
 
-export const updateArticleTitle = async (
+export async function updateArticleTitle(
   id: string | undefined,
   newTitle: string
-) => {
+) {
   const response = await fetch(
     `${import.meta.env.VITE_SERVER_URL}/pages/${id}`,
     {
@@ -62,13 +62,13 @@ export const updateArticleTitle = async (
   }
 
   return response.json();
-};
+}
 
-export const updateBlockContent = async (
+export async function updateBlockContent(
   pageId: string | undefined,
   blockId: string | undefined,
   newContent: string
-) => {
+) {
   const response = await fetch(
     `${import.meta.env.VITE_SERVER_URL}/pages/${pageId}/block/${blockId}`,
     {
@@ -90,4 +90,27 @@ export const updateBlockContent = async (
   }
 
   return response.json();
-};
+}
+
+export async function createNewBlock(pageId: string | undefined) {
+  const response = await fetch(
+    `${import.meta.env.VITE_SERVER_URL}/pages/${pageId}/block`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        type: "text",
+        content: "",
+        children: [],
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to create new block");
+  }
+
+  return response.json();
+}
