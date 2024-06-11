@@ -2,52 +2,34 @@ import styled from "styled-components";
 import { useCallback, useEffect, useState } from "react";
 import debounce from "../utils/debounce";
 import { useLocation, useParams } from "react-router-dom";
+import { fetchData, updateData } from "../services/api";
 
 function ArticleLayout() {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const data = location.state;
   console.log(data);
-  
-  const [title, setTitle] = useState("");
 
+  const [title, setTitle] = useState("");
   useEffect(() => {
-    const fetchId = async () => {
+    const fetchPage = async () => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_SERVER_URL}/pages/${id}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch pages");
-        }
-        const data = await response.json();
-        setTitle(data.title);
+        const pageData = await fetchData(`pages/${id}`!); // 타입 단언문: id가 확실한 string
+        setTitle(pageData.title);
       } catch (error) {
-        console.error("Error fetching pages:", error);
+        console.error("Error fetching page data:", error);
       }
     };
 
-    fetchId();
+    fetchPage();
   }, [id]);
 
   const saveTitle = useCallback(
     debounce(async (newTitle: string) => {
       try {
-        const response = await fetch(
-          `${import.meta.env.VITE_SERVER_URL}/pages/${id}`,
-          {
-            method: "PATCH",
-            body: JSON.stringify({ title: newTitle }),
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        const data = await response.json();
-        console.log("Success:", data);
+        await updateData(`pages/${id}`!, { title: newTitle }); // 타입 단언문
       } catch (error) {
-        console.error("Error:", error);
+        console.error("Error saving title:", error);
       }
     }, 1000),
     [id]
