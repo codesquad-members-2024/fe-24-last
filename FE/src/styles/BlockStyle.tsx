@@ -2,7 +2,7 @@ import styled, { css } from "styled-components";
 
 export const blockStyles = {
     text: css`
-        margin: auto;
+        
     `,
 };
 
@@ -13,9 +13,10 @@ interface BlockProps {
 const Block = styled.div<BlockProps>`
     ${({ $type }) => blockStyles[$type]};
     max-width: 708px;
+    min-width: 708px;
+    height: 100%;
     outline: none;
-    padding: 3px 0px;
-    margin: 0px auto;
+    
     &:empty:before {
         content: attr(aria-placeholder);
         color: #aaa;
@@ -23,4 +24,22 @@ const Block = styled.div<BlockProps>`
     }
 `;
 
-export default Block;
+const DragHandle = styled.div`
+    visibility: hidden;
+`
+
+const BlockContainer = styled.div`
+    max-width: 750px;
+    padding: 3px 0px;
+    margin: 0px auto;
+    display: flex;
+    gap: 6px;
+    &:hover {
+        ${DragHandle} {
+            visibility: visible
+        }
+    }
+`
+
+
+export {Block, BlockContainer, DragHandle};

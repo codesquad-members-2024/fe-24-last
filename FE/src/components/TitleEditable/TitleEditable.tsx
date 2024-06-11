@@ -27,6 +27,7 @@ const TitleEditable = ({ id, title }: TitleEditorProps) => {
         },
     });
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const debouncedMutation = useCallback(
         debounce(async ({ id, title }: { id: string; title: TitleForm }) => {
             mutate({ id, title });
@@ -53,7 +54,7 @@ const TitleEditable = ({ id, title }: TitleEditorProps) => {
     );
 };
 
-export default React.memo(TitleEditable);
+export default TitleEditable;
 
 const TitleView = styled.div`
     max-width: 708px;
