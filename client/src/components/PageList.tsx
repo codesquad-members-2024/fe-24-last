@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
-import { createNewPage, deletePage } from "../services/api";
+import { createNewPage, deleteData } from "../services/api";
 import { PageTree } from "./SideBar";
 
 interface PageProps {
@@ -19,7 +19,7 @@ const PageList = ({ page, children }: PageProps) => {
   };
 
   const handleDeletePage = async () => {
-    await deletePage(`pages/${page._id}`);
+    await deleteData(`pages/${page._id}`);
     navigate(-1);
   };
 

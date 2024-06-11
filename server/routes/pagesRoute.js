@@ -12,6 +12,18 @@ pagesRouter.get("/api/pages", async (req, res) => {
   }
 });
 
+pagesRouter.post("/api/pages", async (req, res) => {
+  console.log(req.body);
+  try {
+    const pageData = req.body;
+    const newPage = new Page(pageData);
+    await newPage.save();
+    res.status(200).json({ message: "추가 성공", data: newPage });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 pagesRouter.get("/api/pages/:id", async (req, res) => {
   try {
     const pageId = req.params.id;
@@ -20,18 +32,6 @@ pagesRouter.get("/api/pages/:id", async (req, res) => {
       return res.status(404).json({ message: "Page not found" });
     }
     res.json(page);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-pagesRouter.post("/api/pages", async (req, res) => {
-  console.log(req.body);
-  try {
-    const pageData = req.body;
-    const newPage = new Page(pageData);
-    await newPage.save();
-    res.status(200).json({ message: "추가 성공", data: newPage });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -74,5 +74,90 @@ pagesRouter.delete("/api/pages/:id", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+pagesRouter.get("/api/pages/:id/blocks/:blockId", async (req, res) => {
+  try {
+    const { id: pageId, blockId } = req.params;
+
+    const page = await Page.findById(pageId);
+    if (!page) {
+      return res.status(404).json({ message: "Page not found" });
+    }
+
+    const block = page.blocklist.id(blockId);
+    if (!block) {
+      return res.status(404).json({ message: "Block not found" });
+    }
+
+    res.status(200).json(block);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+pagesRouter.post("/api/pages/:id/blocks", async (req, res) => {
+  try {
+    const pageId = req.params.id;
+    const newBlock = req.body;
+
+    const page = await Page.findById(pageId);
+    if (!page) return res.status(404).json({ message: "Page not found" });
+
+    page.blocklist.push(newBlock);
+    await page.save();
+
+    res.status(200).json({ message: "블록 추가 성공", data: newBlock });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+pagesRouter.patch("/api/pages/:id/blocks/:blockId", async (req, res) => {
+  try {
+    const { id: pageId, blockId } = req.params;
+    const updatedBlockData = req.body;
+
+    const page = await Page.findById(pageId);
+    if (!page) {
+      return res.status(404).json({ message: "Page not found" });
+    }
+
+    const block = page.blocklist.id(blockId);
+    if (!block) {
+      return res.status(404).json({ message: "Block not found" });
+    }
+
+    block.set(updatedBlockData);
+    await page.save();
+
+    res.status(200).json({ message: "Block updated successfully", data: block });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+pagesRouter.delete("/api/pages/:id/blocks/:blockId", async (req, res) => {
+  try {
+    const { id: pageId, blockId } = req.params;
+
+    const page = await Page.findById(pageId);
+    if (!page) {
+      return res.status(404).json({ message: "Page not found" });
+    }
+    
+    const blockIndex = page.blocklist.findIndex(block => block.id === blockId);
+    if (blockIndex === 0) {
+      return res.status(404).json({ message: "Block not found" });
+    }
+
+    page.blocklist.splice(blockIndex, 1);
+    await page.save();
+
+    res.status(200).json({ message: "Block deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 
 export default pagesRouter;
