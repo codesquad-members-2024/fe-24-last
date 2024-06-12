@@ -27,8 +27,8 @@ export default function Sidebar({ teamspace, users }: SidebarProps) {
         <span>템플릿</span>
       </SideMenu>
       <SideMenu>현재 접속한 유저</SideMenu>
-      {users.map((user) => (
-        <UserStatus {...user} />
+      {users.map((user, index) => (
+        <UserStatus key={`sidemenu-${index}`} {...user} />
       ))}
     </Wrapper>
   );

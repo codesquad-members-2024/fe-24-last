@@ -20,8 +20,8 @@ export default function Teamspace({ title, articles }: TeamspaceProps) {
         <div></div>
         <span>{title}</span>
       </SideMenu>
-      {articles.map(({ title: articleTitle, icon }) => (
-        <SideMenu>
+      {articles.map(({ title: articleTitle, icon }, index) => (
+        <SideMenu key={`sidemenu-article-${index}`}>
           <IconImage src={icon} />
           <span>{articleTitle}</span>
         </SideMenu>

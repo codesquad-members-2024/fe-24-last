@@ -34,12 +34,33 @@ export const DefaultColor = css`
   color: #5f5e5b;
 `;
 
+export const SubmitColor = css`
+  color: white;
+`;
+
 export const SmallFontSize = css`
   font-size: 12px;
 `;
 
 export const DefaultFontSize = css`
   font-size: 14px;
+`;
+
+export const BoxBackground = css`
+  background-color: #f3f4f6;
+`;
+
+export const SubmitBackground = css`
+  background-color: blue;
+`;
+
+export const BoxBorder = css`
+  border: 1px solid #f3f4f6;
+  border-radius: 16px;
+`;
+
+export const ButtonBorder = css`
+  border-radius: 4px;
 `;
 
 export const SideMenu = styled(RowGap)`
