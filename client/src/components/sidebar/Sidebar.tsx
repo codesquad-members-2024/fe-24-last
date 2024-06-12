@@ -1,6 +1,6 @@
 import { AppstoreOutlined, HomeOutlined, SettingOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
-import { ColumnGap, DefaultFontSize, SideMenu, WeakColor } from '../../styles/themes';
+import { themes, ColumnGap, SideMenu } from '../../styles/themes';
 import UserStatus from './UserStatus';
 import Teamspace from './Teamspace';
 import { TeamspaceDescription, UserDescription } from '../../constants';
@@ -9,6 +9,11 @@ export interface SidebarProps {
   teamspace: TeamspaceDescription;
   users: UserDescription[];
 }
+
+const {
+  Color: { WeakColor },
+  FontSize: { Default },
+} = themes;
 
 export default function Sidebar({ teamspace, users }: SidebarProps) {
   return (
@@ -35,8 +40,7 @@ export default function Sidebar({ teamspace, users }: SidebarProps) {
 }
 
 const Wrapper = styled(ColumnGap)`
-  ${DefaultFontSize}
-
+  font-size: ${Default};
   position: fixed;
   top: 0;
   left: 0;
@@ -49,13 +53,13 @@ const Wrapper = styled(ColumnGap)`
 `;
 
 const HomeButton = styled(HomeOutlined)`
-  ${WeakColor}
+  color: ${WeakColor};
 `;
 
 const SettingButton = styled(SettingOutlined)`
-  ${WeakColor}
+  color: ${WeakColor};
 `;
 
 const TemplateButton = styled(AppstoreOutlined)`
-  ${WeakColor}
+  color: ${WeakColor};
 `;

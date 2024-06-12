@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { FlexColumn, BoxBackground, BoxBorder, ButtonBorder, SubmitBackground, SubmitColor } from '../../styles/themes';
+import { themes, FlexColumn, BoxBorder, ButtonBorder } from '../../styles/themes';
 
 export default function NicknameModal() {
   return (
@@ -10,6 +10,9 @@ export default function NicknameModal() {
     </Wrapper>
   );
 }
+const {
+  Color: { BoxBackground, SubmitColor },
+} = themes;
 
 const Wrapper = styled(FlexColumn)`
   width: 300px;
@@ -22,9 +25,9 @@ const Wrapper = styled(FlexColumn)`
 `;
 
 const NicknameInput = styled.input`
-  ${BoxBackground}
   ${BoxBorder}
 
+  background-color: ${BoxBackground};
   width: 200px;
   height: 30px;
   text-align: center;
@@ -35,10 +38,9 @@ const NicknameInput = styled.input`
 `;
 
 const SubmitButton = styled.button`
-  ${SubmitBackground}
-  ${SubmitColor}
   ${ButtonBorder}
-
+  background-color: ${BoxBackground};
+  color: ${SubmitColor};
   border: 1px solid blue;
   opacity: 0.4;
 
