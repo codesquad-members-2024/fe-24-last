@@ -19,7 +19,7 @@ function ArticleLayout() {
     enabled: !!id,
   });
 
-  const debouncedSaveTitle = debounce(async (newTitle: string) => {
+  const [debouncedSaveTitle] = debounce(async (newTitle: string) => {
     try {
       await updateArticleTitle(id, newTitle);
       refetchArticles();

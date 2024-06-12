@@ -65,7 +65,7 @@ pagesRouter.patch("/:id", async (req, res) => {
 pagesRouter.delete("/api/pages", async (req, res) => {
   try {
     const pageData = req.body;
-    const newPage = new Page(pageData);
+    const newPage = new Pages(pageData);
     await newPage.save();
     res
       .status(200)
@@ -87,7 +87,7 @@ pagesRouter.post("/:id/block", async (req, res) => {
     res
       .status(201)
       .json({ message: "Block added successfully", block: newBlock });
-  } catch {
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
@@ -102,6 +102,21 @@ pagesRouter.patch("/:id/block/:blockId", async (req, res) => {
     block.content = content;
     await article.save();
     res.json({ message: "Block updated successfully", block });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+pagesRouter.delete("/:id/block/:blockId", async (req, res) => {
+  const { id: articleId, blockId } = req.params;
+
+  try {
+    const article = await Pages.findById(articleId);
+    article.blocklist = article.blocklist.filter(
+      (block) => block._id.toString() !== blockId
+    );
+    await article.save();
+    res.json({ message: "Block deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

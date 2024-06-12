@@ -114,3 +114,21 @@ export async function createNewBlock(pageId: string | undefined) {
 
   return response.json();
 }
+
+export async function deleteBlock(
+  pageId: string | undefined,
+  blockId: string | undefined
+) {
+  const response = await fetch(
+    `${import.meta.env.VITE_SERVER_URL}/pages/${pageId}/block/${blockId}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to delete block");
+  }
+
+  return response.json();
+}

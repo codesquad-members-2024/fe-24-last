@@ -1,7 +1,12 @@
+import { useRef } from "react";
 import styled from "styled-components";
 import { Block } from "../model/types";
 import debounce from "../utils/debounce";
-import { updateBlockContent, createNewBlock } from "../services/api";
+import {
+  updateBlockContent,
+  createNewBlock,
+  deleteBlock,
+} from "../services/api";
 import { useParams } from "react-router-dom";
 
 interface BlockBoxProps {
@@ -15,14 +20,18 @@ export default function BlockBox({
 }: BlockBoxProps) {
   const { id: pageId } = useParams<{ id: string }>();
   const { content, _id: blockId } = blockData;
+  const blockRef = useRef<HTMLDivElement>(null);
 
-  const debouncedSaveContent = debounce(async (newContent: string) => {
-    try {
-      await updateBlockContent(pageId, blockId, newContent);
-    } catch (error) {
-      console.error("Error:", error);
-    }
-  }, 1000);
+  const [debouncedSaveContent, clearDebouncedSaveContent] = debounce(
+    async (newContent: string) => {
+      try {
+        await updateBlockContent(pageId, blockId, newContent);
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    },
+    1000
+  );
 
   const handleContentChange = (e: React.FormEvent<HTMLDivElement>) => {
     const newContent = e.currentTarget.innerText;
@@ -38,12 +47,24 @@ export default function BlockBox({
       } catch (error) {
         console.error(error);
       }
+    } else if (e.key === "Backspace") {
+      if (blockRef.current && blockRef.current.innerText === "") {
+        e.preventDefault();
+        try {
+          clearDebouncedSaveContent();
+          await deleteBlock(pageId, blockId);
+          refetchCurrentArticle();
+        } catch (error) {
+          console.error("Error deleting block:", error);
+        }
+      }
     }
   };
 
   return (
     <Wrapper>
       <BlockArea
+        ref={blockRef}
         contentEditable
         onInput={handleContentChange}
         onKeyDown={handleKeyDown}
