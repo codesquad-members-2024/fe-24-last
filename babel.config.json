@@ -1,0 +1,27 @@
+{
+	"presets": [
+		[
+			"@babel/preset-env",
+			{
+				//targets 옵션은 어떤 환경(브라우저 및 Node.js 버전)에서 코드가 실행될지를 정의하여 Babel이 해당 환경에 맞게 코드 변환을 최적화
+				"targets": {
+					"browsers": [
+						"last 2 versions",
+						"not dead",
+						"not < 2%"
+					]
+					// last 2 versions : 각 브라우저의 최신 2개 버전을 대상으로 합니다
+				},
+				"modules": false
+			}
+		],
+		[
+			"@babel/preset-react",
+			{
+				"pragma": "h"
+			}
+			//pragma는 특정 주석을 인식하여 특별한 동작을 수행하도록 설정하는 방법을 의미
+			// 기본적으로 JSX는 React의 React.createElement로 변환됩니다. 하지만 다른 라이브러리나 커스텀 함수로 JSX를 변환하고 싶을 때 pragma를 사용하여 이를 지정할 수 있습니다.
+		]
+	]
+}
