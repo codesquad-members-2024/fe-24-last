@@ -18,7 +18,7 @@ const ControlBox = styled.div`
 `;
 
 const ToggleBtn = styled(RightOutlined)<{ $isOpen: boolean, $depth: number }>`
-    transform: ${({ $isOpen}) => ($isOpen ? 'rotate(90deg)' : 'rotate(0deg)')};
+    transform: ${({ $isOpen }) => ($isOpen ? 'rotate(90deg)' : 'rotate(0deg)')};
     transition: transform 0.2s;
     margin-left: ${({$depth}) => ($depth * 20)}px;
     font-size: 15px;
