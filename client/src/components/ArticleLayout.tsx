@@ -1,8 +1,8 @@
 import styled from "styled-components";
-import { FormEvent, KeyboardEvent, useCallback, useEffect, useState } from "react";
+import { FormEvent, KeyboardEvent, useCallback, useEffect, useState} from "react";
 import debounce from "../utils/debounce";
 import { useLocation, useParams } from "react-router-dom";
-import { createBlock, deleteData, fetchData, updateData } from "../services/api";
+import { createBlock, deleteData, fetchData, updateData} from "../services/api";
 import BlockList from "./BlockList";
 
 export interface Block {
@@ -24,57 +24,46 @@ function ArticleLayout() {
 
   useEffect(() => {
     const fetchPage = async () => {
-      try {
-        const pageData = await fetchData(`pages/${pageId}`);
-        setTitle(pageData.title);
-        if (pageData.blocklist.length === 0) {
-          const defaultBlock = await createBlock(pageId!, 0);
-          setBlocks([defaultBlock]);
-        } else {
-          setBlocks(pageData.blocklist);
-        }
-      } catch (error) {
-        console.error("Error fetching page data:", error);
+      const pageData = await fetchData(`pages/${pageId}`);
+      setTitle(pageData.title);
+      if (pageData.blocklist.length === 0) {
+        const defaultBlock = await createBlock(pageId!, 0);
+        setBlocks([defaultBlock]);
+      } else {
+        setBlocks(pageData.blocklist);
       }
     };
 
     fetchPage();
-  }, [pageId, blocks.length]);
+  }, [pageId]);
 
   const saveTitle = useCallback(
     debounce(async (newTitle: string) => {
-      try {
-        await updateData(`pages/${pageId}`, { title: newTitle });
-      } catch (error) {
-        console.error("Error saving title:", error);
-      }
+      await updateData(`pages/${pageId}`, { title: newTitle });
     }, 1000),
     [pageId]
   );
 
-  const handleTitleChange = (e: React.FormEvent<HTMLDivElement>) => {
+  const handleTitleChange = (e: FormEvent<HTMLDivElement>) => {
     const newTitle = e.currentTarget.innerText;
     // setTitle(newTitle);
     saveTitle(newTitle);
   };
 
-  const handleKeyDown = async ( e: KeyboardEvent<HTMLDivElement>, index: number ) => {
+  const handleKeyDown = async (
+    e: KeyboardEvent<HTMLDivElement>,
+    index: number
+  ) => {
     if (e.key === "Enter") {
       if (e.shiftKey) return;
       e.preventDefault();
-      console.log(index + "인덱스")
-      try {
-        const newBlock = await createBlock(pageId!, index + 1);
-        const updatedBlocks = [
-          ...blocks.slice(0, index + 1),
-          newBlock,
-          ...blocks.slice(index + 1).map((block) => ({ ...block, index: block.index + 1 })),
-        ];
-
-        setBlocks(updatedBlocks);
-      } catch (error) {
-        console.error("Error creating new block:", error);
-      }
+      const newBlock = await createBlock(pageId!, index + 1);
+      const updatedBlocks = [
+        ...blocks.slice(0, index + 1),
+        newBlock,
+        ...blocks.slice(index + 1).map((block) => ({ ...block, index: block.index + 1 })),
+      ];
+      setBlocks(updatedBlocks);
     } else if (e.key === "Backspace" && blocks[index].content === "") {
       e.preventDefault();
       if (blocks.length > 1) {
@@ -84,36 +73,30 @@ function ArticleLayout() {
           ...blocks.slice(index + 1).map((block) => ({ ...block, index: block.index - 1 })),
         ];
         setBlocks(updatedBlocks);
-
-        try {
-          await deleteData(`pages/${pageId}/blocks/${blockToDelete._id}`);
-        } catch (error) {
-          console.error("Error deleting block:", error);
-        }
+        await deleteData(`pages/${pageId}/blocks/${blockToDelete._id}`);
       }
     }
   };
 
   const saveBlock = useCallback(
-    debounce(async (blockId, newContent) => {
-      try {
-        await updateData(`pages/${pageId}/blocks/${blockId}`, {
-          content: newContent,
-        });
-      } catch (error) {
-        console.error("Error updating block:", error);
-      }
+    debounce(async (blockId: string, newContent: string) => {
+      await updateData(`pages/${pageId}/blocks/${blockId}`, {
+        content: newContent,
+      });
     }, 1000),
     [pageId]
   );
 
-  const handleInput = async (e: FormEvent<HTMLDivElement>, index: number) => {
+  const handleInput = (e: FormEvent<HTMLDivElement>, index: number) => {
     const newContent = e.currentTarget.innerText;
     const updatedBlocks = [...blocks];
     updatedBlocks[index].content = newContent;
     // setBlocks(updatedBlocks);
 
-    saveBlock(updatedBlocks[index]._id, newContent);
+    setTimeout(() => {
+      const blockId = updatedBlocks[index + 1]._id;
+      saveBlock(blockId, newContent);
+    }, 0);
   };
 
   return (
@@ -129,7 +112,7 @@ function ArticleLayout() {
       <StyledContentBox>
         {blocks.map((block, index) => (
           <BlockList
-            key={index}
+            key={block._id}
             block={block}
             index={index}
             handleKeyDown={handleKeyDown}
