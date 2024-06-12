@@ -11,12 +11,7 @@ app.use(cors());
 connectDB();
 
 app.use(express.json());
-// app.use(bodyParser.json());
-app.use("/", pagesRouter);
-
-app.get("/", (req, res) => {
-  res.send("하이!");
-});
+app.use("/api/pages", pagesRouter);
 
 app.listen(port, () => {
   console.log(`port ${port}`);

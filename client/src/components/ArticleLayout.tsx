@@ -14,11 +14,12 @@ function ArticleLayout() {
     data: currentArticle,
     error,
     isLoading,
+    refetch: refetchCurrentArticle,
   } = useQuery(["article", id], () => fetchArticleById(id), {
     enabled: !!id,
   });
 
-  const debouncedSaveTitle = debounce(async (newTitle: string) => {
+  const [debouncedSaveTitle] = debounce(async (newTitle: string) => {
     try {
       await updateArticleTitle(id, newTitle);
       refetchArticles();
@@ -48,7 +49,13 @@ function ArticleLayout() {
       </S.TitleBox>
       <S.Content>
         {blocklist.map((block: Block) => {
-          return <BlockBox key={`block-${block._id}`} blockData={block} />;
+          return (
+            <BlockBox
+              key={`block-${block._id}`}
+              blockData={block}
+              refetchCurrentArticle={refetchCurrentArticle}
+            />
+          );
         })}
       </S.Content>
     </S.Wrapper>
