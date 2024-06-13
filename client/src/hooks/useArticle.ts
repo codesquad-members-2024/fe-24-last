@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Block } from '../constants';
-import { sendArticleRequestById, updateArticleRequestById } from '../api/fetchArticle';
+import { sendArticleRequestById, updateArticleRequestById } from '../api/articleAPI';
 import { io } from 'socket.io-client';
 import { debounce } from '../utils/timeoutUtils';
 

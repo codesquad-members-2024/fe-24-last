@@ -1,5 +1,7 @@
 export const mockArticle = {
   id: 1,
+  title: '제목 있음',
+  icon: 'src/anywhere',
   content: [
     {
       type: 'header',

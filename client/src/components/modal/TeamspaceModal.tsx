@@ -2,12 +2,27 @@ import styled from 'styled-components';
 import { TeamspaceDescription } from '../../constants';
 import { FlexColumn } from '../../styles/themes';
 import TeamspacePanel from './TeamspacePanel';
+import { useEffect, useState } from 'react';
+import { postNewTeamspace, sendTeamspaceListRequest } from '../../api/indexAPI';
+import TeamspaceCreateModal from './TeamspaceCreateModal';
 
-export interface TeamspaceModalProps {
-  teamspaces: TeamspaceDescription[];
-}
+export default function TeamspaceModal() {
+  const [teamspaces, setTeamspaces] = useState<TeamspaceDescription[]>([]);
+  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
 
-export default function TeamspaceModal({ teamspaces }: TeamspaceModalProps) {
+  useEffect(() => {
+    sendTeamspaceListRequest().then((data) => setTeamspaces(data));
+  }, []);
+
+  const handleAddButtonClick = () => setIsCreateFormOpen(true);
+  const handleCancelClick = () => setIsCreateFormOpen(false);
+  const handleSubmitClick = (title: string) => {
+    postNewTeamspace(title).then(() => {
+      sendTeamspaceListRequest().then((data) => setTeamspaces(data));
+      setIsCreateFormOpen(false);
+    });
+  };
+
   return (
     <Wrapper>
       <span>팀 스페이스 목록</span>
@@ -18,13 +33,19 @@ export default function TeamspaceModal({ teamspaces }: TeamspaceModalProps) {
           ))}
         </TeamspaceListContent>
       </TeamspaceListBox>
+      <AddButton onClick={handleAddButtonClick}>팀 스페이스 추가 +</AddButton>
+      {isCreateFormOpen && <TeamspaceCreateModal {...{ handleCancelClick, handleSubmitClick }} />}
     </Wrapper>
   );
 }
 
 const Wrapper = styled(FlexColumn)`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 700px;
-  height: 500px;
+  height: 550px;
   border: 1px solid black;
   justify-content: center;
   align-items: center;
@@ -42,11 +63,26 @@ const TeamspaceListContent = styled.div`
   box-sizing: border-box;
   padding: 16px;
   width: 100%;
-  max-height: 100%;
+  height: 100%;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   justify-items: center;
   align-items: center;
   gap: 16px;
   overflow-y: scroll;
+`;
+
+const AddButton = styled.button`
+  width: 150px;
+  height: 24px;
+  color: white;
+  background-color: blue;
+  border: 1px solid blue;
+  border-radius: 12px;
+  opacity: 0.4;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 1;
+  }
 `;

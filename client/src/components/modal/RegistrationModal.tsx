@@ -1,16 +1,30 @@
 import styled from 'styled-components';
 import { BoxBackground, BoxBorder, ButtonBorder, FlexColumn, SubmitBackground, themes } from '../../styles/themes';
+import { useRef } from 'react';
+import { postRegistration } from '../../api/indexAPI';
+import { useNavigate } from 'react-router-dom';
 
 const {
   Color: { SubmitColor },
 } = themes;
 
 export default function RegistrationModal() {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const getInputText = () => {
+    const inputNode = inputRef.current;
+    return inputNode ? inputNode.value : '';
+  };
+  const navigate = useNavigate();
+
+  const handleSubmitClick = () => {
+    postRegistration(getInputText() || '').then(() => navigate('/login'));
+  };
+
   return (
     <Wrapper>
       <span>회원가입</span>
-      <NicknameInput type="text" placeholder="닉네임" />
-      <SubmitButton>확인</SubmitButton>
+      <NicknameInput ref={inputRef} type="text" placeholder="닉네임" />
+      <SubmitButton onClick={handleSubmitClick}>확인</SubmitButton>
     </Wrapper>
   );
 }

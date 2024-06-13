@@ -1,32 +1,25 @@
 import mongoose from 'mongoose';
-import { printErrorAndExit } from '../utils/processUtils';
-import Article from '../models/Article';
-import { mockArticle } from './mockArticle';
+import { printErrorAndExit } from '../utils/processUtils.js';
+import Article from '../models/Article.js';
+import Teamspace from '../models/Teamspace.js';
 
-const initializeDb = async () => {
-  await Article.deleteMany();
-  const articleCount = await Article.countDocuments();
-
-  if (articleCount === 0) {
-    await Article.insertMany(mockArticle);
-    console.log('article successfully initialized');
-  }
+export const initializeDB = async () => {
+  await Article.deleteMany({});
+  await Teamspace.deleteMany({});
 };
 
 export async function setupMongoDB(url: string) {
   try {
     await mongoose.connect(url);
     console.log('mongoDB connected');
+    await initializeDB();
+    console.log('mongoDB successfully initialized');
   } catch (error) {
     printErrorAndExit(error);
   }
 
   const db = mongoose.connection;
   db.on('error', (error) => printErrorAndExit(error));
-  db.once('open', () => {
-    console.log('connected successfully');
-    initializeDb();
-  });
 
   return db;
 }

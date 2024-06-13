@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
 const ItemSchema = new Schema(
   {
@@ -19,12 +19,14 @@ const BlockSchema = new Schema(
   },
   { _id: false }
 );
-const articleSchema = new mongoose.Schema({
-  id: { type: Number, required: true, unique: true },
+
+export const ArticleSchema = new Schema({
+  title: { type: String },
+  icon: { type: String },
   content: { type: [BlockSchema], required: true },
   updatedAt: { type: String, default: '1970-06-03T19:00:00+09:00' },
 });
 
-const Article = mongoose.model('Article', articleSchema);
+const Article = model('Article', ArticleSchema);
 
 export default Article;

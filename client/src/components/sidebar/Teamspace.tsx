@@ -2,13 +2,13 @@ import styled from 'styled-components';
 import { SideMenu } from '../../styles/themes';
 
 interface ArticleDescription {
-  id: number;
+  _id: string;
   title: string;
   icon: string;
 }
 
 export interface TeamspaceProps {
-  id: number;
+  _id: string;
   title: string;
   articles: ArticleDescription[];
 }

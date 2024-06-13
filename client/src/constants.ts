@@ -44,13 +44,13 @@ export interface BlockControllerProps {
 }
 
 export interface TeamspaceDescription {
-  id: number;
+  _id: string;
   title: string;
   articles: ArticleDescription[];
 }
 
 export interface ArticleDescription {
-  id: number;
+  _id: string;
   title: string;
   icon: string;
 }

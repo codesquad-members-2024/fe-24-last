@@ -1,19 +1,34 @@
 import styled from 'styled-components';
 import { themes, FlexColumn, BoxBorder, ButtonBorder } from '../../styles/themes';
+import { useNavigate } from 'react-router-dom';
+import { useRef } from 'react';
+import { postLogin } from '../../api/indexAPI';
 
-export default function NicknameModal() {
-  return (
-    <Wrapper>
-      <span>로그인</span>
-      <NicknameInput type="text" placeholder="닉네임" />
-      <SubmitButton>확인</SubmitButton>
-      <RegistrationButton>회원가입</RegistrationButton>
-    </Wrapper>
-  );
-}
 const {
   Color: { BoxBackground, SubmitColor },
 } = themes;
+
+export default function NicknameModal() {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const getInputText = () => {
+    const inputNode = inputRef.current;
+    return inputNode ? inputNode.value : '';
+  };
+  const navigate = useNavigate();
+
+  const handleSubmitClick = () => {
+    postLogin(getInputText() || '').then(() => navigate('/teamspaces'));
+  };
+
+  return (
+    <Wrapper>
+      <span>로그인</span>
+      <NicknameInput ref={inputRef} type="text" placeholder="닉네임" />
+      <SubmitButton onClick={handleSubmitClick}>확인</SubmitButton>
+      <RegistrationButton onClick={() => navigate('/registration')}>회원가입</RegistrationButton>
+    </Wrapper>
+  );
+}
 
 const Wrapper = styled(FlexColumn)`
   width: 300px;
@@ -40,7 +55,8 @@ const NicknameInput = styled.input`
 
 const SubmitButton = styled.button`
   ${ButtonBorder}
-  background-color: ${BoxBackground};
+
+  background-color: blue;
   color: ${SubmitColor};
   border: 1px solid blue;
   opacity: 0.4;

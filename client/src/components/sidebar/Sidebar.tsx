@@ -4,6 +4,9 @@ import { themes, ColumnGap, SideMenu } from '../../styles/themes';
 import UserStatus from './UserStatus';
 import Teamspace from './Teamspace';
 import { TeamspaceDescription, UserDescription } from '../../constants';
+import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { sendTeamspaceRequestById } from '../../api/teamspaceAPI';
 
 export interface SidebarProps {
   teamspace: TeamspaceDescription;
@@ -15,7 +18,14 @@ const {
   FontSize: { Default },
 } = themes;
 
-export default function Sidebar({ teamspace, users }: SidebarProps) {
+export default function Sidebar() {
+  const [teamspace, setTeamspace] = useState<TeamspaceDescription>();
+  const { teamspaceId } = useParams();
+
+  useEffect(() => {
+    sendTeamspaceRequestById(teamspaceId || '').then((data) => setTeamspace(data));
+  }, []);
+
   return (
     <Wrapper>
       <SideMenu>
@@ -26,15 +36,15 @@ export default function Sidebar({ teamspace, users }: SidebarProps) {
         <SettingButton />
         <span>설정</span>
       </SideMenu>
-      <Teamspace {...teamspace} />
+      {teamspace && <Teamspace {...teamspace} />}
       <SideMenu>
         <TemplateButton />
         <span>템플릿</span>
       </SideMenu>
-      <SideMenu>현재 접속한 유저</SideMenu>
-      {users.map((user, index) => (
+      {/* <SideMenu>현재 접속한 유저</SideMenu>
+      users.map((user, index) => (
         <UserStatus key={`sidemenu-${index}`} {...user} />
-      ))}
+      ))} */}
     </Wrapper>
   );
 }
