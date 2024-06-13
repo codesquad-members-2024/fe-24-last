@@ -4,7 +4,8 @@ import debounce from "../utils/debounce";
 import { useLocation, useParams } from "react-router-dom";
 import { createBlock, deleteData, fetchData, updateData} from "../services/api";
 import BlockList from "./BlockList";
-
+import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd";
+import { HolderOutlined } from "@ant-design/icons";
 export interface Block {
   type: string;
   content: string;
@@ -99,6 +100,25 @@ function ArticleLayout() {
     }, 0);
   };
 
+  const reorder = (list: Block[], startIndex: number, endIndex: number) => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+
+    result.forEach((block, idx) => {
+      block.index = idx;
+    });
+
+    return result;
+  };
+
+  const handleOnDragEnd = (result: DropResult) => {
+    console.log(result);
+    if (!result.destination) return;
+    setBlocks((items) => reorder(items, result.source.index, result.destination!.index)); // null 또는 undefined일 경우 처리
+    updateData
+  };
+
   return (
     <Wrapper>
       <StyledTitleBox
@@ -109,17 +129,36 @@ function ArticleLayout() {
       >
         {title}
       </StyledTitleBox>
-      <StyledContentBox>
-        {blocks.map((block, index) => (
-          <BlockList
-            key={block._id}
-            block={block}
-            index={index}
-            handleKeyDown={handleKeyDown}
-            handleInput={handleInput}
-          />
-        ))}
-      </StyledContentBox>
+      <DragDropContext onDragEnd={handleOnDragEnd}>
+        <Droppable droppableId="droppable">
+          {(provided) => (
+            <StyledContentBox
+              {...provided.droppableProps}
+              ref={provided.innerRef}
+            >
+              {blocks.map((block, index) => (
+                <Draggable key={block._id} draggableId={block._id} index={index} >
+                  {(provided) => (
+                    <StyledBlockBox
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                    >
+                      <StyledHolderOutlined {...provided.dragHandleProps}/>
+                      <BlockList
+                        block={block}
+                        index={index}
+                        handleKeyDown={(e) => handleKeyDown(e, index)}
+                        handleInput={handleInput}
+                      />
+                    </StyledBlockBox>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </StyledContentBox>
+          )}
+        </Droppable>
+      </DragDropContext>
     </Wrapper>
   );
 }
@@ -152,6 +191,21 @@ const StyledContentBox = styled.div`
   font-size: 16px;
   line-height: 1.5;
   width: 100%;
+`;
+
+const StyledHolderOutlined = styled(HolderOutlined)`
+  visibility: hidden;
+  color: #aeaeae;
+`;
+
+const StyledBlockBox = styled.div`
+  width: 100%;
+  display: flex;
+  &:hover {
+    ${StyledHolderOutlined} {
+      visibility: visible ;
+    }
+  }
 `;
 
 export default ArticleLayout;
