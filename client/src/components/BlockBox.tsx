@@ -12,11 +12,13 @@ import { useParams } from "react-router-dom";
 interface BlockBoxProps {
   blockData: Block;
   refetchCurrentArticle: () => void;
+  blockIndex: number;
 }
 
 export default function BlockBox({
   blockData,
   refetchCurrentArticle,
+  blockIndex,
 }: BlockBoxProps) {
   const { id: pageId } = useParams<{ id: string }>();
   const { content, _id: blockId } = blockData;
@@ -42,7 +44,7 @@ export default function BlockBox({
     if (e.key === "Enter") {
       e.preventDefault();
       try {
-        await createNewBlock(pageId);
+        await createNewBlock(pageId, blockIndex);
         refetchCurrentArticle();
       } catch (error) {
         console.error(error);

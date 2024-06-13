@@ -77,12 +77,22 @@ pagesRouter.delete("/api/pages", async (req, res) => {
 
 pagesRouter.post("/:id/block", async (req, res) => {
   const { id: articleId } = req.params;
-  const { type, content, children } = req.body;
+  const { type, content, children, insertIndex } = req.body;
 
   try {
     const article = await Pages.findById(articleId);
     const newBlock = { type, content, children };
-    article.blocklist.push(newBlock);
+
+    if (
+      insertIndex !== undefined &&
+      insertIndex >= 0 &&
+      insertIndex < article.blocklist.length
+    ) {
+      article.blocklist.splice(insertIndex + 1, 0, newBlock);
+    } else {
+      article.blocklist.push(newBlock);
+    }
+
     await article.save();
     res
       .status(201)

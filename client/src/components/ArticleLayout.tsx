@@ -48,12 +48,13 @@ function ArticleLayout() {
         {title}
       </S.TitleBox>
       <S.Content>
-        {blocklist.map((block: Block) => {
+        {blocklist.map((block: Block, index: number) => {
           return (
             <BlockBox
               key={`block-${block._id}`}
               blockData={block}
               refetchCurrentArticle={refetchCurrentArticle}
+              blockIndex={index}
             />
           );
         })}

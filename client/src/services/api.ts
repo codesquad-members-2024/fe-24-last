@@ -92,7 +92,10 @@ export async function updateBlockContent(
   return response.json();
 }
 
-export async function createNewBlock(pageId: string | undefined) {
+export async function createNewBlock(
+  pageId: string | undefined,
+  blockIndex: number
+) {
   const response = await fetch(
     `${import.meta.env.VITE_SERVER_URL}/pages/${pageId}/block`,
     {
@@ -101,6 +104,7 @@ export async function createNewBlock(pageId: string | undefined) {
         type: "text",
         content: "",
         children: [],
+        insertIndex: blockIndex,
       }),
       headers: {
         "Content-Type": "application/json",
