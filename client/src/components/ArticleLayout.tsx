@@ -1,11 +1,12 @@
 import styled from "styled-components";
 import { FormEvent, KeyboardEvent, useCallback, useEffect, useState} from "react";
 import debounce from "../utils/debounce";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { createBlock, deleteData, fetchData, updateData} from "../services/api";
 import BlockList from "./BlockList";
 import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd";
 import { HolderOutlined } from "@ant-design/icons";
+
 export interface Block {
   type: string;
   content: string;
@@ -16,12 +17,10 @@ export interface Block {
 
 function ArticleLayout() {
   const { id: pageId } = useParams<{ id: string }>();
-  const location = useLocation();
-  const data = location.state;
-  console.log(data);
 
   const [title, setTitle] = useState("");
   const [blocks, setBlocks] = useState<Block[]>([]);
+  const [isNewBlock, setIsNewBlock] = useState(false);
 
   useEffect(() => {
     const fetchPage = async () => {
@@ -51,10 +50,7 @@ function ArticleLayout() {
     saveTitle(newTitle);
   };
 
-  const handleKeyDown = async (
-    e: KeyboardEvent<HTMLDivElement>,
-    index: number
-  ) => {
+  const handleKeyDown = async (e: KeyboardEvent<HTMLDivElement>, index: number) => {
     if (e.key === "Enter") {
       if (e.shiftKey) return;
       e.preventDefault();
@@ -65,6 +61,7 @@ function ArticleLayout() {
         ...blocks.slice(index + 1).map((block) => ({ ...block, index: block.index + 1 })),
       ];
       setBlocks(updatedBlocks);
+      setIsNewBlock(true); // 새 블럭 생성
     } else if (e.key === "Backspace" && blocks[index].content === "") {
       e.preventDefault();
       if (blocks.length > 1) {
@@ -94,12 +91,11 @@ function ArticleLayout() {
     updatedBlocks[index].content = newContent;
     // setBlocks(updatedBlocks);
 
-    setTimeout(() => {
-      const blockId = updatedBlocks[index + 1]._id;
-      saveBlock(blockId, newContent);
-    }, 0);
+    const blockId = isNewBlock ? updatedBlocks[index + 1]._id : updatedBlocks[index]._id;
+    saveBlock(blockId, newContent);
+    setIsNewBlock(false); 
   };
-
+  
   const reorder = (list: Block[], startIndex: number, endIndex: number) => {
     const result = Array.from(list);
     const [removed] = result.splice(startIndex, 1);
@@ -115,8 +111,7 @@ function ArticleLayout() {
   const handleOnDragEnd = (result: DropResult) => {
     console.log(result);
     if (!result.destination) return;
-    setBlocks((items) => reorder(items, result.source.index, result.destination!.index)); // null 또는 undefined일 경우 처리
-    updateData
+    setBlocks((items) => reorder(items, result.source.index, result.destination!.index)); // ! null 또는 undefined일 경우 처리
   };
 
   return (
@@ -137,12 +132,9 @@ function ArticleLayout() {
               ref={provided.innerRef}
             >
               {blocks.map((block, index) => (
-                <Draggable key={block._id} draggableId={block._id} index={index} >
+                <Draggable key={block._id} draggableId={block._id} index={index}>
                   {(provided) => (
-                    <StyledBlockBox
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                    >
+                    <StyledBlockBox ref={provided.innerRef} {...provided.draggableProps}>
                       <StyledHolderOutlined {...provided.dragHandleProps}/>
                       <BlockList
                         block={block}
