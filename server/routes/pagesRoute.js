@@ -96,7 +96,7 @@ pagesRouter.post("/:id/block", async (req, res) => {
     await article.save();
     res
       .status(201)
-      .json({ message: "Block added successfully", block: newBlock });
+      .json({ message: "Block added successfully", nextIdx: insertIndex + 1 });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

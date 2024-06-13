@@ -13,17 +13,14 @@ interface BlockBoxProps {
   blockData: Block;
   refetchCurrentArticle: () => void;
   blockIndex: number;
-  setFocusOnNewBlock: (
-    index: number,
-    ref: React.RefObject<HTMLDivElement>
-  ) => void;
+  setNewBlockIndex: (id: string) => void;
 }
 
 export default function BlockBox({
   blockData,
   refetchCurrentArticle,
   blockIndex,
-  setFocusOnNewBlock,
+  setNewBlockIndex,
 }: BlockBoxProps) {
   const { id: pageId } = useParams<{ id: string }>();
   const { content, _id: blockId } = blockData;
@@ -46,12 +43,13 @@ export default function BlockBox({
   };
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.nativeEvent.isComposing) return;
     if (e.key === "Enter") {
       e.preventDefault();
       try {
-        await createNewBlock(pageId, blockIndex);
+        const newBlock = await createNewBlock(pageId, blockIndex);
+        setNewBlockIndex(newBlock.nextIdx);
         refetchCurrentArticle();
-        setFocusOnNewBlock(blockIndex + 1, blockRef);
       } catch (error) {
         console.error(error);
       }
@@ -88,11 +86,11 @@ export default function BlockBox({
 const Wrapper = styled.div`
   display: flex;
   width: 100%;
-  height: 20px;
+  height: 30px;
 `;
 
 const BlockArea = styled.div`
   width: 100%;
   height: 100%;
-  border: 1px solid black;
+  padding: 3px 2px;
 `;

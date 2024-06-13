@@ -20,4 +20,7 @@ export const TitleBox = styled.h1`
   }
 `;
 
-export const Content = styled.div``;
+export const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
