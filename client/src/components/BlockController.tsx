@@ -1,6 +1,8 @@
 import { BlockControllerProps } from '../constants';
 import EditableBlock from './EditableBlock';
-import useBlockController, { CursorPosition } from '../hooks/useBlockController';
+import useBlockController from '../hooks/useBlockController';
+import { CursorPosition } from '../helpers/cursorHelpers';
+
 import { ColumnGap } from '../styles/themes';
 import { useRef } from 'react';
 

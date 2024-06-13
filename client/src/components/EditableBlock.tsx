@@ -10,8 +10,7 @@ import {
 } from '../constants';
 import { ColumnGap, Flex } from '../styles/themes';
 import React, { useEffect } from 'react';
-import { CursorPosition } from '../hooks/useBlockController';
-import { specifyPositionOfCursor } from '../helpers/specifyPositionOfCursor';
+import { CursorPosition, specifyPositionOfCursor } from '../helpers/cursorHelpers';
 import BlockTag from './BlockTag';
 
 export interface HandleInputProps {

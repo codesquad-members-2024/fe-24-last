@@ -1,11 +1,6 @@
 import { Block, BlockControllerProps, ParagraphBlock } from '../constants';
 import { HandleInputProps } from '../components/EditableBlock';
-
-export interface CursorPosition {
-  node: Node | null;
-  offset: number;
-  blockOffset: number;
-}
+import { saveCursorPosition } from '../helpers/cursorHelpers';
 
 const insertLineBreak = (blocks: Block[], blockIndex: number, offset: number): Block[] => {
   const block = blocks[blockIndex];
@@ -67,21 +62,12 @@ export default function useBlockController({
     let newBlocks = [...blocks];
     const block = newBlocks[blockIndex];
 
-    //1. 현재 커서의 위치 저장
-    const selection = window.getSelection();
-    const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
-    const cursorPosition: CursorPosition = {
-      node: null,
-      offset: 0,
-      blockOffset: 0,
-    };
+    const saveCursorPositionResult = saveCursorPosition(blockIndex);
+    if (!saveCursorPositionResult) return;
+    const { range, cursorPosition } = saveCursorPositionResult;
 
-    if (range && updateCursorPosition) {
-      cursorPosition.node = range.startContainer;
-      cursorPosition.offset = range.startOffset;
-      cursorPosition.blockOffset = blockIndex;
-      updateCursorPosition(cursorPosition);
-    }
+    if (!updateCursorPosition) return;
+    updateCursorPosition(cursorPosition);
 
     if (key === 'Backspace' && isBlankBlock(block)) {
       newBlocks = removeBlock(blocks, blockIndex);
@@ -91,9 +77,7 @@ export default function useBlockController({
     }
 
     if (key === 'Enter' && shiftKey) {
-      if (updateCursorPosition) {
-        updateCursorPosition({ ...cursorPosition, offset: range?.startOffset ? range?.startOffset + 1 : 0 });
-      }
+      updateCursorPosition({ ...cursorPosition, offset: range?.startOffset ? range?.startOffset + 1 : 0 });
       newBlocks = insertLineBreak(blocks, blockIndex, cursorPosition.offset);
       setBlocks(newBlocks);
       handleFetch(newBlocks);
@@ -102,8 +86,7 @@ export default function useBlockController({
     }
 
     if (key === 'Enter') {
-      if (updateCursorPosition) updateCursorPosition({ ...cursorPosition, blockOffset: blockIndex + 1 });
-
+      updateCursorPosition({ ...cursorPosition, blockOffset: blockIndex + 1 });
       newBlocks = addNewBlock(blocks, blockIndex);
       setBlocks(newBlocks);
       handleFetch(newBlocks);
