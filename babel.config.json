@@ -1,4 +1,5 @@
 {
+	"sourceMaps": true,
 	"plugins": [
 		[
 			"@babel/plugin-transform-react-jsx",

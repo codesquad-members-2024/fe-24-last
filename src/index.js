@@ -1,131 +1,95 @@
-import { vm, vm2 } from './main.js';
+/** @jsx h */
 
-function diffByBfs(current, next) {
-	const queue = [{ current, next }];
-	const change = [];
-	while (queue.length > 0) {
-		const { current, next } = queue.shift();
-
-		if (current.children) {
-			for (let i = 0; i < current.children.length; i++) {
-				queue.push({
-					current: current.children[i],
-					next: next.children[i],
-				});
-			}
-			if (current.type !== next.type) {
-				change.push({
-					target: 'type',
-					key: current.key,
-					type: next.type,
-				});
-			}
-			if (current.props.id !== 'app' && current.props !== next.props) {
-				change.push({
-					target: 'props',
-					key: current.key,
-					props: next.props,
-				});
-			}
-			if (current.children !== next.children) {
-				change.push({
-					target: 'children',
-					key: current.key,
-					children: next.children,
-				});
-			}
-		}
-		return change;
-	}
+export function h(type, props, ...children) {
+	return {
+		type,
+		props,
+		key: Math.floor(Math.random() * 1000),
+		children: children.flat(),
+	};
 }
 
-function trackByKey(node, changes) {
-	const queue = [{ node, parent: null, index: null }];
-	while (queue.length > 0) {
-		const { node: current, parent, index } = queue.shift();
-		const apply = changes.find(item => item.key === current.key);
-
-		if (apply) {
-			switch (apply.target) {
-				case 'type':
-					current.type = apply.type;
-					break;
-				case 'props':
-					current.props = apply.props;
-					break;
-				case 'children':
-					current.children = apply.children;
-					break;
-			}
-			// 부모 노드의 children을 갱신
-			if (parent && index !== null) {
-				parent.children[index] = current;
-			}
-		}
-
-		if (current.children) {
-			for (let i = 0; i < current.children.length; i++) {
-				queue.push({ node: current.children[i], parent: current, index: i });
-			}
-		}
-	}
-	console.log(node);
-	return node;
-}
-
-function updateElement($parent, newNode, oldNode, index = 0) {
-	if (!oldNode) {
-		$parent.appendChild(createElement(newNode));
-	} else if (!newNode) {
-		$parent.removeChild($parent.childNodes[index]);
-	} else if (isNodeChanged(newNode, oldNode)) {
-		$parent.replaceChild(createElement(newNode), $parent.childNodes[index]);
-	} else if (newNode.type) {
-		const newLength = newNode.children.length;
-		const oldLength = oldNode.children.length;
-		for (let i = 0; i < newLength || i < oldLength; i++) {
-			updateElement(
-				$parent.childNodes[index],
-				newNode.children[i],
-				oldNode.children[i],
-				i
-			);
-		}
-	}
-}
-
-function isNodeChanged(node1, node2) {
-	return (
-		typeof node1 !== typeof node2 ||
-		(typeof node1 === 'string' && node1 !== node2) ||
-		node1.type !== node2.type
-	);
-}
-
-function createElement(node) {
+const createNode = node => {
 	if (typeof node === 'string') {
 		return document.createTextNode(node);
 	}
-	const $el = document.createElement(node.type);
-	if (node.props) {
-		Object.keys(node.props).forEach(key => {
-			$el.setAttribute(key, node.props[key]);
-		});
-	}
-	if (node.children) {
-		node.children.forEach(child => {
-			const $child = createElement(child);
-			$el.appendChild($child);
-		});
-	}
-	console.log('$el', $el);
-	return $el;
-}
-const compare = (current, next) => {
-	const change = diffByBfs(current, next);
-	const updatedNode = trackByKey(current, change);
-	const $app = document.getElementById('root');
-	updateElement($app, updatedNode, current);
+	const $obj = document.createElement(node.type);
+	$obj.id = node.key;
+
+	const children = node.children.map(createNode);
+	children.forEach(child => $obj.appendChild(child));
+
+	return $obj;
 };
 
-compare(vm, vm2);
+//newNode가 기준이기 때문에, oldNode와 비교해서 newNode내용으로 업데이트
+const updateNode = (parent, newNode, oldNode, index = 0) => {
+	// oldNode 있고 newNode 없는 경우 -> 즉 새로운 가상 DOM에서는 해당 노드가 삭제된 경우, parent의 index 위치에 있는 자식 노드를 실제 DOM에서 제거
+	if (oldNode && !newNode) {
+		return parent.removeChild(parent.childNodes[index]);
+	}
+	// oldNode 없고 newNode 있는 경우
+	if (!oldNode && newNode) {
+		return parent.appendChild(createNode(newNode));
+	}
+	// oldNode, newNode 모두 텍스트인 경우
+	if (typeof oldNode === 'string' && typeof newNode === 'string') {
+		if (oldNode === newNode) return;
+
+		return parent.replaceChild(createNode(newNode), parent.childNodes[index]);
+	}
+	// oldNode, newNode type이 다른 경우
+	if (oldNode.type !== newNode.type) {
+		return parent.replaceChild(createNode(newNode), parent.childNodes[index]);
+	}
+	// 이후에는 children을 순회하면서 다시 위에 과정을 반복
+	const maxLength = Math.max(oldNode.children.length, newNode.children.length);
+	for (let i = 0; i < maxLength; i++) {
+		updateNode(
+			parent.childNodes[index],
+			newNode.children[i],
+			oldNode.children[i],
+			i
+		);
+	}
+};
+
+const oldList = ['🐬', '🐑🐑', '🦥'];
+const newList = ['🐬🐬🐬🐬🐬', '🐑🐑', '🦥'];
+const state = [{}];
+const render = array => (
+	<div id='App'>
+		<ul>
+			{array.map((item, idx) => (
+				<li key={idx}>{item}</li>
+			))}
+		</ul>
+		<input type='text' />
+	</div>
+);
+
+const oldNode = render(oldList);
+const newNode = render(newList);
+
+const $App = document.createElement('div');
+document.body.appendChild($App);
+//초기 렌더링
+updateNode($App, oldNode, null);
+
+const view = document.querySelector('#view');
+
+view.textContent = $App.innerHTML;
+
+const observer = new MutationObserver(() => {
+	view.textContent = $App.innerHTML;
+});
+
+observer.observe($App, {
+	attributes: true,
+	childList: true,
+	subtree: true,
+});
+
+setTimeout(() => {
+	updateNode($App, newNode, oldNode);
+}, 2000);
