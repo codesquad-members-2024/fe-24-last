@@ -1,19 +1,19 @@
 import styled from 'styled-components';
-import { themes, FlexColumn, BoxBorder, ButtonBorder } from '../../styles/themes';
+import { BoxBackground, BoxBorder, ButtonBorder, FlexColumn, SubmitBackground, themes } from '../../styles/themes';
 
-export default function NicknameModal() {
+const {
+  Color: { SubmitColor },
+} = themes;
+
+export default function RegistrationModal() {
   return (
     <Wrapper>
-      <span>로그인</span>
+      <span>회원가입</span>
       <NicknameInput type="text" placeholder="닉네임" />
       <SubmitButton>확인</SubmitButton>
-      <RegistrationButton>회원가입</RegistrationButton>
     </Wrapper>
   );
 }
-const {
-  Color: { BoxBackground, SubmitColor },
-} = themes;
 
 const Wrapper = styled(FlexColumn)`
   width: 300px;
@@ -26,9 +26,9 @@ const Wrapper = styled(FlexColumn)`
 `;
 
 const NicknameInput = styled.input`
+  ${BoxBackground}
   ${BoxBorder}
 
-  background-color: ${BoxBackground};
   width: 200px;
   height: 30px;
   padding: 0 1rem;
@@ -39,26 +39,14 @@ const NicknameInput = styled.input`
 `;
 
 const SubmitButton = styled.button`
+  ${SubmitBackground}
   ${ButtonBorder}
-  background-color: ${BoxBackground};
-  color: ${SubmitColor};
+
   border: 1px solid blue;
+  color: ${SubmitColor};
   opacity: 0.4;
-  cursor: pointer;
 
   &:hover {
     opacity: 1;
-  }
-`;
-
-const RegistrationButton = styled.button`
-  border: none;
-  background-color: transparent;
-  font-size: 12px;
-  cursor: pointer;
-
-  &:hover {
-    color: blue;
-    text-decoration: underline;
   }
 `;

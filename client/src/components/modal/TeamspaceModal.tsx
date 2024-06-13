@@ -42,6 +42,7 @@ const TeamspaceListContent = styled.div`
   box-sizing: border-box;
   padding: 16px;
   width: 100%;
+  max-height: 100%;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   justify-items: center;
