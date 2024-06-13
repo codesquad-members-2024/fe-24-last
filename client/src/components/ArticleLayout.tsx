@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "react-query";
 import debounce from "../utils/debounce";
@@ -18,6 +19,34 @@ function ArticleLayout() {
   } = useQuery(["article", id], () => fetchArticleById(id), {
     enabled: !!id,
   });
+  const [focusIndex, setFocusIndex] = useState<number | null>(null);
+  const blockRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const setFocusOnNewBlock = (
+    index: number,
+    ref: React.RefObject<HTMLDivElement>
+  ) => {
+    blockRefs.current[index] = ref.current;
+    setFocusIndex(index);
+  };
+
+  useEffect(() => {
+    if (focusIndex !== null && blockRefs.current[focusIndex]) {
+      const newBlockElement = blockRefs.current[focusIndex];
+      if (newBlockElement) {
+        newBlockElement.focus();
+        const range = document.createRange();
+        range.selectNodeContents(newBlockElement);
+        range.collapse(false);
+        const sel = window.getSelection();
+        if (sel) {
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+      }
+      setFocusIndex(null);
+    }
+  }, [focusIndex, currentArticle?.blocklist]);
 
   const [debouncedSaveTitle] = debounce(async (newTitle: string) => {
     try {
@@ -55,6 +84,7 @@ function ArticleLayout() {
               blockData={block}
               refetchCurrentArticle={refetchCurrentArticle}
               blockIndex={index}
+              setFocusOnNewBlock={setFocusOnNewBlock}
             />
           );
         })}

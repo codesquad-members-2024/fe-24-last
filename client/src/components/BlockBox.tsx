@@ -13,12 +13,17 @@ interface BlockBoxProps {
   blockData: Block;
   refetchCurrentArticle: () => void;
   blockIndex: number;
+  setFocusOnNewBlock: (
+    index: number,
+    ref: React.RefObject<HTMLDivElement>
+  ) => void;
 }
 
 export default function BlockBox({
   blockData,
   refetchCurrentArticle,
   blockIndex,
+  setFocusOnNewBlock,
 }: BlockBoxProps) {
   const { id: pageId } = useParams<{ id: string }>();
   const { content, _id: blockId } = blockData;
@@ -46,6 +51,7 @@ export default function BlockBox({
       try {
         await createNewBlock(pageId, blockIndex);
         refetchCurrentArticle();
+        setFocusOnNewBlock(blockIndex + 1, blockRef);
       } catch (error) {
         console.error(error);
       }
@@ -71,6 +77,7 @@ export default function BlockBox({
         onInput={handleContentChange}
         onKeyDown={handleKeyDown}
         suppressContentEditableWarning
+        id={blockId}
       >
         {content}
       </BlockArea>
