@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "react-query";
 import debounce from "../utils/debounce";
+import { focusOnBlock } from "../utils/focus";
 import { Block } from "../model/types";
 import { fetchArticleById, updateArticleTitle } from "../services/api";
 import { useArticles } from "../contexts/ArticlesProvider";
@@ -36,10 +37,9 @@ function ArticleLayout() {
   };
 
   useEffect(() => {
-    if (newBlockIndex) {
-      const newId = currentArticle.blocklist[newBlockIndex]._id;
-      const newBlockElement = document.getElementById(newId);
-      if (newBlockElement) newBlockElement.focus();
+    if (newBlockIndex && currentArticle.blocklist[newBlockIndex]._id) {
+      const newBlockId = currentArticle.blocklist[newBlockIndex]._id;
+      focusOnBlock(newBlockId);
     }
   }, [newBlockIndex, currentArticle?.blocklist]);
 

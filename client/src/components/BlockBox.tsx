@@ -58,6 +58,8 @@ export default function BlockBox({
         e.preventDefault();
         try {
           clearDebouncedSaveContent();
+          const previousBlockIndex = blockIndex > 0 ? blockIndex - 1 : 0;
+          setNewBlockIndex(previousBlockIndex.toString());
           await deleteBlock(pageId, blockId);
           refetchCurrentArticle();
         } catch (error) {
