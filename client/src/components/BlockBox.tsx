@@ -8,6 +8,7 @@ import {
   deleteBlock,
 } from "../services/api";
 import { useParams } from "react-router-dom";
+import { HolderOutlined } from "@ant-design/icons";
 
 interface BlockBoxProps {
   blockData: Block;
@@ -71,6 +72,9 @@ export default function BlockBox({
 
   return (
     <Wrapper>
+      <IconWrapper>
+        <HolderOutlined />
+      </IconWrapper>
       <BlockArea
         ref={blockRef}
         contentEditable
@@ -85,14 +89,22 @@ export default function BlockBox({
   );
 }
 
+const IconWrapper = styled.div`
+  visibility: hidden;
+  margin-right: 5px;
+  cursor: pointer;
+`;
+
 const Wrapper = styled.div`
   display: flex;
   width: 100%;
-  height: 30px;
+  margin-bottom: 8px;
+  &:hover ${IconWrapper} {
+    visibility: visible;
+  }
 `;
 
 const BlockArea = styled.div`
   width: 100%;
-  height: 100%;
   padding: 3px 2px;
 `;
