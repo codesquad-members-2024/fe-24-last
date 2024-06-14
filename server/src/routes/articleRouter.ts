@@ -3,13 +3,13 @@ import Article from '../models/Article.js';
 import { CustomRequest } from '../index.js';
 import Teamspace from '../models/Teamspace.js';
 
-const articleRouter: Router = express.Router();
+const articleRouter: Router = express.Router({ mergeParams: true });
 
 articleRouter.get('/:articleId', async (req: Request, res: Response) => {
   try {
     const { teamspaceId, articleId } = req.params;
 
-    const teamspace = await Teamspace.findOne({ id: teamspaceId }).populate('articles');
+    const teamspace = await Teamspace.findOne({ _id: teamspaceId }).populate('articles');
     if (!teamspace) return res.status(404).json({ message: 'Teamspace not found' });
 
     const article = teamspace.articles.find((article) => article._id.toString() === articleId);
@@ -31,7 +31,7 @@ articleRouter.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Title and content are required' });
     }
 
-    const teamspace = await Teamspace.findOne({ id: teamspaceId });
+    const teamspace = await Teamspace.findOne({ _id: teamspaceId });
     if (!teamspace) {
       return res.status(404).json({ message: 'Teamspace not found' });
     }
@@ -54,7 +54,7 @@ articleRouter.patch('/:articleId', async (req: Request, res: Response) => {
     const { teamspaceId, articleId } = req.params;
     const { content } = req.body;
 
-    const teamspace = await Teamspace.findOne({ id: teamspaceId }).populate('articles');
+    const teamspace = await Teamspace.findOne({ _id: teamspaceId }).populate('articles');
     if (!teamspace) {
       return res.status(404).json({ message: 'Teamspace not found' });
     }
@@ -85,7 +85,7 @@ articleRouter.delete('/:articleId', async (req: Request, res: Response) => {
   try {
     const { teamspaceId, articleId } = req.params;
 
-    const teamspace = await Teamspace.findOne({ id: teamspaceId }).populate('articles');
+    const teamspace = await Teamspace.findOne({ _id: teamspaceId }).populate('articles');
     if (!teamspace) {
       return res.status(404).json({ message: 'Teamspace not found' });
     }
