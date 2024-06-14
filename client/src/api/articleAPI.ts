@@ -1,12 +1,21 @@
 import { Block } from '../constants';
 
+interface ArticleRequestProps {
+  teamspaceId: string;
+  articleId: string;
+}
+
+interface UpdateArticleProps extends ArticleRequestProps {
+  blocks: Block[];
+}
+
 const SERVER = import.meta.env.VITE_SERVER;
 
 const UNKNOWN_ERROR_MESSAGE = '알 수 없는 에러가 발생하였습니다.';
 
-export const sendArticleRequestById = async (id: number) => {
+export const sendArticleRequestById = async ({ teamspaceId, articleId }: ArticleRequestProps) => {
   try {
-    const response = await fetch(`${SERVER}/api/article/${id}`);
+    const response = await fetch(`${SERVER}/api/teamspace/${teamspaceId}/article/${articleId}`);
 
     if (!response.ok) throw new Error(UNKNOWN_ERROR_MESSAGE);
 
@@ -15,9 +24,10 @@ export const sendArticleRequestById = async (id: number) => {
     console.error(error);
   }
 };
-export const updateArticleRequestById = async (id: number, blocks: Block[]) => {
+
+export const updateArticleRequestById = async ({ teamspaceId, articleId, blocks }: UpdateArticleProps) => {
   try {
-    const response = await fetch(`${SERVER}/api/article/${id}`, {
+    const response = await fetch(`${SERVER}/api/teamspace/${teamspaceId}/article/${articleId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',

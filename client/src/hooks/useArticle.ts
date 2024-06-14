@@ -1,30 +1,32 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Block } from '../constants';
-import { sendArticleRequestById, updateArticleRequestById } from '../api/fetchArticle';
-import { debounce } from 'lodash';
+import { sendArticleRequestById, updateArticleRequestById } from '../api/articleAPI';
 import { io } from 'socket.io-client';
+import { debounce } from '../utils/timeoutUtils';
+import { useParams } from 'react-router-dom';
 
-const FIRST_PAGE = 1;
+const SERVER = import.meta.env.VITE_SERVER;
 
 export default function useArticle() {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const clientBlocksRef = useRef<Block[]>([]);
+  const { teamspaceId, articleId } = useParams();
 
   useEffect(() => {
-    const socket = io('http://localhost:3000');
+    const socket = io(SERVER);
 
     socket.on('articleUpdated', (data) => {
       setBlocks(data.content);
     });
 
-    sendArticleRequestById(FIRST_PAGE).then(({ content }) => {
+    sendArticleRequestById({ teamspaceId: teamspaceId || '', articleId: articleId || '' }).then(({ content }) => {
       setBlocks(content);
     });
 
     return () => {
       socket.off('articleUpdated');
     };
-  }, []);
+  }, [teamspaceId, articleId]);
 
   useEffect(() => {
     clientBlocksRef.current = blocks;
@@ -32,7 +34,11 @@ export default function useArticle() {
 
   const debouncedFetch = useCallback(
     debounce((updatedBlocks: Block[]) => {
-      updateArticleRequestById(FIRST_PAGE, updatedBlocks).then(({ content }) => {
+      updateArticleRequestById({
+        teamspaceId: teamspaceId || '',
+        articleId: articleId || '',
+        blocks: updatedBlocks,
+      }).then(({ content }) => {
         setBlocks(content);
       });
     }, 1000),
