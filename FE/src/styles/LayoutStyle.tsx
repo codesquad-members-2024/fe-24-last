@@ -6,7 +6,6 @@ const LayoutWrap = styled.div`
 `
 
 const ContentWrap = styled.div`
-    margin-left: 250px;
     flex: 1;
     padding: 20px;
     overflow-y: auto;

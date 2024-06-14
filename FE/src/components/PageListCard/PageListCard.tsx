@@ -1,5 +1,5 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useCallback, useLayoutEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import { PageType } from "../../pages/SideBar";
 import * as S from "../../styles/PageListCardStyle";
@@ -7,6 +7,7 @@ import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
 import NewPageBtn from "../NewPageBtn/NewPageBtn";
 import useDeletePage from "../../hooks/useDeletePage";
 import ModalComponent from "../Modal/Modal";
+import { useTitleContext } from "../../hooks/useTitleContext";
 
 interface PageListCardProps {
     page: PageType;
@@ -17,14 +18,19 @@ interface PageListCardProps {
 const PageListCard = ({ page, pages, depth = 0 }: PageListCardProps) => {
     const navigate = useNavigate();
     const { mutate } = useDeletePage();
+    const { id } = useParams()
     const [isOpen, setIsOpen] = useState(false);
+    const { currentTitle, setCurrentTitle } = useTitleContext();
 
     const handleToggle = () => setIsOpen(!isOpen);
-    const handleLinkClick = () =>
-        navigate(`/page/${page._id}`, { state: page });
+    const handleLinkClick = () => navigate(`/page/${page._id}`, { state: page });
     const handleDeletePage = async () => mutate(page._id);
 
-    const childPages = () => pages.filter((p) => p.parent_id === page._id);
+    const childPages = useCallback(() => pages.filter((p) => p.parent_id === page._id), [pages, page])
+    
+    useLayoutEffect(() => {
+        if (id === page._id) setCurrentTitle(page.title)
+    }, [id, page._id, page.title, setCurrentTitle]);
 
     return (
         <>
@@ -37,7 +43,7 @@ const PageListCard = ({ page, pages, depth = 0 }: PageListCardProps) => {
                         $depth={depth}
                     ></S.ToggleBtn>
                     <S.CustomLink onClick={handleLinkClick}>
-                        {page.title}
+                        {id === page._id ? currentTitle : page.title}
                     </S.CustomLink>
                 </S.ToggleLinkWrap>
                 <S.ControlBox>
@@ -65,4 +71,4 @@ const PageListCard = ({ page, pages, depth = 0 }: PageListCardProps) => {
     );
 };
 
-export default React.memo(PageListCard);
+export default PageListCard;
