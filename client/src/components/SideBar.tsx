@@ -1,27 +1,29 @@
 import styled from "styled-components";
 import { FormOutlined, CheckOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { createNewPage, fetchData } from "../services/api";
+import PageList from "./PageList";
+import { buildPageTree } from "../utils/buildTree";
 
-interface Page {
+export interface Page {
   _id: string;
   title: string;
   blocklist: [];
   parent_id: string;
 }
 
+export interface PageTree extends Page {
+  children: PageTree[];
+}
+
 export function SideBar() {
-  const [pages, setPages] = useState<Page[]>([]);
+  const [pages, setPages] = useState<PageTree[]>([]);
 
   useEffect(() => {
     const fetchPages = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/pages`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch pages");
-        }
-        const data = await response.json();
-        setPages(data);
+        const pages: Page[] = await fetchData(`pages`);
+        setPages(buildPageTree(pages)); // 트리구조로 데이터 set
       } catch (error) {
         console.error("Error fetching pages:", error);
       }
@@ -31,53 +33,40 @@ export function SideBar() {
   }, []);
 
   const handleNewPage = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/pages`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title: "",
-          blocklist: [],
-          parent_id: "",
-        }),
-      });
-      if (!response.ok) {
-        console.log("실패 !");
-      }
-    } catch (error) {
-      console.error("Failed to submit new Pages:", error);
-    }
+    await createNewPage("");
+  };
+
+  const renderPageTree = (pages: PageTree[]) => {
+    return pages.map((page) => (
+      <PageList key={page._id} page={page}>
+        {page.children.length > 0 && (
+          <div style={{ paddingLeft: "10px" }}>
+            {renderPageTree(page.children)}
+          </div>
+        )}
+      </PageList>
+    ));
   };
 
   return (
-    <>
-      <Wrapper>
-        <StyledTopBox>
-          <UserInfo>사용자 이름</UserInfo>
-          <NewPageButton onClick={handleNewPage}>
-            <FormOutlined />
-          </NewPageButton>
-        </StyledTopBox>
-        <StyledMiddleBox>
-          <div className="mypages">개인 페이지</div>
-          <StyledPages>
-            {pages.map((page) => (
-              <StyledLink to={`/${page._id}`} state={page} key={page._id}>
-                {page.title || "제목 없음"}
-              </StyledLink>
-            ))}
-          </StyledPages>
-        </StyledMiddleBox>
-        <StyledBottomBox>
-          <TemplateButton>
-            <CheckOutlined />
-            <div>할 일 목록 템플릿</div>
-          </TemplateButton>
-        </StyledBottomBox>
-      </Wrapper>
-    </>
+    <Wrapper>
+      <StyledTopBox>
+        <UserInfo>마롱의 노션</UserInfo>
+        <NewPageButton onClick={handleNewPage}>
+          <FormOutlined />
+        </NewPageButton>
+      </StyledTopBox>
+      <StyledMiddleBox>
+        <div className="mypages">개인 페이지</div>
+        <StyledPages>{renderPageTree(pages)}</StyledPages>
+      </StyledMiddleBox>
+      <StyledBottomBox>
+        <TemplateButton>
+          <CheckOutlined />
+          <div>할 일 목록 템플릿</div>
+        </TemplateButton>
+      </StyledBottomBox>
+    </Wrapper>
   );
 }
 
@@ -96,21 +85,19 @@ const StyledTopBox = styled.div`
   height: 44px;
   display: flex;
   justify-content: space-between;
+  padding: 15px;
 `;
 
 const UserInfo = styled.div`
   height: 100%;
   display: flex;
   align-items: center;
-  padding: 0 10px;
 `;
 
 const NewPageButton = styled.div`
   height: 100%;
   display: flex;
   align-items: center;
-  padding: 0 15px;
-  font-size: 25px;
   cursor: pointer;
 `;
 
@@ -125,7 +112,6 @@ const StyledMiddleBox = styled.div`
 const StyledPages = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
 `;
 
 const StyledBottomBox = styled.div`
@@ -137,10 +123,6 @@ const StyledBottomBox = styled.div`
 
 const TemplateButton = styled.div`
   display: flex;
-  padding: 0 15px;
-`;
-
-const StyledLink = styled(Link)`
-  color: unset;
-  text-decoration: unset;
+  padding: 15px;
+  gap: 10px;
 `;
