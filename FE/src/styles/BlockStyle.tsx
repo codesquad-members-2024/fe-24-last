@@ -1,4 +1,5 @@
 import styled, { css } from "styled-components";
+import { HolderOutlined } from "@ant-design/icons";
 
 export const blockStyles = {
     text: css`
@@ -24,7 +25,7 @@ const Block = styled.div<BlockProps>`
     }
 `;
 
-const DragHandle = styled.div`
+const DragHandle = styled(HolderOutlined)`
     visibility: hidden;
 `
 
@@ -34,6 +35,7 @@ const BlockContainer = styled.div`
     margin: 0px auto;
     display: flex;
     gap: 6px;
+    position: relative;
     &:hover {
         ${DragHandle} {
             visibility: visible

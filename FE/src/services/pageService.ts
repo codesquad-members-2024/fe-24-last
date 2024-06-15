@@ -25,7 +25,7 @@ const postNewPage = async (parentId: string | null) => {
             body: JSON.stringify({
                 title: "untitled",
                 blocklist: [{
-                    type: "text",
+                    type: "p",
                     content: "",
                     children: [],
                     }],
