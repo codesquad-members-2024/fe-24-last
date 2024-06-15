@@ -14,12 +14,17 @@ interface TitleEditorProps {
     title: string
 }
 
+interface TitleMutateType {
+    id: string; 
+    title: TitleForm
+}
+
 const TitleEditable = ({ id, title }: TitleEditorProps) => {
     const queryClient = useQueryClient();
     const { setCurrentTitle } = useTitleContext();
 
     const { mutate } = useMutation({
-        mutationFn: async ({ id, title }: { id: string; title: TitleForm }) => {
+        mutationFn: async ({ id, title }: TitleMutateType) => {
             await patchTitle(`page/title/${id}`, title);
         },
         onSuccess: () => {
@@ -29,7 +34,7 @@ const TitleEditable = ({ id, title }: TitleEditorProps) => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const debouncedMutation = useCallback(
-        debounce(async ({ id, title }: { id: string; title: TitleForm }) => {
+        debounce(async ({ id, title }: TitleMutateType) => {
             mutate({ id, title });
         }),
         [mutate]
