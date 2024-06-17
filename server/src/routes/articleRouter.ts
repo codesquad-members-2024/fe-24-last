@@ -71,7 +71,7 @@ articleRouter.patch('/:articleId', async (req: Request, res: Response) => {
 
     const io = (req as unknown as CustomRequest).io;
     if (io) {
-      io.emit('articleUpdated', article);
+      io.emit(`article-${article._id}`, article);
     }
 
     res.json(article);

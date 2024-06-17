@@ -15,7 +15,7 @@ export default function useArticle() {
   useEffect(() => {
     const socket = io(SERVER);
 
-    socket.on('articleUpdated', (data) => {
+    socket.on(`article-${articleId}`, (data) => {
       setBlocks(data.content);
     });
 
@@ -24,7 +24,7 @@ export default function useArticle() {
     });
 
     return () => {
-      socket.off('articleUpdated');
+      socket.off(`article-${articleId}`);
     };
   }, [teamspaceId, articleId]);
 
