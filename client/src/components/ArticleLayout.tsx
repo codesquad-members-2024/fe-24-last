@@ -1,11 +1,13 @@
 import { useParams } from "react-router-dom";
 import { useQuery } from "react-query";
 import debounce from "../utils/debounce";
+import { focusOnBlock } from "../utils/focus";
 import { Block } from "../model/types";
 import { fetchArticleById, updateArticleTitle } from "../services/api";
 import { useArticles } from "../contexts/ArticlesProvider";
 import * as S from "../styles/ArticleLayout";
 import BlockBox from "./BlockBox";
+import { useEffect, useState } from "react";
 
 function ArticleLayout() {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +20,7 @@ function ArticleLayout() {
   } = useQuery(["article", id], () => fetchArticleById(id), {
     enabled: !!id,
   });
+  const [newBlockIndex, setNewBlockIndex] = useState<string | null>(null);
 
   const [debouncedSaveTitle] = debounce(async (newTitle: string) => {
     try {
@@ -33,10 +36,18 @@ function ArticleLayout() {
     debouncedSaveTitle(newTitle);
   };
 
+  useEffect(() => {
+    if (newBlockIndex && currentArticle.blocklist[newBlockIndex]._id) {
+      const newBlockId = currentArticle.blocklist[newBlockIndex]._id;
+      focusOnBlock(newBlockId);
+    }
+  }, [newBlockIndex, currentArticle?.blocklist]);
+
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading page</div>;
 
   const { title, blocklist } = currentArticle;
+
   return (
     <S.Wrapper>
       <S.TitleBox
@@ -48,12 +59,14 @@ function ArticleLayout() {
         {title}
       </S.TitleBox>
       <S.Content>
-        {blocklist.map((block: Block) => {
+        {blocklist.map((block: Block, index: number) => {
           return (
             <BlockBox
               key={`block-${block._id}`}
               blockData={block}
               refetchCurrentArticle={refetchCurrentArticle}
+              blockIndex={index}
+              setNewBlockIndex={setNewBlockIndex}
             />
           );
         })}

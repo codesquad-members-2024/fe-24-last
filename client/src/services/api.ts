@@ -14,13 +14,7 @@ export async function createNewPage() {
     },
     body: JSON.stringify({
       title: "",
-      blocklist: [
-        {
-          type: "text",
-          content: "",
-          children: [],
-        },
-      ],
+      blocklist: [{ element: [[{ type: "text", content: "" }]] }],
       parent_id: "",
     }),
   });
@@ -92,15 +86,17 @@ export async function updateBlockContent(
   return response.json();
 }
 
-export async function createNewBlock(pageId: string | undefined) {
+export async function createNewBlock(
+  pageId: string | undefined,
+  blockIndex: number
+) {
   const response = await fetch(
     `${import.meta.env.VITE_SERVER_URL}/pages/${pageId}/block`,
     {
       method: "POST",
       body: JSON.stringify({
-        type: "text",
-        content: "",
-        children: [],
+        element: [[{ type: "text", content: "" }]],
+        insertIndex: blockIndex,
       }),
       headers: {
         "Content-Type": "application/json",

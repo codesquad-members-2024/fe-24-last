@@ -5,7 +5,7 @@ const pagesRouter = express.Router();
 
 pagesRouter.get("/", async (req, res) => {
   try {
-    // await Page.deleteMany({})
+    // await Pages.deleteMany({});
     const pagesList = await Pages.find();
     res.json(pagesList);
   } catch (error) {
@@ -77,16 +77,26 @@ pagesRouter.delete("/api/pages", async (req, res) => {
 
 pagesRouter.post("/:id/block", async (req, res) => {
   const { id: articleId } = req.params;
-  const { type, content, children } = req.body;
+  const { type, content, children, insertIndex } = req.body;
 
   try {
     const article = await Pages.findById(articleId);
     const newBlock = { type, content, children };
-    article.blocklist.push(newBlock);
+
+    if (
+      insertIndex !== undefined &&
+      insertIndex >= 0 &&
+      insertIndex < article.blocklist.length
+    ) {
+      article.blocklist.splice(insertIndex + 1, 0, newBlock);
+    } else {
+      article.blocklist.push(newBlock);
+    }
+
     await article.save();
     res
       .status(201)
-      .json({ message: "Block added successfully", block: newBlock });
+      .json({ message: "Block added successfully", nextIdx: insertIndex + 1 });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

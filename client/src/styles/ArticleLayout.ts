@@ -14,10 +14,14 @@ export const TitleBox = styled.h1`
   margin-top: 100px;
   display: flex;
   align-items: center;
+  margin-left: 20px;
   &:empty:before {
     content: attr(aria-placeholder);
     color: gray;
   }
 `;
 
-export const Content = styled.div``;
+export const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
