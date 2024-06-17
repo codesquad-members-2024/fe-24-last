@@ -1,12 +1,12 @@
 export interface BlockChildren {
+  _id: string;
   type: string;
   content: string;
 }
 
 export interface Block {
   _id: string;
-  type: string;
-  content: string;
+  element: [[BlockChildren]];
 }
 
 export interface Article {
