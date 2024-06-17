@@ -14,13 +14,7 @@ export async function createNewPage() {
     },
     body: JSON.stringify({
       title: "",
-      blocklist: [
-        {
-          type: "text",
-          content: "",
-          children: [],
-        },
-      ],
+      blocklist: [{ element: [[{ type: "text", content: "" }]] }],
       parent_id: "",
     }),
   });
@@ -101,9 +95,7 @@ export async function createNewBlock(
     {
       method: "POST",
       body: JSON.stringify({
-        type: "text",
-        content: "",
-        children: [],
+        element: [[{ type: "text", content: "" }]],
         insertIndex: blockIndex,
       }),
       headers: {

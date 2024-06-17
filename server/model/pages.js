@@ -1,21 +1,19 @@
 import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
-const ChildrenSchema = new Schema({
+const ElementSchema = new Schema({
   type: String,
   content: String,
 });
 
 const BlockSchema = new Schema({
-  type: String,
-  content: String,
-  children: [ChildrenSchema] || [],
+  element: [[ElementSchema]],
 });
 
 const PageSchema = new Schema({
   title: String,
-  blocklist: [BlockSchema] || [],
-  parent_id: String || null,
+  blocklist: [BlockSchema],
+  parent_id: String,
 });
 
 export const Pages = mongoose.model("Page", PageSchema);
