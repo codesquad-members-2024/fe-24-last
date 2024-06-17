@@ -24,7 +24,7 @@ export default function BlockBox({
   setNewBlockIndex,
 }: BlockBoxProps) {
   const { id: pageId } = useParams<{ id: string }>();
-  const { content, _id: blockId } = blockData;
+  const { element, _id: blockId } = blockData;
   const blockRef = useRef<HTMLDivElement>(null);
 
   const [debouncedSaveContent, clearDebouncedSaveContent] = debounce(
@@ -72,34 +72,62 @@ export default function BlockBox({
 
   return (
     <Wrapper>
-      <IconWrapper>
-        <HolderOutlined />
-      </IconWrapper>
-      <BlockArea
-        ref={blockRef}
-        contentEditable
-        onInput={handleContentChange}
-        onKeyDown={handleKeyDown}
-        suppressContentEditableWarning
-        id={blockId}
-      >
-        {content}
-      </BlockArea>
+      {element.map((row, rowIndex) => (
+        <Row key={`${blockId}-${rowIndex}`}>
+          {row.map((child) => (
+            <Cell key={child._id}>
+              <IconWrapper>
+                <HolderOutlined />
+              </IconWrapper>
+              <BlockArea
+                ref={blockRef}
+                contentEditable
+                onInput={handleContentChange}
+                onKeyDown={handleKeyDown}
+                suppressContentEditableWarning
+                id={child._id}
+              >
+                {child.content}
+              </BlockArea>
+            </Cell>
+          ))}
+        </Row>
+      ))}
     </Wrapper>
   );
 }
 
-const IconWrapper = styled.div`
-  visibility: hidden;
-  margin-right: 5px;
-  cursor: pointer;
-`;
-
 const Wrapper = styled.div`
   display: flex;
+  flex-direction: column;
   width: 100%;
   margin-bottom: 8px;
-  &:hover ${IconWrapper} {
+`;
+
+const Row = styled.div`
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+`;
+
+const Cell = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 8px;
+  flex-grow: 1;
+  flex-basis: 0;
+  position: relative;
+`;
+
+const IconWrapper = styled.div`
+  visibility: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+
+  ${Cell}:hover & {
     visibility: visible;
   }
 `;
