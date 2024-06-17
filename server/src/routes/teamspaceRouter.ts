@@ -8,6 +8,33 @@ import { CustomRequest } from '../index.js';
 const teamspaceRouter = (io: Server): Router => {
   const router = express.Router();
 
+  /**
+   * @swagger
+   * /teamspaces/{teamspaceId}:
+   *   get:
+   *     tags:
+   *       - teamspace
+   *     summary: 팀 스페이스 조회
+   *     description: 팀 스페이스 ID를 사용하여 팀 스페이스 정보를 조회합니다.
+   *     parameters:
+   *       - in: path
+   *         name: teamspaceId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: 팀 스페이스 ID
+   *     responses:
+   *       200:
+   *         description: 성공
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/Teamspace'
+   *       404:
+   *         description: 팀 스페이스를 찾을 수 없습니다.
+   *       500:
+   *         description: 서버 에러
+   */
   router.get('/:teamspaceId', async (req: Request, res: Response) => {
     try {
       const { teamspaceId } = req.params;
@@ -22,6 +49,36 @@ const teamspaceRouter = (io: Server): Router => {
     }
   });
 
+  /**
+   * @swagger
+   * /teamspaces:
+   *   post:
+   *     tags:
+   *       - teamspace
+   *     summary: 팀 스페이스 생성
+   *     description: 새로운 팀 스페이스를 생성합니다.
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               title:
+   *                 type: string
+   *                 description: 팀 스페이스 이름
+   *             required:
+   *               - title
+   *     responses:
+   *       201:
+   *         description: 팀 스페이스가 성공적으로 생성되었습니다.
+   *       400:
+   *         description: 유효하지 않은 팀 스페이스 이름
+   *       409:
+   *         description: 중복된 팀 스페이스 이름
+   *       500:
+   *         description: 서버 에러
+   */
   router.post('/', async (req, res) => {
     try {
       const { title } = req.body;
@@ -47,6 +104,43 @@ const teamspaceRouter = (io: Server): Router => {
     }
   });
 
+  /**
+   * @swagger
+   * /teamspaces/{teamspaceId}:
+   *   patch:
+   *     tags:
+   *       - teamspace
+   *     summary: 팀 스페이스 수정
+   *     description: 팀 스페이스 ID를 사용하여 팀 스페이스 이름을 수정합니다.
+   *     parameters:
+   *       - in: path
+   *         name: teamspaceId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: 팀 스페이스 ID
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               title:
+   *                 type: string
+   *                 description: 새로운 팀 스페이스 이름
+   *             required:
+   *               - title
+   *     responses:
+   *       200:
+   *         description: 팀 스페이스가 성공적으로 수정되었습니다.
+   *       400:
+   *         description: 유효하지 않은 팀 스페이스 ID 또는 이름
+   *       404:
+   *         description: 팀 스페이스를 찾을 수 없습니다.
+   *       500:
+   *         description: 서버 에러
+   */
   router.patch('/:teamspaceId', async (req: Request, res: Response) => {
     try {
       const { teamspaceId } = req.params;
@@ -78,6 +172,29 @@ const teamspaceRouter = (io: Server): Router => {
     }
   });
 
+  /**
+   * @swagger
+   * /teamspaces/{teamspaceId}:
+   *   delete:
+   *     tags:
+   *       - teamspace
+   *     summary: 팀 스페이스 삭제
+   *     description: 팀 스페이스 ID를 사용하여 팀 스페이스를 삭제합니다.
+   *     parameters:
+   *       - in: path
+   *         name: teamspaceId
+   *         schema:
+   *           type: string
+   *         required: true
+   *         description: 팀 스페이스 ID
+   *     responses:
+   *       200:
+   *         description: 팀 스페이스가 성공적으로 삭제되었습니다.
+   *       404:
+   *         description: 팀 스페이스를 찾을 수 없습니다.
+   *       500:
+   *         description: 서버 에러
+   */
   router.delete('/:teamspaceId', async (req: Request, res: Response) => {
     try {
       const { teamspaceId } = req.params;
