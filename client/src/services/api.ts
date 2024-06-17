@@ -1,7 +1,45 @@
+import { useQuery } from "@tanstack/react-query";
+
 const server = import.meta.env.VITE_SERVER_URL;
 
+interface RequestOptions {
+  method: string;
+  headers: {
+    "Content-Type": string;
+  };
+  body?: string;
+}
+
+const apiRequest = async (endpoint: string, method = "GET", data = null) => {
+  const options: RequestOptions = {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+  if (data) {
+    options.body = JSON.stringify(data);
+  }
+
+  const response = await fetch(`${server}/${endpoint}`, options);
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  if (method !== "DELETE") {
+    return await response.json();
+  }
+};
+
+export const useFetchData = (endpoint: string) => {
+  return useQuery({
+    queryKey: [endpoint],
+    queryFn: () => apiRequest(endpoint),
+  });
+};
+
 /**
- * 
+ *
  * @param parent_id
  * @url ${server}/pages
  */
@@ -28,7 +66,7 @@ export const createNewPage = async (parent_id = "") => {
 };
 
 /**
- * 
+ *
  * @param endpoint
  * @url ${server}/${endpoint}
  */
@@ -48,9 +86,9 @@ export const fetchData = async (endpoint: string) => {
 };
 
 /**
- * 
- * @param endpoint 
- * @param newData 
+ *
+ * @param endpoint
+ * @param newData
  * @url ${server}/${endpoint}
  */
 
@@ -71,8 +109,8 @@ export const updateData = async (endpoint: string, newData: object) => {
 };
 
 /**
- * 
- * @param endpoint 
+ *
+ * @param endpoint
  * @url ${server}/${endpoint}
  */
 
@@ -93,9 +131,9 @@ export const deleteData = async (endpoint: string) => {
 };
 
 /**
- * 
- * @param pageId 
- * @param index 
+ *
+ * @param pageId
+ * @param index
  * @url ${server}/pages/${pageId}/blocks
  */
 export const createBlock = async (pageId: string, index: number) => {
@@ -109,14 +147,13 @@ export const createBlock = async (pageId: string, index: number) => {
         type: "text",
         content: "",
         index: index,
-        children: []
+        children: [],
       }),
     });
     if (!response.ok) {
       throw new Error("실패 !");
     }
     return await response.json();
-
   } catch (error) {
     console.error("Failed to create block:", error);
     throw error;
