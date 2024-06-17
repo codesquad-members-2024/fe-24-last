@@ -29,6 +29,7 @@ const BlockEditable = ({
 }: BlockEditorProps) => {
     const [isDropdownOpen, setDropdownOpen] = useState(false)
     const [isFocus, setFocus] = useState(false)
+    const dropDownRef = useRef<HTMLDivElement>(null)
     const caretPositionRef = useRef<{
         startContainer: Node;
         startOffset: number;
@@ -57,6 +58,11 @@ const BlockEditable = ({
             restoreCaretPosition(caretPositionRef);
     }, [content]);
 
+    useEffect(() => {
+        if (isDropdownOpen) {
+            dropDownRef.current?.focus();
+        }
+    }, [isDropdownOpen]);
 
     return (
         <S.BlockContainer>
@@ -76,7 +82,7 @@ const BlockEditable = ({
                 {content}
             </S.Block>
             {isDropdownOpen && (
-                <DropdownBox handleBlockChange={handleBlockChange} index={index}/>
+                <DropdownBox handleBlockChange={handleBlockChange} index={index} ref={dropDownRef}/>
             )}
         </S.BlockContainer>
     );

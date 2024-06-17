@@ -36,11 +36,18 @@ const Page = () => {
     });
 
     const handleBlockChange = (index: number, key: keyof BlockType, value: string) => {
-        const updatedBlocks = blocks.current.map((block, i) =>
-            i === index ? { ...block, [key]: value || "" } : block
-        );
-        blocks.current = [...updatedBlocks];
-        debouncedMutation({ id, blocks: updatedBlocks });
+        const updatedBlocks = blocks.current.map((block, i) => {
+        if (i === index) {
+            const updatedBlock = { ...block, [key]: value || "" };
+            if (key === "type") {
+                updatedBlock.content = "";
+            }
+            return updatedBlock;
+        }
+        return block;
+    });
+    blocks.current = [...updatedBlocks];
+    debouncedMutation({ id, blocks: updatedBlocks });
     };
     
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, index: number) => {
