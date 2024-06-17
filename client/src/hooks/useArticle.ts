@@ -4,23 +4,30 @@ import { sendArticleRequestById, updateArticleRequestById } from '../api/article
 import { io } from 'socket.io-client';
 import { debounce } from '../utils/timeoutUtils';
 import { useParams } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 const SERVER = import.meta.env.VITE_SERVER;
 
 export default function useArticle() {
-  const [blocks, setBlocks] = useState<Block[]>([]);
   const clientBlocksRef = useRef<Block[]>([]);
   const { teamspaceId, articleId } = useParams();
+  const queryClient = useQueryClient();
+
+  const { data: blocks = [] } = useQuery<Block[]>({
+    queryKey: [`article-${articleId}`],
+    queryFn: async () => {
+      const response = await sendArticleRequestById({ teamspaceId: teamspaceId || '', articleId: articleId || '' });
+      return response.content;
+    },
+    refetchOnWindowFocus: false,
+  });
 
   useEffect(() => {
     const socket = io(SERVER);
 
-    socket.on(`article-${articleId}`, (data) => {
-      setBlocks(data.content);
-    });
-
-    sendArticleRequestById({ teamspaceId: teamspaceId || '', articleId: articleId || '' }).then(({ content }) => {
-      setBlocks(content);
+    socket.on(`article-${articleId}`, ({ content }) => {
+      clientBlocksRef.current = content;
+      queryClient.setQueryData([`article-${articleId}`], content);
     });
 
     return () => {
@@ -28,20 +35,16 @@ export default function useArticle() {
     };
   }, [teamspaceId, articleId]);
 
-  useEffect(() => {
-    clientBlocksRef.current = blocks;
-  }, [blocks]);
-
   const debouncedFetch = useCallback(
-    debounce((updatedBlocks: Block[]) => {
-      updateArticleRequestById({
-        teamspaceId: teamspaceId || '',
-        articleId: articleId || '',
-        blocks: updatedBlocks,
-      }).then(({ content }) => {
-        setBlocks(content);
-      });
-    }, 1000),
+    debounce(
+      (updatedBlocks: Block[]) =>
+        updateArticleRequestById({
+          teamspaceId: teamspaceId || '',
+          articleId: articleId || '',
+          blocks: updatedBlocks,
+        }),
+      1000
+    ),
     []
   );
 
@@ -49,13 +52,12 @@ export default function useArticle() {
     const newBlocks = [...blocks];
     newBlocks[index] = updatedBlock;
     clientBlocksRef.current[index] = updatedBlock;
-    setBlocks(clientBlocksRef.current);
     debouncedFetch(clientBlocksRef.current);
   };
 
   return {
     blocks,
-    setBlocks,
+    setBlocks: (newBlocks: Block[]) => (clientBlocksRef.current = newBlocks),
     debouncedFetch,
     handleContentChange,
   };

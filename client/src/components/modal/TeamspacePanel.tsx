@@ -14,10 +14,12 @@ export default function TeamspacePanel({ teamspace }: TeamspacePanelProps) {
   const navigate = useNavigate();
   const defaultArticleId = teamspace.articles[FIRST_PAGE]._id || '';
 
+  const handleButtonClick = () => navigate(`/teamspace/${_id}/article/${defaultArticleId}`);
+
   return (
     <Wrapper>
       <TitleText>{title}</TitleText>
-      <button onClick={() => navigate(`/teamspace/${_id}/article/${defaultArticleId}`)}>들어가기</button>
+      <button onClick={handleButtonClick}>들어가기</button>
     </Wrapper>
   );
 }

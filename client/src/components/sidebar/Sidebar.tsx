@@ -5,8 +5,8 @@ import UserStatus from './UserStatus';
 import Teamspace from './Teamspace';
 import { TeamspaceDescription, UserDescription } from '../../constants';
 import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
 import { sendTeamspaceRequestById } from '../../api/teamspaceAPI';
+import { useQuery } from '@tanstack/react-query';
 
 export interface SidebarProps {
   teamspace: TeamspaceDescription;
@@ -19,12 +19,12 @@ const {
 } = themes;
 
 export default function Sidebar() {
-  const [teamspace, setTeamspace] = useState<TeamspaceDescription>();
   const { teamspaceId } = useParams();
 
-  useEffect(() => {
-    sendTeamspaceRequestById(teamspaceId || '').then((data) => setTeamspace(data));
-  }, []);
+  const { data: teamspace } = useQuery<TeamspaceDescription>({
+    queryKey: [`teamspace-${teamspaceId}`],
+    queryFn: () => sendTeamspaceRequestById(teamspaceId || ''),
+  });
 
   return (
     <Wrapper>

@@ -5,32 +5,47 @@ import TeamspacePanel from './TeamspacePanel';
 import { useEffect, useState } from 'react';
 import { postNewTeamspace, sendTeamspaceListRequest } from '../../api/indexAPI';
 import TeamspaceCreateModal from './TeamspaceCreateModal';
+import useUserStore from '../../hooks/useUserStore';
+import { useNavigate } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export default function TeamspaceModal() {
-  const [teamspaces, setTeamspaces] = useState<TeamspaceDescription[]>([]);
+  const client = useQueryClient();
+  const { userId, isLoggedIn } = useUserStore();
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const { data: teamspaces } = useQuery<TeamspaceDescription[]>({
+    queryKey: ['teamspaces'],
+    queryFn: sendTeamspaceListRequest,
+  });
+
+  const { mutate: fetchNewTeamspace } = useMutation({
+    mutationFn: postNewTeamspace,
+    onSuccess: () => {
+      client.invalidateQueries({ queryKey: ['teamspaces'] });
+      setIsCreateFormOpen(false);
+    },
+  });
 
   useEffect(() => {
-    sendTeamspaceListRequest().then((data) => setTeamspaces(data));
+    // 세션 구현 이전 로그인 상태를 임시로 클라이언트에서 관리
+    if (!isLoggedIn) navigate('/login');
   }, []);
 
   const handleAddButtonClick = () => setIsCreateFormOpen(true);
   const handleCancelClick = () => setIsCreateFormOpen(false);
-  const handleSubmitClick = (title: string) => {
-    postNewTeamspace(title).then(() => {
-      sendTeamspaceListRequest().then((data) => setTeamspaces(data));
-      setIsCreateFormOpen(false);
-    });
-  };
+  const handleSubmitClick = (title: string) => fetchNewTeamspace(title);
 
   return (
     <Wrapper>
       <span>팀 스페이스 목록</span>
       <TeamspaceListBox>
         <TeamspaceListContent>
-          {teamspaces.map((teamspace, index) => (
-            <TeamspacePanel key={`teamspace-panel-${index}`} {...{ teamspace }} />
-          ))}
+          {teamspaces &&
+            teamspaces.map((teamspace, index) => (
+              <TeamspacePanel key={`teamspace-panel-${index}`} {...{ teamspace }} />
+            ))}
         </TeamspaceListContent>
       </TeamspaceListBox>
       <AddButton onClick={handleAddButtonClick}>팀 스페이스 추가 +</AddButton>

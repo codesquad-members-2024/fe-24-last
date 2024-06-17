@@ -16,6 +16,14 @@ const Screen = styled(FlexColumn)`
 
 export const router = createBrowserRouter([
   {
+    path: '/',
+    element: (
+      <Screen>
+        <TeamspaceModal />
+      </Screen>
+    ),
+  },
+  {
     path: '/login',
     element: (
       <Screen>
@@ -28,14 +36,6 @@ export const router = createBrowserRouter([
     element: (
       <Screen>
         <RegistrationModal />
-      </Screen>
-    ),
-  },
-  {
-    path: '/teamspaces',
-    element: (
-      <Screen>
-        <TeamspaceModal />
       </Screen>
     ),
   },

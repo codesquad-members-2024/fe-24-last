@@ -3,6 +3,7 @@ import { BoxBackground, BoxBorder, ButtonBorder, FlexColumn, SubmitBackground, t
 import { useRef } from 'react';
 import { postRegistration } from '../../api/indexAPI';
 import { useNavigate } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
 
 const {
   Color: { SubmitColor },
@@ -16,9 +17,12 @@ export default function RegistrationModal() {
   };
   const navigate = useNavigate();
 
-  const handleSubmitClick = () => {
-    postRegistration(getInputText() || '').then(() => navigate('/login'));
-  };
+  const { mutate: fetchRegistration } = useMutation({
+    mutationFn: postRegistration,
+    onSuccess: () => navigate('/login'),
+  });
+
+  const handleSubmitClick = () => fetchRegistration(getInputText() || '');
 
   return (
     <Wrapper>
