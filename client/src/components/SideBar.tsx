@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { FormOutlined, CheckOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import { createNewPage, fetchData } from "../services/api";
+import { createNewPage, useFetchData } from "../services/api";
 import PageList from "./PageList";
 import { buildPageTree } from "../utils/buildTree";
 
@@ -18,19 +18,11 @@ export interface PageTree extends Page {
 
 export function SideBar() {
   const [pages, setPages] = useState<PageTree[]>([]);
+  const { data, error, isLoading } = useFetchData(`pages`);
 
   useEffect(() => {
-    const fetchPages = async () => {
-      try {
-        const pages: Page[] = await fetchData(`pages`);
-        setPages(buildPageTree(pages)); // 트리구조로 데이터 set
-      } catch (error) {
-        console.error("Error fetching pages:", error);
-      }
-    };
-
-    fetchPages();
-  }, []);
+    if (data) setPages(buildPageTree(data));
+  }, [data]);
 
   const handleNewPage = async () => {
     await createNewPage("");
