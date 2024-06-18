@@ -4,6 +4,30 @@ import Teamspace from '../models/Teamspace.js';
 
 const mainRouter: Router = express.Router();
 
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     tags:
+ *       - login
+ *     summary: 로그인
+ *     description: 닉네임을 입력하여 로그인
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoginRequest'
+ *     responses:
+ *       200:
+ *         description: 성공
+ *       400:
+ *         description: 닉네임은 필수입니다.
+ *       404:
+ *         description: 닉네임이나 비밀번호가 유효하지 않습니다.
+ *       500:
+ *         description: 서버 에러
+ */
 mainRouter.post('/login', async (req: Request, res: Response) => {
   try {
     const { nickname } = req.body;
@@ -20,6 +44,30 @@ mainRouter.post('/login', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * @swagger
+ * /registration:
+ *   post:
+ *     tags:
+ *       - login
+ *     summary: 회원가입
+ *     description: 닉네임을 입력하여 회원가입
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoginRequest'
+ *     responses:
+ *       200:
+ *         description: 성공
+ *       400:
+ *         description: 닉네임은 필수입니다.
+ *       409:
+ *         description: 중복된 닉네임입니다.
+ *       500:
+ *         description: 서버 에러
+ */
 mainRouter.post('/registration', async (req: Request, res: Response) => {
   try {
     const { nickname } = req.body;
@@ -39,6 +87,24 @@ mainRouter.post('/registration', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * @swagger
+ * /teamspaces:
+ *   get:
+ *     tags:
+ *       - teamspace
+ *     summary: 팀 스페이스 목록
+ *     description: 팀 스페이스 목록 조회
+ *     responses:
+ *       200:
+ *         description: 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Teamspaces'
+ *       500:
+ *         description: 서버 에러
+ */
 mainRouter.get('/teamspaces', async (req: Request, res: Response) => {
   try {
     const teamspace = await Teamspace.find();
