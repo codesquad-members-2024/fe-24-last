@@ -6,7 +6,6 @@ const useCreatePage = () => {
     const { mutate } = useMutation({
         mutationFn: async (parentId: string | null) => {
             const newPageData = await postNewPage(parentId);
-            console.log(newPageData)
             return newPageData;
         },
         onSuccess: () => {

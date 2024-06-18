@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
-import { BlockType } from "../../pages/SideBar";
 import restoreCaretPosition from "../../utils/restoreCaretPosition";
 import saveCaretPosition from "../../utils/saveCaretPosition";
 import DropdownBox from "../DropdownBox/DropdownBox";
@@ -10,7 +9,8 @@ interface BlockEditorProps {
     id: string | undefined;
     type: string;
     content: string;
-    handleBlockChange: (index: number, key: keyof BlockType, value: string) => void;
+    handleContentChange: (index: number, newContent: string) => void;
+    handleTagChange: (index: number, newType: string) => void;
     handleKeyDown: (
         e: React.KeyboardEvent<HTMLDivElement>,
         index: number
@@ -23,7 +23,8 @@ const BlockEditable = ({
     id,
     type,
     content,
-    handleBlockChange,
+    handleContentChange,
+    handleTagChange,
     handleKeyDown,
     dragHandleProps,
 }: BlockEditorProps) => {
@@ -40,7 +41,7 @@ const BlockEditable = ({
     const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
         saveCaretPosition(caretPositionRef);
         const newContent = (e.currentTarget as HTMLDivElement).textContent ?? "";
-        handleBlockChange(index, "content", newContent)
+        handleContentChange(index, newContent)
         if (newContent === "/" && isFocus) {
             setDropdownOpen(true);
         } else {
@@ -55,14 +56,15 @@ const BlockEditable = ({
     }, [id]);
 
     useEffect(() => {
-            restoreCaretPosition(caretPositionRef);
+        if(content !== "") restoreCaretPosition(caretPositionRef);
+        console.log(content)
     }, [content]);
 
     useEffect(() => {
         if (isDropdownOpen) {
             dropDownRef.current?.focus();
         }
-    }, [isDropdownOpen]);
+    }, [isDropdownOpen, isFocus]);
 
     return (
         <S.BlockContainer>
@@ -75,14 +77,19 @@ const BlockEditable = ({
                 aria-placeholder="글을 작성하려면 '스페이스'키를, 명령어를 사용하려면 '/'키를 누르세요."
                 onInput={handleInput}
                 onKeyDown={(e) => handleKeyDown(e, index)}
-                onFocus={()=> setFocus(true)}
-                onBlur={()=> setFocus(false)}
-                $type={type as keyof typeof S.blockStyles}
+                onFocus={() => setFocus(true)}
+                onBlur={() => setFocus(false)}
+                $isFocus={isFocus}
             >
                 {content}
             </S.Block>
             {isDropdownOpen && (
-                <DropdownBox handleBlockChange={handleBlockChange} index={index} ref={dropDownRef}/>
+                <DropdownBox
+                    handleTagChange={handleTagChange}
+                    index={index}
+                    ref={dropDownRef}
+                    setDropdownOpen={setDropdownOpen}
+                />
             )}
         </S.BlockContainer>
     );

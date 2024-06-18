@@ -1,5 +1,5 @@
+import React, { useState } from "react";
 import { Modal } from "antd";
-import { useState } from "react";
 import styled from "styled-components";
 
 interface ModalComponentProps {

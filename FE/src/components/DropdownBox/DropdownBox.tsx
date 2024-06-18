@@ -1,26 +1,17 @@
 import styled from "styled-components";
-import { BlockType } from "../../pages/SideBar";
-import moveCursorToStartEnd from "../../utils/MoveCursorToStartEnd";
 import React, { useImperativeHandle, useState, useRef } from "react";
-
+import useOnClickOutside from "../../hooks/useOnClickOutSide";
 const TAG_LIST = [
     { name: "Heading1", tag: "h1" },
     { name: "Heading2", tag: "h2" },
     { name: "Heading3", tag: "h3" },
     { name: "Text", tag: "p" },
-    { name: "To-do list", tag: "input" },
-    { name: "Bulleted list", tag: "ul" },
-    { name: "Numbered list", tag: "ol" },
     { name: "Quote", tag: "cite" },
 ];
-
 interface DropdownBoxProps {
-    handleBlockChange: (
-        index: number,
-        key: keyof BlockType,
-        value: string
-    ) => void;
+    handleTagChange: (index: number, newType: string) => void;
     index: number;
+    setDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 export interface DropdownBoxHandle {
@@ -28,19 +19,17 @@ export interface DropdownBoxHandle {
 }
 
 const DropdownBox = React.forwardRef<DropdownBoxHandle, DropdownBoxProps>(
-    ({ handleBlockChange, index }, ref) => {
+    ({  handleTagChange, index, setDropdownOpen }, ref) => {
         const [selectItemIdx, setSelectItemIdx] = useState(0);
         const [hoverItemIdx, setHoverItemIdx] = useState<number | null>(null);
         const dropDownRef = useRef<HTMLDivElement>(null);
+        
+        useOnClickOutside(dropDownRef, setDropdownOpen);
 
         const handleBlockClick = (selectTag: string) => {
-            console.log(selectTag)
-            handleBlockChange(index, "type", selectTag);
-            const currentBlock = document.querySelector<HTMLDivElement>(
-                `[data-position="${index}"]`
-            );
-            if (currentBlock) moveCursorToStartEnd(currentBlock, true);
-        };
+            handleTagChange(index, selectTag);
+            setDropdownOpen(false)
+        }
 
         useImperativeHandle(ref, () => ({
             focus() {
@@ -56,6 +45,7 @@ const DropdownBox = React.forwardRef<DropdownBoxHandle, DropdownBoxProps>(
                 setSelectItemIdx((prevIndex) => Math.max(prevIndex - 1, 0));
             } else if (e.key === "Enter") {
                 handleBlockClick(TAG_LIST[selectItemIdx].tag);
+                setDropdownOpen(false)
             }
         };
 
@@ -84,6 +74,7 @@ const DropdownBox = React.forwardRef<DropdownBoxHandle, DropdownBoxProps>(
     }
 );
 
+DropdownBox.displayName
 export default DropdownBox;
 
 const DropDownContainer = styled.div`
@@ -94,7 +85,7 @@ const DropDownContainer = styled.div`
     top: 100%;
     left: 0;
     width: 200px;
-    height: 220px;
+    height: 150px;
     display: flex;
     flex-direction: column;
     box-shadow: 0 0 3px;
