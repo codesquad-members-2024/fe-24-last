@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import * as S from "../../styles/BlockStyle";
+import { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
+import { BlockType } from "../../pages/SideBar";
 import restoreCaretPosition from "../../utils/restoreCaretPosition";
 import saveCaretPosition from "../../utils/saveCaretPosition";
-import { HolderOutlined } from "@ant-design/icons";
-import { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
+import DropdownBox from "../DropdownBox/DropdownBox";
+import * as S from "../../styles/BlockStyle";
 interface BlockEditorProps {
     index: number;
     id: string | undefined;
     type: string;
     content: string;
-    handleContentChange: (index: number, content: string) => void;
+    handleBlockChange: (index: number, key: keyof BlockType, value: string) => void;
     handleKeyDown: (
         e: React.KeyboardEvent<HTMLDivElement>,
         index: number
@@ -22,11 +23,13 @@ const BlockEditable = ({
     id,
     type,
     content,
-    handleContentChange,
+    handleBlockChange,
     handleKeyDown,
     dragHandleProps,
 }: BlockEditorProps) => {
-    const [isComposing, setIsComposing] = useState(false);
+    const [isDropdownOpen, setDropdownOpen] = useState(false)
+    const [isFocus, setFocus] = useState(false)
+    const dropDownRef = useRef<HTMLDivElement>(null)
     const caretPositionRef = useRef<{
         startContainer: Node;
         startOffset: number;
@@ -36,18 +39,13 @@ const BlockEditable = ({
 
     const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
         saveCaretPosition(caretPositionRef);
-        if (!isComposing && e.currentTarget && caretPositionRef.current) {
-            const newContent =
-                (e.currentTarget as HTMLDivElement).textContent ?? "";
-            handleContentChange(index, newContent);
+        const newContent = (e.currentTarget as HTMLDivElement).textContent ?? "";
+        handleBlockChange(index, "content", newContent)
+        if (newContent === "/" && isFocus) {
+            setDropdownOpen(true);
+        } else {
+            setDropdownOpen(false);
         }
-    };
-
-    const handleCompositionEnd = (e: React.FormEvent<HTMLDivElement>) => {
-        setIsComposing(false);
-        const newContent =
-            (e.currentTarget as HTMLDivElement).textContent ?? "";
-        handleContentChange(index, newContent);
     };
 
     useEffect(() => {
@@ -57,31 +55,38 @@ const BlockEditable = ({
     }, [id]);
 
     useEffect(() => {
-        if (!isComposing && caretPositionRef.current) {
             restoreCaretPosition(caretPositionRef);
+    }, [content]);
+
+    useEffect(() => {
+        if (isDropdownOpen) {
+            dropDownRef.current?.focus();
         }
-    }, [content, isComposing]);
+    }, [isDropdownOpen]);
 
     return (
         <S.BlockContainer>
-            <S.DragHandle {...dragHandleProps}>
-                <HolderOutlined />
-            </S.DragHandle>
+            <S.DragHandle {...dragHandleProps} />
             <S.Block
+                as={type}
                 data-position={index}
                 contentEditable
                 suppressContentEditableWarning={true}
-                onCompositionStart={() => setIsComposing(true)}
-                onCompositionEnd={handleCompositionEnd}
                 aria-placeholder="글을 작성하려면 '스페이스'키를, 명령어를 사용하려면 '/'키를 누르세요."
                 onInput={handleInput}
                 onKeyDown={(e) => handleKeyDown(e, index)}
+                onFocus={()=> setFocus(true)}
+                onBlur={()=> setFocus(false)}
                 $type={type as keyof typeof S.blockStyles}
             >
                 {content}
             </S.Block>
+            {isDropdownOpen && (
+                <DropdownBox handleBlockChange={handleBlockChange} index={index} ref={dropDownRef}/>
+            )}
         </S.BlockContainer>
     );
 };
 
 export default BlockEditable;
+

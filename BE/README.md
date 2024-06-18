@@ -17,4 +17,8 @@
 - 페이지 삭제
   - DELETE /api/delete/:id
 
+- 페이지 타이틀 변경
+  - PATCH /api/page/title/:id
 
+- 페이지 블럭 변경
+  - PATCH /api/page/block/:id

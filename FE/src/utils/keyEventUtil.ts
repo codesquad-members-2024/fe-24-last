@@ -1,13 +1,13 @@
-import { Dispatch, SetStateAction, KeyboardEvent } from 'react';
+import { KeyboardEvent } from 'react';
 import { BlockType } from '../pages/SideBar';
 import moveCursorToStartEnd from './MoveCursorToStartEnd';
 
 interface EventParams {
     e: KeyboardEvent<HTMLDivElement>;
     index: number;
-    setBlocks: Dispatch<SetStateAction<BlockType[]>>;
+    blocks: React.MutableRefObject<BlockType[]>;
     updateBlock: BlockType[];
-    currentBlockIdx: React.MutableRefObject<number | null>;
+    setCurrentBlockIdx: React.Dispatch<React.SetStateAction<number | null>>;
 }
 interface ArrowEventParams {
     e: KeyboardEvent<HTMLDivElement>;
@@ -15,24 +15,24 @@ interface ArrowEventParams {
 }
 
 const newBlock: BlockType = {
-    type: "text",
+    type: "p",
     content: "",
     children: [],
 };
 
 
 export const keyEvent = {
-    enterEvent({e, setBlocks, updateBlock, currentBlockIdx, index}: EventParams) {
+    enterEvent({e, blocks, updateBlock, setCurrentBlockIdx, index}: EventParams) {
         e.preventDefault();
         updateBlock.splice(index + 1, 0, newBlock);
-        setBlocks(updateBlock);
-        currentBlockIdx.current = index + 1;
+        blocks.current = updateBlock;
+        setCurrentBlockIdx (index + 1);
     },
-    backspaceEvent({e, setBlocks, updateBlock, currentBlockIdx, index}: EventParams){
+    backspaceEvent({e, blocks, updateBlock, setCurrentBlockIdx, index}: EventParams){
         e.preventDefault();
         updateBlock.splice(index, 1);
-        setBlocks(updateBlock);
-        currentBlockIdx.current = index - 1;
+        blocks.current = updateBlock;
+        setCurrentBlockIdx(index - 1);
     },
     arrowUpEvent({e, index}: ArrowEventParams){
         e.preventDefault();
@@ -44,7 +44,6 @@ export const keyEvent = {
                 () => moveCursorToStartEnd(prevBlock, false),
                 0
             );
-            prevBlock.focus();
         }
     },
     arrowDownEvent({e, index}: ArrowEventParams) {
@@ -54,7 +53,6 @@ export const keyEvent = {
         );
         if (nextBlock) {
             moveCursorToStartEnd(nextBlock, false);
-            nextBlock.focus();
         }
     },
     arrowRightEvent({e, index}: ArrowEventParams) {
@@ -63,7 +61,6 @@ export const keyEvent = {
             `[data-position="${index + 1}"]`
         );
         if (nextBlock) {
-            nextBlock.focus();
             setTimeout(
                 () => moveCursorToStartEnd(nextBlock, true),
                 0
@@ -76,7 +73,6 @@ export const keyEvent = {
             `[data-position="${index - 1}"]`
         );
         if (prevBlock) {
-            prevBlock.focus();
             setTimeout(
                 () => moveCursorToStartEnd(prevBlock, false),
                 0
