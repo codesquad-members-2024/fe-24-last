@@ -1,5 +1,6 @@
 import express from "express";
-import { Pages } from "../model/pages.js";
+import mongoose from "mongoose";
+import { Pages, Blocks } from "../model/pages.js";
 
 const pagesRouter = express.Router();
 
@@ -102,31 +103,63 @@ pagesRouter.post("/:id/block", async (req, res) => {
   }
 });
 
-pagesRouter.patch("/:id/block/:blockId", async (req, res) => {
-  const { id: articleId, blockId } = req.params;
-  const { content } = req.body;
+pagesRouter.patch(
+  "/:id/block/:blockId/element/:elementId",
+  async (req, res) => {
+    const { id: articleId, blockId, elementId } = req.params;
+    const { content } = req.body;
 
-  try {
-    const article = await Pages.findById(articleId);
-    const block = article.blocklist.id(blockId);
-    block.content = content;
-    await article.save();
-    res.json({ message: "Block updated successfully", block });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    try {
+      const page = await Pages.findById(articleId);
+      if (!page) {
+        return res.status(404).json({ message: "Page not found" });
+      }
+
+      //리팩토링이 필요해 보인다
+      let blockFound = false;
+      for (let block of page.blocklist) {
+        if (block._id.toString() === blockId) {
+          let elementFound = false;
+          for (let row of block.element) {
+            for (let element of row) {
+              if (element._id.toString() === elementId) {
+                element.content = content;
+                elementFound = true;
+                break;
+              }
+            }
+            if (elementFound) break;
+          }
+
+          if (!elementFound) {
+            return res.status(404).json({ message: "Element not found" });
+          }
+
+          blockFound = true;
+          break;
+        }
+      }
+
+      if (!blockFound) {
+        return res.status(404).json({ message: "Block not found" });
+      }
+
+      await page.save();
+      res
+        .status(200)
+        .json({ message: "Element content updated successfully", page });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
   }
-});
+);
 
 pagesRouter.delete("/:id/block/:blockId", async (req, res) => {
   const { id: articleId, blockId } = req.params;
 
   try {
     const article = await Pages.findById(articleId);
-    article.blocklist = article.blocklist.filter(
-      (block) => block._id.toString() !== blockId
-    );
-    await article.save();
-    res.json({ message: "Block deleted successfully" });
+    const block = await Blocks.findById(blockId);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

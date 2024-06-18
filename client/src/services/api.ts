@@ -61,10 +61,13 @@ export async function updateArticleTitle(
 export async function updateBlockContent(
   pageId: string | undefined,
   blockId: string | undefined,
+  elementId: string | undefined,
   newContent: string
 ) {
   const response = await fetch(
-    `${import.meta.env.VITE_SERVER_URL}/pages/${pageId}/block/${blockId}`,
+    `${
+      import.meta.env.VITE_SERVER_URL
+    }/pages/${pageId}/block/${blockId}/element/${elementId}`,
     {
       method: "PATCH",
       body: JSON.stringify({ content: newContent }),

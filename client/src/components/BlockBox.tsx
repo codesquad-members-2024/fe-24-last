@@ -28,9 +28,9 @@ export default function BlockBox({
   const blockRef = useRef<HTMLDivElement>(null);
 
   const [debouncedSaveContent, clearDebouncedSaveContent] = debounce(
-    async (newContent: string) => {
+    async (blockId, elementId, newContent) => {
       try {
-        await updateBlockContent(pageId, blockId, newContent);
+        await updateBlockContent(pageId, blockId, elementId, newContent);
       } catch (error) {
         console.error("Error:", error);
       }
@@ -38,10 +38,11 @@ export default function BlockBox({
     1000
   );
 
-  const handleContentChange = (e: React.FormEvent<HTMLDivElement>) => {
-    const newContent = e.currentTarget.innerText;
-    debouncedSaveContent(newContent);
-  };
+  const handleContentChange =
+    (elementId: string) => (e: React.FormEvent<HTMLDivElement>) => {
+      const newContent = e.currentTarget.innerText;
+      debouncedSaveContent(blockId, elementId, newContent);
+    };
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.nativeEvent.isComposing) return;
@@ -82,7 +83,7 @@ export default function BlockBox({
               <BlockArea
                 ref={blockRef}
                 contentEditable
-                onInput={handleContentChange}
+                onInput={handleContentChange(child._id)}
                 onKeyDown={handleKeyDown}
                 suppressContentEditableWarning
                 id={child._id}
