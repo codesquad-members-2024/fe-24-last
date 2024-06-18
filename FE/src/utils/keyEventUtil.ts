@@ -12,71 +12,83 @@ interface EventParams {
 interface ArrowEventParams {
     e: KeyboardEvent<HTMLDivElement>;
     index: number;
+    blocks?: React.MutableRefObject<BlockType[]> | undefined;
+    range?: Range | null;
+    curBlock?: HTMLDivElement | null;
 }
 
-const newBlock: BlockType = {
+const NEW_BLOCK: BlockType = {
     type: "p",
     content: "",
     children: [],
 };
 
+export type KeyEventParams = EventParams | ArrowEventParams;
 
 export const keyEvent = {
-    enterEvent({e, blocks, updateBlock, setCurrentBlockIdx, index}: EventParams) {
+    Enter({e, blocks, updateBlock, setCurrentBlockIdx, index}: EventParams) {
         e.preventDefault();
-        updateBlock.splice(index + 1, 0, newBlock);
+        updateBlock.splice(index + 1, 0, NEW_BLOCK);
         blocks.current = updateBlock;
         setCurrentBlockIdx (index + 1);
     },
-    backspaceEvent({e, blocks, updateBlock, setCurrentBlockIdx, index}: EventParams){
-        e.preventDefault();
-        updateBlock.splice(index, 1);
-        blocks.current = updateBlock;
-        setCurrentBlockIdx(index - 1);
-    },
-    arrowUpEvent({e, index}: ArrowEventParams){
-        e.preventDefault();
-        const prevBlock = document.querySelector<HTMLDivElement>(
-            `[data-position="${index - 1}"]`
-        );
-        if (prevBlock) {
-            setTimeout(
-                () => moveCursorToStartEnd(prevBlock, false),
-                0
-            );
+    Backspace({e, blocks, updateBlock, setCurrentBlockIdx, index}: EventParams){
+        if (index > 0 && !blocks.current[index].content){
+            e.preventDefault();
+            updateBlock.splice(index, 1);
+            blocks.current = updateBlock;
+            setCurrentBlockIdx(index - 1);
         }
     },
-    arrowDownEvent({e, index}: ArrowEventParams) {
-        e.preventDefault();
-        const nextBlock = document.querySelector<HTMLDivElement>(
-            `[data-position="${index + 1}"]`
-        );
-        if (nextBlock) {
-            moveCursorToStartEnd(nextBlock, false);
+    ArrowUp({e, index}: ArrowEventParams){
+        if (index > 0){
+            e.preventDefault();
+            const prevBlock = document.querySelector<HTMLDivElement>(
+                `[data-position="${index - 1}"]`
+            );
+            if (prevBlock) {
+                setTimeout(
+                    () => moveCursorToStartEnd(prevBlock, false),
+                    0
+                );
+            }
         }
     },
-    arrowRightEvent({e, index}: ArrowEventParams) {
-        e.preventDefault();
-        const nextBlock = document.querySelector<HTMLDivElement>(
-            `[data-position="${index + 1}"]`
-        );
-        if (nextBlock) {
-            setTimeout(
-                () => moveCursorToStartEnd(nextBlock, true),
-                0
-            );
+    ArrowDown({e, index, blocks}: ArrowEventParams) {
+        if(blocks &&  index < blocks.current.length - 1){
+            e.preventDefault();
+            const nextBlock = document.querySelector<HTMLDivElement>(
+                `[data-position="${index + 1}"]`
+            )
+            if (nextBlock) {
+                moveCursorToStartEnd(nextBlock, false);
+            }
         }
     },
-    arrowLeftEvent({e, index}: ArrowEventParams){
-        e.preventDefault();
-        const prevBlock = document.querySelector<HTMLDivElement>(
-            `[data-position="${index - 1}"]`
-        );
-        if (prevBlock) {
-            setTimeout(
-                () => moveCursorToStartEnd(prevBlock, false),
-                0
+    ArrowRight({ e, index, range, curBlock, blocks }: ArrowEventParams) {
+        if (range?.endOffset === curBlock?.textContent?.length && blocks && index < blocks.current.length - 1) {
+            e.preventDefault();
+            const nextBlock = document.querySelector<HTMLDivElement>(
+                `[data-position="${index + 1}"]`
             );
+            if (nextBlock) {
+                setTimeout(() => moveCursorToStartEnd(nextBlock, true), 0);
+            }
+        }
+    },
+    ArrowLeft({e, index, range}: ArrowEventParams){
+        if (range?.startOffset === 0 && index > 0) {
+            e.preventDefault();
+            const prevBlock = document.querySelector<HTMLDivElement>(
+                `[data-position="${index - 1}"]`
+            );
+            if (prevBlock) {
+                setTimeout(
+                    () => moveCursorToStartEnd(prevBlock, false),
+                    0
+                );
+            }
+
         }
     }
 }
