@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "react-query";
 import { BlockType, PageType } from "./SideBar";
@@ -35,19 +35,21 @@ const Page = () => {
         },
     });
 
-    const handleBlockChange = (index: number, key: keyof BlockType, value: string) => {
-        const updatedBlocks = blocks.current.map((block, i) => {
-        if (i === index) {
-            const updatedBlock = { ...block, [key]: value || "" };
-            if (key === "type") {
-                updatedBlock.content = "";
-            }
-            return updatedBlock;
-        }
-        return block;
-    });
-    blocks.current = [...updatedBlocks];
-    debouncedMutation({ id, blocks: updatedBlocks });
+    const handleTagChange = (index: number, newType: string) => {
+        const updatedBlocks = blocks.current.map((block, i) =>
+            i === index ? { ...block, type: newType || "", content: "" } : block
+        );
+        blocks.current = [...updatedBlocks];
+        setCurrentBlockIdx(index)
+        debouncedMutation({ id, blocks: updatedBlocks });
+    };
+
+    const handleContentChange = (index: number, newContent: string) => {
+        const updatedBlocks = blocks.current.map((block, i) =>
+            i === index ? { ...block, content: newContent } : block
+        );
+        blocks.current = [...updatedBlocks];
+        debouncedMutation({ id, blocks: updatedBlocks });
     };
     
     const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, index: number) => {
@@ -82,7 +84,6 @@ const Page = () => {
         debouncedMutation({ id, blocks: blocks.current });
     };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     const debouncedMutation = useCallback(
         debounce(
             async ({ id, blocks }: { id: string | undefined; blocks: BlockType[] }) => {
@@ -119,12 +120,15 @@ const Page = () => {
     };
 
     useEffect(() => {
-        if (currentBlockIdx !== null && prevBlock.current.length + 1 === blocks.current.length
-        ) focusChange(currentBlockIdx, true);
-
-        if (currentBlockIdx !== null && prevBlock.current.length - 1 === blocks.current.length
-        ) focusChange(currentBlockIdx, false);
-
+        if (currentBlockIdx !== null && 
+            prevBlock.current.length + 1 === blocks.current.length) {
+            focusChange(currentBlockIdx, true);
+        } else if (currentBlockIdx !== null && 
+            prevBlock.current.length - 1 === blocks.current.length) {
+            focusChange(currentBlockIdx, false);
+        } else if (currentBlockIdx !== null){
+            focusChange(currentBlockIdx, true);
+        }
         setCurrentBlockIdx(null);
     }, [currentBlockIdx]);
 
@@ -169,7 +173,8 @@ const Page = () => {
                                                     id={id}
                                                     type={currentBlock.type}
                                                     content={currentBlock.content}
-                                                    handleBlockChange={handleBlockChange}
+                                                    handleContentChange={handleContentChange}
+                                                    handleTagChange={handleTagChange}
                                                     handleKeyDown={handleKeyDown}
                                                     dragHandleProps={provided.dragHandleProps}
                                                 />

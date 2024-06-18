@@ -32,7 +32,6 @@ const TitleEditable = ({ id, title }: TitleEditorProps) => {
         },
     });
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     const debouncedMutation = useCallback(
         debounce(async ({ id, title }: TitleMutateType) => {
             mutate({ id, title });
