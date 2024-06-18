@@ -2,9 +2,10 @@ import styled from 'styled-components';
 import { themes, FlexColumn, BoxBorder, ButtonBorder } from '../../styles/themes';
 import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
-import { postLogin } from '../../api/indexAPI';
+import { postLogin } from '../../api/mainAPI';
 import useUserStore from '../../hooks/useUserStore';
 import { useMutation } from '@tanstack/react-query';
+import { message } from 'antd';
 
 const {
   Color: { BoxBackground, SubmitColor },
@@ -27,6 +28,7 @@ export default function NicknameModal() {
       setIsLoggedIn(true);
       navigate('/');
     },
+    onError: ({ message: errorMessage }) => message.warning(errorMessage),
   });
 
   const handleSubmitClick = () => fetchLogin(getInputText() || '');
@@ -50,6 +52,10 @@ const Wrapper = styled(FlexColumn)`
   justify-content: center;
   align-items: center;
   gap: 14px;
+`;
+
+const ErrorText = styled.span`
+  color: red;
 `;
 
 const NicknameInput = styled.input`

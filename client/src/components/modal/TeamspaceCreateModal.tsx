@@ -10,7 +10,7 @@ import {
 } from '../../styles/themes';
 import { useRef } from 'react';
 
-interface TeamspaceCreateModalProps {
+export interface TeamspaceCreateModalProps {
   handleCancelClick: () => void;
   handleSubmitClick: (title: string) => void;
 }

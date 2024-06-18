@@ -6,7 +6,7 @@ import Teamspace from './Teamspace';
 import { TeamspaceDescription, UserDescription } from '../../constants';
 import { useParams } from 'react-router-dom';
 import { sendTeamspaceRequestById } from '../../api/teamspaceAPI';
-import { useQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 
 export interface SidebarProps {
   teamspace: TeamspaceDescription;
@@ -21,9 +21,10 @@ const {
 export default function Sidebar() {
   const { teamspaceId } = useParams();
 
-  const { data: teamspace } = useQuery<TeamspaceDescription>({
+  const { data: teamspace } = useSuspenseQuery<TeamspaceDescription>({
     queryKey: [`teamspace-${teamspaceId}`],
     queryFn: () => sendTeamspaceRequestById(teamspaceId || ''),
+    refetchOnWindowFocus: false,
   });
 
   return (

@@ -10,7 +10,7 @@ const teamspaceRouter = (io: Server): Router => {
 
   /**
    * @swagger
-   * /teamspaces/{teamspaceId}:
+   * /teamspace/{teamspaceId}:
    *   get:
    *     tags:
    *       - teamspace
@@ -51,7 +51,7 @@ const teamspaceRouter = (io: Server): Router => {
 
   /**
    * @swagger
-   * /teamspaces:
+   * /teamspace:
    *   post:
    *     tags:
    *       - teamspace
@@ -106,7 +106,7 @@ const teamspaceRouter = (io: Server): Router => {
 
   /**
    * @swagger
-   * /teamspaces/{teamspaceId}:
+   * /teamspace/{teamspaceId}:
    *   patch:
    *     tags:
    *       - teamspace
@@ -174,7 +174,7 @@ const teamspaceRouter = (io: Server): Router => {
 
   /**
    * @swagger
-   * /teamspaces/{teamspaceId}:
+   * /teamspace/{teamspaceId}:
    *   delete:
    *     tags:
    *       - teamspace
