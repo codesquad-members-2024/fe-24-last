@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
-import restoreCaretPosition from "../../utils/restoreCaretPosition";
-import saveCaretPosition from "../../utils/saveCaretPosition";
-import DropdownBox from "../DropdownBox/DropdownBox";
-import * as S from "../../styles/BlockStyle";
+import restoreCaretPosition from "../../../utils/restoreCaretPosition";
+import saveCaretPosition from "../../../utils/saveCaretPosition";
+import DropdownBox from "./DropdownBox/DropdownBox";
+import * as S from "../../../styles/BlockStyle";
 interface BlockEditorProps {
     index: number;
     id: string | undefined;
@@ -57,7 +57,6 @@ const BlockEditable = ({
 
     useEffect(() => {
         if(content !== "") restoreCaretPosition(caretPositionRef);
-        console.log(content)
     }, [content]);
 
     useEffect(() => {

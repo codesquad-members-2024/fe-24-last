@@ -1,6 +1,6 @@
-import styled from "styled-components";
 import React, { useImperativeHandle, useState, useRef } from "react";
-import useOnClickOutside from "../../hooks/useOnClickOutSide";
+import useOnClickOutside from "../../../../hooks/useOnClickOutSide";
+import * as S from "../../../../styles/DropdownBoxStyle"
 const TAG_LIST = [
     { name: "Heading1", tag: "h1" },
     { name: "Heading2", tag: "h2" },
@@ -14,9 +14,9 @@ interface DropdownBoxProps {
     setDropdownOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-export interface DropdownBoxHandle {
-    focus: () => void;
-}
+export interface DropdownBoxHandle {focus: () => void}
+
+type KeyMap = "ArrowDown" | "ArrowUp" | "Enter";
 
 const DropdownBox = React.forwardRef<DropdownBoxHandle, DropdownBoxProps>(
     ({  handleTagChange, index, setDropdownOpen }, ref) => {
@@ -37,22 +37,24 @@ const DropdownBox = React.forwardRef<DropdownBoxHandle, DropdownBoxProps>(
             }
         }));
 
+        const dropdownKeyMap = {
+            ArrowDown: () => setSelectItemIdx((prevIndex) => Math.min(prevIndex + 1, TAG_LIST.length - 1)),
+            ArrowUp: () => setSelectItemIdx((prevIndex) => Math.max(prevIndex - 1, 0)),
+            Enter: () => {
+                handleBlockClick(TAG_LIST[selectItemIdx].tag);
+                setDropdownOpen(false);
+            }
+        }
         const handleDropDownKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
             e.preventDefault();
-            if (e.key === "ArrowDown") {
-                setSelectItemIdx((prevIndex) => Math.min(prevIndex + 1, TAG_LIST.length - 1));
-            } else if (e.key === "ArrowUp") {
-                setSelectItemIdx((prevIndex) => Math.max(prevIndex - 1, 0));
-            } else if (e.key === "Enter") {
-                handleBlockClick(TAG_LIST[selectItemIdx].tag);
-                setDropdownOpen(false)
-            }
+            if (!["ArrowDown", "ArrowUp", "Enter"].includes(e.key)) return;
+            dropdownKeyMap[e.key as KeyMap]();
         };
 
         return (
-            <DropDownContainer >
+            <S.DropDownContainer >
                 {TAG_LIST.map((curTag, i) => (
-                    <SelectItem
+                    <S.SelectItem
                         ref={dropDownRef} 
                         tabIndex={0}
                         key={i}
@@ -67,48 +69,12 @@ const DropdownBox = React.forwardRef<DropdownBoxHandle, DropdownBoxProps>(
                         $hoverItemIdx={hoverItemIdx}
                     >
                         {curTag.name}
-                    </SelectItem>
+                    </S.SelectItem>
                 ))}
-            </DropDownContainer>
+            </S.DropDownContainer>
         );
     }
 );
 
 DropdownBox.displayName
 export default DropdownBox;
-
-const DropDownContainer = styled.div`
-    position: absolute;
-    z-index: 10;
-    border: none;
-    border-radius: 10px;
-    top: 100%;
-    left: 0;
-    width: 200px;
-    height: 150px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 0 3px;
-    overflow: hidden;
-    &:focus {
-        outline: none;
-    }
-`;
-
-const SelectItem = styled.div<{ $selectItemIdx: boolean; $hoverItemIdx: number | null }>`
-    z-index: 10;
-    flex-grow: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-bottom: 1px solid #ccc;
-    background-color: ${({ $selectItemIdx, $hoverItemIdx }) =>
-        $selectItemIdx && $hoverItemIdx === null ? '#e0e0e0' : 'white'};
-    &:last-child {
-        border-bottom: none;
-    }
-    cursor: pointer;
-    &:hover {
-        background-color: #e0e0e0;
-    }
-`;
