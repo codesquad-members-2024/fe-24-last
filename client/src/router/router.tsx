@@ -5,9 +5,9 @@ import TeamspaceModal from '../components/modal/TeamspaceModal';
 import styled from 'styled-components';
 import { Flex, FlexColumn } from '../styles/themes';
 import Sidebar from '../components/sidebar/Sidebar';
-import Article from '../components/Article';
 import { Suspense } from 'react';
 import Loading from '../components/loading/Loading';
+import Article from '../components/article/Article';
 
 const Screen = styled(FlexColumn)`
   width: 100vw;

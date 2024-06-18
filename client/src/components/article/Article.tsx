@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import BlockController from './BlockController';
-import useArticle from '../hooks/useArticle';
-import { Flex } from '../styles/themes';
+import BlockController from '../BlockController';
+import useArticle from '../../hooks/useArticle';
+import { Flex } from '../../styles/themes';
 
 export default function Article() {
   const { blocks, setBlocks, debouncedFetch, handleContentChange } = useArticle();

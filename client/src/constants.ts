@@ -1,3 +1,5 @@
+import { CursorPosition } from './helpers/cursorHelpers';
+
 interface BlockBase {
   type: string;
 }
@@ -39,7 +41,7 @@ export type Block = HeaderBlock | ParagraphBlock | UnorderedItemBlock | OrderedL
 export interface BlockControllerProps {
   blocks: Block[];
   setBlocks: (blocks: Block[]) => void;
-  handleFetch: (blocks: Block[]) => void;
+  handleFetch: (blocks: Block[], cursorPosition: CursorPosition) => void;
   handleContentChange: (block: Block, index: number) => void;
 }
 

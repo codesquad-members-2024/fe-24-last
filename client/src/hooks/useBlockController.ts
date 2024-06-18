@@ -1,6 +1,7 @@
 import { Block, BlockControllerProps, ParagraphBlock } from '../constants';
 import { HandleInputProps } from '../components/EditableBlock';
-import { saveCursorPosition } from '../helpers/cursorHelpers';
+import { CursorPosition, storeCursorPosition } from '../helpers/cursorHelpers';
+import { useCursorStore } from '../stores/cursorStore';
 
 const insertLineBreak = (blocks: Block[], blockIndex: number, offset: number): Block[] => {
   const block = blocks[blockIndex];
@@ -48,6 +49,7 @@ export default function useBlockController({
   handleFetch,
   handleContentChange,
 }: BlockControllerProps) {
+  const { setCursorPosition } = useCursorStore();
   const handleInput = ({
     e: {
       key,
@@ -56,40 +58,42 @@ export default function useBlockController({
     },
     index: blockIndex,
     itemIndex,
-    cursorPositionRef,
-    updateCursorPosition,
   }: HandleInputProps) => {
     let newBlocks = [...blocks];
     const block = newBlocks[blockIndex];
-
-    const saveCursorPositionResult = saveCursorPosition(blockIndex);
-    if (!saveCursorPositionResult) return;
-    const { range, cursorPosition } = saveCursorPositionResult;
-
-    if (!updateCursorPosition) return;
-    updateCursorPosition(cursorPosition);
+    const cursorPosition = storeCursorPosition() as CursorPosition;
+    const { offset } = cursorPosition;
 
     if (key === 'Backspace' && isBlankBlock(block)) {
+      const newCursorPosition = {
+        ...cursorPosition,
+        offset: Infinity,
+        blockOffset: blockIndex < 1 ? 0 : blockIndex - 1,
+      };
+
       newBlocks = removeBlock(blocks, blockIndex);
       setBlocks(newBlocks);
-      handleFetch(newBlocks);
+      handleFetch(newBlocks, newCursorPosition);
       return;
     }
 
     if (key === 'Enter' && shiftKey) {
-      updateCursorPosition({ ...cursorPosition, offset: range?.startOffset ? range?.startOffset + 1 : 0 });
-      newBlocks = insertLineBreak(blocks, blockIndex, cursorPosition.offset);
+      const newCursorPosition = { ...cursorPosition, offset: offset ? offset + 1 : 0 };
+
+      newBlocks = insertLineBreak(blocks, blockIndex, offset); //?
       setBlocks(newBlocks);
-      handleFetch(newBlocks);
+      setCursorPosition(newCursorPosition);
+      handleFetch(newBlocks, newCursorPosition);
 
       return;
     }
 
     if (key === 'Enter') {
-      updateCursorPosition({ ...cursorPosition, blockOffset: blockIndex + 1 });
+      const newCursorPosition = { ...cursorPosition, blockOffset: blockIndex + 1 };
+
       newBlocks = addNewBlock(blocks, blockIndex);
       setBlocks(newBlocks);
-      handleFetch(newBlocks);
+      handleFetch(newBlocks, newCursorPosition);
       return;
     }
 

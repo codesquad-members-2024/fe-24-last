@@ -14,6 +14,25 @@ DefaultController.args = {
   blocks: [
     { type: 'header', content: 'Hello World', level: 2 },
     { type: 'paragraph', content: '내용입니다.' },
-    { type: 'list', items: ['미메', '슈니', '우디'] },
+    { type: 'ul-item', content: '미메' },
+    { type: 'ul-item', content: '슈니' },
+    { type: 'ul-item', content: '우디' },
+    {
+      type: 'ordered-list',
+      items: [
+        {
+          type: 'ol-item',
+          content: '미메',
+        },
+        {
+          type: 'ol-item',
+          content: '슈니',
+        },
+        {
+          type: 'ol-item',
+          content: '우디',
+        },
+      ],
+    },
   ],
 };
