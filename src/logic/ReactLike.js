@@ -15,7 +15,7 @@ function init(app, $root) {
 	updateElement($root, globalNodes.oldNode);
 }
 
-function render() {
+function renderAndCommit() {
 	const newNode = globalNodes.headComponent();
 	updateElement(
 		globalNodes.headContainer,
@@ -33,7 +33,11 @@ function useState(initialValue) {
 	// }
 	const key = JSON.stringify(initialValue);
 	if (!stateManager.hasKey(key))
-		stateManager.storeState(key, initialValue); //state가 없는경우 초기 state 등록
+		stateManager.storeState(
+			key,
+			initialValue,
+			renderAndCommit
+		); //state가 없는경우 초기 state 등록
 
 	const setState = (value) => {
 		if (typeof value === "function")
@@ -45,10 +49,10 @@ function useState(initialValue) {
 
 		console.log("render : ", stateManager.state);
 
-		render(); //옵저버패턴으로 변경
+		stateManager.render();
 	};
 
 	return [stateManager.getState(key), setState];
 }
 
-export { init, render, useState };
+export { init, useState };

@@ -20,6 +20,8 @@ function Todo() {
 			prev.filter((todo) => todo.id !== id)
 		);
 
+	// const handleCreateTodo =()=>setTodos
+
 	console.log("투두스", todos);
 
 	return (
