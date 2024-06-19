@@ -35,6 +35,13 @@ function ArticleLayout() {
     saveTitle(newTitle);
   };
 
+  const handleTitleKeyDown = async (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key == "Enter") {
+      e.preventDefault();
+      await handleKeyDown(e, -1);
+    }
+  }
+
   const handleKeyDown = async (e: KeyboardEvent<HTMLDivElement>, index: number) => {
     if (e.key === "Enter") {
       if (e.shiftKey) return;
@@ -97,35 +104,32 @@ function ArticleLayout() {
     try {
       await updateData(`pages/${pageId}/blocks`, { blocks });
     } catch (error) {
-      console.log("🚀 ~ updateBlockOrder ~ blocks:", blocks)
       console.error("Failed to update block order:", error);
     }
   };
   
   const handleOnDragEnd = (result: DropResult) => {
     if (!result.destination) return;
-  
     const reorderedBlocks = reorder(blocks, result.source.index, result.destination.index);
-  
     setBlocks(reorderedBlocks);
     updateBlockOrder(reorderedBlocks);
-    console.log("🚀 ~ handleOnDragEnd ~ reorderedBlocks:", reorderedBlocks)
   };
 
   useEffect(() => {
     if (pageData) {
       setTitle(pageData.title);
       setBlocks(pageData.blocklist);
-    }
+    }       
   }, [pageData, pageId]);
 
   return (
     <Wrapper>
       <StyledTitleBox
         contentEditable
+        suppressContentEditableWarning
         aria-placeholder="제목없음"
         onInput={handleTitleChange}
-        suppressContentEditableWarning
+        onKeyDown={handleTitleKeyDown}
       >
         {title}
       </StyledTitleBox>
