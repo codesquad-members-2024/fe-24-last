@@ -1,4 +1,4 @@
-import { useState } from "./logic/ReactLike.js";
+import { useState } from "./logic/hooks.js";
 import { h } from "./logic/helper.js";
 /** @jsx h */
 
@@ -22,7 +22,7 @@ function Todo() {
 
 	// const handleCreateTodo =()=>setTodos
 
-	console.log("투두스", todos);
+	console.log("투두스", todos);//DELETE
 
 	return (
 		<div id="app">
