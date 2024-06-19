@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { FormOutlined, CheckOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import { createNewPage, useFetchData } from "../services/api";
+import { useGetPage, useCreateNewData, NewPageData } from "../services/api";
 import PageList from "./PageList";
 import { buildPageTree } from "../utils/buildTree";
 
@@ -18,14 +18,21 @@ export interface PageTree extends Page {
 
 export function SideBar() {
   const [pages, setPages] = useState<PageTree[]>([]);
-  const { data, error, isLoading } = useFetchData(`pages`);
+  const { data } = useGetPage("pages");
+  const createNewData = useCreateNewData();
 
   useEffect(() => {
     if (data) setPages(buildPageTree(data));
   }, [data]);
 
-  const handleNewPage = async () => {
-    await createNewPage("");
+  const handleNewPage = () => {
+    const newPageData: NewPageData = {
+      title: "",
+      blocklist: [],
+      parent_id: "",
+    };
+
+    createNewData(newPageData);
   };
 
   const renderPageTree = (pages: PageTree[]) => {
@@ -68,7 +75,6 @@ const Wrapper = styled.div`
   justify-content: space-between;
   background-color: rgb(247, 247, 245);
   min-width: 240px;
-
   height: 100vh;
 `;
 
