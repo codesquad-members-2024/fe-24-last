@@ -1,8 +1,8 @@
 import styled from "styled-components";
-import { FormEvent, KeyboardEvent, useCallback, useEffect, useState} from "react";
+import { FormEvent, KeyboardEvent, useCallback, useEffect, useState } from "react";
 import debounce from "../utils/debounce";
 import { useParams } from "react-router-dom";
-import { createBlock, deleteData, fetchData, updateData} from "../services/api";
+import { createBlock, deleteData, updateData, usePatchNewBlock, useGetPage } from "../services/api";
 import BlockList from "./BlockList";
 import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd";
 import { HolderOutlined } from "@ant-design/icons";
@@ -10,32 +10,17 @@ import { HolderOutlined } from "@ant-design/icons";
 export interface Block {
   type: string;
   content: string;
-  _id: string;
+  _id?: string;
   index: number;
   children: Block[];
 }
 
 function ArticleLayout() {
   const { id: pageId } = useParams<{ id: string }>();
-
+  const mutate = usePatchNewBlock(pageId);
   const [title, setTitle] = useState("");
   const [blocks, setBlocks] = useState<Block[]>([]);
-  const [isNewBlock, setIsNewBlock] = useState(false);
-
-  useEffect(() => {
-    const fetchPage = async () => {
-      const pageData = await fetchData(`pages/${pageId}`);
-      setTitle(pageData.title);
-      if (pageData.blocklist.length === 0) {
-        const defaultBlock = await createBlock(pageId!, 0);
-        setBlocks([defaultBlock]);
-      } else {
-        setBlocks(pageData.blocklist);
-      }
-    };
-
-    fetchPage();
-  }, [pageId]);
+  const { data: pageData } = useGetPage(`pages/${pageId}`);
 
   const saveTitle = useCallback(
     debounce(async (newTitle: string) => {
@@ -54,14 +39,21 @@ function ArticleLayout() {
     if (e.key === "Enter") {
       if (e.shiftKey) return;
       e.preventDefault();
-      const newBlock = await createBlock(pageId!, index + 1);
+      const newData = {
+        type: "text",
+        content: "",
+        children: [],
+      };
+      const { data: newBlock } = await createBlock(pageId!, index + 1);
+      const { _id: blockId } = newBlock;
+
       const updatedBlocks = [
         ...blocks.slice(0, index + 1),
         newBlock,
         ...blocks.slice(index + 1).map((block) => ({ ...block, index: block.index + 1 })),
       ];
       setBlocks(updatedBlocks);
-      setIsNewBlock(true); // 새 블럭 생성
+      mutate({ newData, blockId });
     } else if (e.key === "Backspace" && blocks[index].content === "") {
       e.preventDefault();
       if (blocks.length > 1) {
@@ -77,7 +69,7 @@ function ArticleLayout() {
   };
 
   const saveBlock = useCallback(
-    debounce(async (blockId: string, newContent: string) => {
+    debounce(async (blockId: string = "", newContent: string) => {
       await updateData(`pages/${pageId}/blocks/${blockId}`, {
         content: newContent,
       });
@@ -89,30 +81,43 @@ function ArticleLayout() {
     const newContent = e.currentTarget.innerText;
     const updatedBlocks = [...blocks];
     updatedBlocks[index].content = newContent;
-    // setBlocks(updatedBlocks);
-
-    const blockId = isNewBlock ? updatedBlocks[index + 1]._id : updatedBlocks[index]._id;
+    const blockId = updatedBlocks[index]._id;
     saveBlock(blockId, newContent);
-    setIsNewBlock(false); 
   };
-  
+
   const reorder = (list: Block[], startIndex: number, endIndex: number) => {
-    const result = Array.from(list);
+    const result = [...list];
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
 
-    result.forEach((block, idx) => {
-      block.index = idx;
-    });
-
-    return result;
+    return result.map((block, idx) => ({ ...block, index: idx }));
   };
 
+  const updateBlockOrder = async (blocks: Block[]) => {
+    try {
+      await updateData(`pages/${pageId}/blocks`, { blocks });
+    } catch (error) {
+      console.log("🚀 ~ updateBlockOrder ~ blocks:", blocks)
+      console.error("Failed to update block order:", error);
+    }
+  };
+  
   const handleOnDragEnd = (result: DropResult) => {
-    console.log(result);
     if (!result.destination) return;
-    setBlocks((items) => reorder(items, result.source.index, result.destination!.index)); // ! null 또는 undefined일 경우 처리
+  
+    const reorderedBlocks = reorder(blocks, result.source.index, result.destination.index);
+  
+    setBlocks(reorderedBlocks);
+    updateBlockOrder(reorderedBlocks);
+    console.log("🚀 ~ handleOnDragEnd ~ reorderedBlocks:", reorderedBlocks)
   };
+
+  useEffect(() => {
+    if (pageData) {
+      setTitle(pageData.title);
+      setBlocks(pageData.blocklist);
+    }
+  }, [pageData, pageId]);
 
   return (
     <Wrapper>
@@ -132,11 +137,19 @@ function ArticleLayout() {
               ref={provided.innerRef}
             >
               {blocks.map((block, index) => (
-                <Draggable key={block._id} draggableId={block._id} index={index}>
+                <Draggable
+                  key={index}
+                  draggableId={String(index)}
+                  index={index}
+                >
                   {(provided) => (
-                    <StyledBlockBox ref={provided.innerRef} {...provided.draggableProps}>
-                      <StyledHolderOutlined {...provided.dragHandleProps}/>
+                    <StyledBlockBox
+                      {...provided.draggableProps}
+                      ref={provided.innerRef}
+                    >
+                      <StyledHolderOutlined {...provided.dragHandleProps} />
                       <BlockList
+                        key={block._id}
                         block={block}
                         index={index}
                         handleKeyDown={(e) => handleKeyDown(e, index)}
@@ -160,6 +173,7 @@ const Wrapper = styled.div`
   padding-left: 100px;
   padding-right: 100px;
   flex-grow: 1;
+  min-width: 700px;
 `;
 
 const StyledTitleBox = styled.h1`
@@ -195,7 +209,7 @@ const StyledBlockBox = styled.div`
   display: flex;
   &:hover {
     ${StyledHolderOutlined} {
-      visibility: visible ;
+      visibility: visible;
     }
   }
 `;

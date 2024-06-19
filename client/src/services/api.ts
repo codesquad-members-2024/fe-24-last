@@ -1,5 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
-
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 const server = import.meta.env.VITE_SERVER_URL;
 
 interface RequestOptions {
@@ -10,7 +9,22 @@ interface RequestOptions {
   body?: string;
 }
 
-const apiRequest = async (endpoint: string, method = "GET", data = null) => {
+export interface NewPageData {
+  title: string;
+  blocklist: [];
+  parent_id: string;
+}
+
+export interface NewBlockData {
+  type: string;
+  content: string;
+  index?: number;
+  children?: unknown[];
+}
+
+type DataType = NewPageData | NewBlockData;
+
+const requestAPI = async (endpoint: string, method = "GET", data?: object) => {
   const options: RequestOptions = {
     method,
     headers: {
@@ -31,11 +45,43 @@ const apiRequest = async (endpoint: string, method = "GET", data = null) => {
   }
 };
 
-export const useFetchData = (endpoint: string) => {
-  return useQuery({
+export const useGetPage = (endpoint: string) => {
+  const { data, isLoading } = useQuery({
     queryKey: [endpoint],
-    queryFn: () => apiRequest(endpoint),
+    queryFn: () => requestAPI(endpoint),
   });
+  return { data, isLoading };
+};
+
+export const useCreateNewData = () => {
+  const queryClient = useQueryClient();
+
+  const { mutate } = useMutation({
+    mutationFn: (newData: DataType) => requestAPI("pages", "POST", newData),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["pages"] }),
+  });
+  return mutate;
+};
+
+interface NewBlockMutate {
+  newData: NewBlockData;
+  blockId: string | number;
+}
+
+export const usePatchNewBlock = (pageId: string = "") => {
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation({
+    mutationFn: async ({ newData, blockId }: NewBlockMutate) => {
+      return await requestAPI(
+        `pages/${pageId}/blocks/${blockId}`,
+        "PATCH",
+        newData
+      );
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: [`pages/${pageId}`] }),
+  });
+  return mutate;
 };
 
 /**
@@ -101,8 +147,9 @@ export const updateData = async (endpoint: string, newData: object) => {
         "Content-Type": "application/json",
       },
     });
+
     const data = await response.json();
-    console.log("Success:", data);
+    console.log("Success:", newData, data);
   } catch (error) {
     console.error("Error:", error);
   }
@@ -136,6 +183,7 @@ export const deleteData = async (endpoint: string) => {
  * @param index
  * @url ${server}/pages/${pageId}/blocks
  */
+
 export const createBlock = async (pageId: string, index: number) => {
   try {
     const response = await fetch(`${server}/pages/${pageId}/blocks`, {
@@ -150,6 +198,7 @@ export const createBlock = async (pageId: string, index: number) => {
         children: [],
       }),
     });
+
     if (!response.ok) {
       throw new Error("실패 !");
     }
