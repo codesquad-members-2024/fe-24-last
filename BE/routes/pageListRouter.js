@@ -69,6 +69,7 @@ pagesListRouter.patch("/api/page/block/:id", async (req, res) => {
         if (!article) {
             return res.status(404).json({ error: "Article not found" });
         }
+        
 
         article.blocklist = [...block];
         await article.save();
