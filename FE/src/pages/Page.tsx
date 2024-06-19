@@ -21,7 +21,8 @@ const Page = () => {
     const [currentBlockIdx, setCurrentBlockIdx] = useState<number | null>(null);
     const [, setBlockState] = useState<BlockType[]>([]);
     const blocks = useRef<BlockType[]>([]);
-
+    const ws = useRef<WebSocket | null>(null);
+    
     const { mutate } = useMutation({
         mutationFn: async ({id, blocks}: {id: string | undefined, blocks: BlockType[]}) => {
             await patchBlock(`page/block/${id}`, { block: blocks });
@@ -34,9 +35,12 @@ const Page = () => {
     const debouncedMutation = useCallback(
         debounce(
             async ({ id, blocks }: { id: string | undefined; blocks: BlockType[] }) => {
-                mutate({ id, blocks });
-            }
-        ),
+                mutate({ id, blocks })
+                if (ws.current) {
+                    ws.current.send(JSON.stringify({ id, blocks }));
+                }
+            }),
+                
         [mutate]
     );
 
@@ -61,15 +65,16 @@ const Page = () => {
         if (!["Enter", "Backspace", "ArrowUp",
             "ArrowDown", "ArrowRight", "ArrowLeft"].includes(e.key) ||
             e.nativeEvent.isComposing) return;
-        const updateBlock = [...blocks.current];
+
         const selection = window.getSelection();
         const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
-        const curBlock = document.querySelector<HTMLDivElement>(
-            `[data-position="${index}"]`);
-        prevBlock.current = [...blocks.current];
+        const updateBlock = [...blocks.current];
+        const curBlock = document.querySelector<HTMLDivElement>(`[data-position="${index}"]`);
         const parameter = (e.key === "Enter" || e.key === "Backspace") 
         ? { e, blocks, updateBlock, setCurrentBlockIdx, index } 
         : { e, index, blocks, range, curBlock };
+        prevBlock.current = [...blocks.current];
+
         keyEvent[e.key as KeyMap](parameter as any);
         debouncedMutation({ id, blocks: blocks.current });
     };
@@ -89,6 +94,26 @@ const Page = () => {
         blocks.current = [...state.blocklist];
         setBlockState([...state.blocklist]);
     }, [id, state]);
+
+    useEffect(() => {
+        ws.current = new WebSocket("ws://localhost:4001");
+        
+        ws.current.onmessage = (event) => {
+            const { id: receivedId, blocks: receivedBlocks } = JSON.parse(event.data);
+            if (receivedId === id) {
+                blocks.current = receivedBlocks;
+                setBlockState(receivedBlocks);
+                queryClient.invalidateQueries({ queryKey: ["pageList"] });
+            }
+        };
+
+        return () => {
+            if(ws.current) {
+                ws.current.close();
+            }
+        };
+    }, [id, queryClient, setBlockState])
+
 
     return (
         <PageContainer>

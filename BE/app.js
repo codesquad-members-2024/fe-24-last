@@ -6,14 +6,17 @@ import pagesListRouter from "./routes/pageListRouter.js";
 import data from "./data.json" assert { type: "json" };
 import Pages from "./Models/pagesSchema.js";
 import 'dotenv/config';
+import WebSocket, { WebSocketServer } from "ws";
 
 const url = process.env.REACT_APP_MONGODB_URL;
 
 const app = express();
 const port = 4000;
+const wss = new WebSocketServer({ port: 4001 })
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(express.static("public"))
 
 const initData = async() => {
     // await Pages.deleteMany({});
@@ -35,6 +38,22 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 db.once("open", async() => {
     console.log("MongoDB connected");
     await initData()
+});
+
+wss.on("connection", (ws, request) => {
+    console.log(`새로운 유저 접속 ${request.socket.remoteAddress}, ${wss.clients.size}명`);
+
+    ws.on("message", (message) => {
+        const {id, blocks} = JSON.parse(message);
+        
+        wss.clients.forEach(client => {
+            client.send(JSON.stringify({id, blocks}));
+        });
+    });
+
+    ws.on("close", () => {
+        console.log(`유저 연결 종료 ${request.socket.remoteAddress}`);
+    });
 });
 
 app.use("/", pagesListRouter);

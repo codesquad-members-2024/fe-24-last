@@ -40,14 +40,13 @@ const DropdownBox = React.forwardRef<DropdownBoxHandle, DropdownBoxProps>(
         const dropdownKeyMap = {
             ArrowDown: () => setSelectItemIdx((prevIndex) => Math.min(prevIndex + 1, TAG_LIST.length - 1)),
             ArrowUp: () => setSelectItemIdx((prevIndex) => Math.max(prevIndex - 1, 0)),
-            Enter: () => {
-                handleBlockClick(TAG_LIST[selectItemIdx].tag);
-                setDropdownOpen(false);
-            }
+            Enter: () => handleBlockClick(TAG_LIST[selectItemIdx].tag),
+            Escape: () => setDropdownOpen(false),
         }
+
         const handleDropDownKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
             e.preventDefault();
-            if (!["ArrowDown", "ArrowUp", "Enter"].includes(e.key)) return;
+            if (!["ArrowDown", "ArrowUp", "Enter", "Escape"].includes(e.key)) return;
             dropdownKeyMap[e.key as KeyMap]();
         };
 
