@@ -63,6 +63,19 @@ export const useCreateNewData = () => {
   return mutate;
 };
 
+export const useDeletePage = () => {
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation({
+    mutationFn: async (pageId: string) => {
+      return await requestAPI(`pages/${pageId}`, "DELETE");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pages"] });
+    },
+  });
+  return mutate;
+};
+
 interface NewBlockMutate {
   newData: NewBlockData;
   blockId: string | number;
