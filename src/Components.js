@@ -20,12 +20,8 @@ function Todo() {
 			prev.filter((todo) => todo.id !== id)
 		);
 
-	// const handleCreateTodo =()=>setTodos
-
-	console.log("투두스", todos);//DELETE
-
 	return (
-		<div id="app">
+		<div>
 			<ul>
 				{todos.map(({ id, completed, content }) => (
 					<li
@@ -56,7 +52,7 @@ function Todo() {
 }
 
 function Div() {
-	return <div>아무것도 안하는 디브</div>;
+	return <div>컴포넌트 확인하기 위한 디브</div>;
 }
 
 export { Div, Todo };
