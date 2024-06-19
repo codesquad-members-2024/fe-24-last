@@ -112,6 +112,25 @@ pagesRouter.post("/api/pages/:id/blocks", async (req, res) => {
   }
 });
 
+pagesRouter.patch("/api/pages/:id/blocks", async (req, res) => {
+  try {
+    const { id: pageId } = req.params;
+    const { blocks } = req.body;
+
+    const page = await Pages.findById(pageId);
+    if (!page) {
+      return res.status(404).json({ message: "Page not found" });
+    }
+
+    page.blocklist = blocks;
+
+    await page.save();
+    res.status(200).json({ message: "Blocks reordered successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 pagesRouter.patch("/api/pages/:id/blocks/:blockId", async (req, res) => {
   try {
     const { id: pageId, blockId } = req.params;
