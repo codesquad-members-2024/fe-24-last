@@ -44,51 +44,52 @@ export default function BlockBox({
       debouncedSaveContent(blockId, elementId, newContent);
     };
 
-  const handleKeyDown = async (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.nativeEvent.isComposing) return;
-    if (e.key === "Enter") {
-      e.preventDefault();
-      try {
-        const newBlock = await createNewBlock(pageId, blockIndex);
-        setNewBlockIndex(newBlock.nextIdx);
-        refetchCurrentArticle();
-      } catch (error) {
-        console.error(error);
-      }
-    } else if (e.key === "Backspace") {
-      if (blockRef.current && blockRef.current.innerText === "") {
+  const handleKeyDown =
+    (elementId: string) => async (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.nativeEvent.isComposing) return;
+      if (e.key === "Enter") {
         e.preventDefault();
         try {
-          clearDebouncedSaveContent();
-          const previousBlockIndex = blockIndex > 0 ? blockIndex - 1 : 0;
-          setNewBlockIndex(previousBlockIndex.toString());
-          await deleteBlock(pageId, blockId);
+          const newBlock = await createNewBlock(pageId, blockIndex);
+          setNewBlockIndex(newBlock.nextIdx);
           refetchCurrentArticle();
         } catch (error) {
-          console.error("Error deleting block:", error);
+          console.error(error);
+        }
+      } else if (e.key === "Backspace") {
+        if (blockRef.current && blockRef.current.innerText === "") {
+          e.preventDefault();
+          try {
+            clearDebouncedSaveContent();
+            const previousBlockIndex = blockIndex > 0 ? blockIndex - 1 : 0;
+            setNewBlockIndex(previousBlockIndex.toString());
+            await deleteBlock(pageId, blockId, elementId);
+            refetchCurrentArticle();
+          } catch (error) {
+            console.error("Error deleting block:", error);
+          }
         }
       }
-    }
-  };
+    };
 
   return (
     <Wrapper>
       {element.map((column, columnIndex) => (
         <Column key={`${blockId}-${columnIndex}`}>
-          {column.map((child) => (
-            <Cell key={child._id}>
+          {column.map((element) => (
+            <Cell key={element._id}>
               <IconWrapper>
                 <HolderOutlined />
               </IconWrapper>
               <BlockArea
                 ref={blockRef}
                 contentEditable
-                onInput={handleContentChange(child._id)}
-                onKeyDown={handleKeyDown}
+                onInput={handleContentChange(element._id)}
+                onKeyDown={handleKeyDown(element._id)}
                 suppressContentEditableWarning
-                id={child._id}
+                id={element._id}
               >
-                {child.content}
+                {element.content}
               </BlockArea>
             </Cell>
           ))}
@@ -115,7 +116,6 @@ const Column = styled.div`
 const Cell = styled.div`
   display: flex;
   flex-direction: row;
-  align-items: center;
   padding: 8px;
   flex-grow: 1;
   flex-basis: 0;
@@ -125,9 +125,10 @@ const Cell = styled.div`
 const IconWrapper = styled.div`
   visibility: hidden;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   cursor: pointer;
+  height: fit-content;
 
   ${Cell}:hover & {
     visibility: visible;

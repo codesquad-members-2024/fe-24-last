@@ -28,7 +28,6 @@ pagesRouter.get("/:id", async (req, res) => {
 });
 
 pagesRouter.post("/", async (req, res) => {
-  console.log(req.body);
   try {
     const pageData = req.body;
     const newPage = new Pages(pageData);
@@ -78,11 +77,11 @@ pagesRouter.delete("/api/pages", async (req, res) => {
 
 pagesRouter.post("/:id/block", async (req, res) => {
   const { id: articleId } = req.params;
-  const { type, content, children, insertIndex } = req.body;
+  const { element, insertIndex } = req.body;
 
   try {
     const article = await Pages.findById(articleId);
-    const newBlock = { type, content, children };
+    const newBlock = { element };
 
     if (
       insertIndex !== undefined &&
@@ -154,15 +153,48 @@ pagesRouter.patch(
   }
 );
 
-pagesRouter.delete("/:id/block/:blockId", async (req, res) => {
-  const { id: articleId, blockId } = req.params;
+pagesRouter.delete(
+  "/:id/block/:blockId/element/:elementId",
+  async (req, res) => {
+    const { id: articleId, blockId, elementId } = req.params;
 
-  try {
-    const article = await Pages.findById(articleId);
-    const block = await Blocks.findById(blockId);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    try {
+      const article = await Pages.findById(articleId);
+      const blockIndex = article.blocklist.findIndex(
+        (block) => block._id.toString() === blockId
+      );
+      const block = article.blocklist[blockIndex];
+
+      let elementRemoved = false;
+
+      block.element = block.element
+        .map((column) => {
+          return column.filter((element) => {
+            if (element._id.toString() === elementId) {
+              elementRemoved = true;
+              return false;
+            }
+            return true;
+          });
+        })
+        .filter((column) => column.length > 0);
+
+      if (elementRemoved) {
+        if (block.element.length === 0) {
+          article.blocklist.splice(blockIndex, 1);
+        }
+
+        await article.save();
+        return res
+          .status(200)
+          .json({ message: "Element deleted successfully" });
+      } else {
+        return res.status(404).json({ message: "Element not found" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
   }
-});
+);
 
 export default pagesRouter;
