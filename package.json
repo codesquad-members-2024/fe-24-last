@@ -4,8 +4,7 @@
 	"description": "vanilla JS로 리액트의 일부를 만들어 보자",
 	"main": "index.js",
 	"scripts": {
-		"build": "babel src/main.js --out-file src/buildMain.js",
-		"buildC": "babel src/Components.js --out-file src/buildComponents.js"
+		"build": "babel src/main.js --out-file src/buildMain.js && babel src/Components.js --out-file src/buildComponents.js"
 	},
 	"author": "",
 	"license": "ISC",
