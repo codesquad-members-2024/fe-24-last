@@ -14,7 +14,29 @@ export async function createNewPage() {
     },
     body: JSON.stringify({
       title: "",
-      blocklist: [{ element: [[{ type: "text", content: "" }]] }],
+      blocklist: [
+        {
+          element: [
+            [{ type: "text", content: "안녕" }],
+            [{ type: "text", content: "빙수" }],
+          ],
+        },
+        {
+          element: [[{ type: "text", content: "" }]],
+        },
+        {
+          element: [
+            [
+              { type: "text", content: "때구" },
+              { type: "text", content: "째굼이" },
+            ],
+            [
+              { type: "text", content: "마아롱" },
+              { type: "text", content: "오리" },
+            ],
+          ],
+        },
+      ],
       parent_id: "",
     }),
   });

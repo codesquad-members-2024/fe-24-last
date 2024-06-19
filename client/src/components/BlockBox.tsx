@@ -73,9 +73,9 @@ export default function BlockBox({
 
   return (
     <Wrapper>
-      {element.map((row, rowIndex) => (
-        <Row key={`${blockId}-${rowIndex}`}>
-          {row.map((child) => (
+      {element.map((column, columnIndex) => (
+        <Column key={`${blockId}-${columnIndex}`}>
+          {column.map((child) => (
             <Cell key={child._id}>
               <IconWrapper>
                 <HolderOutlined />
@@ -92,7 +92,7 @@ export default function BlockBox({
               </BlockArea>
             </Cell>
           ))}
-        </Row>
+        </Column>
       ))}
     </Wrapper>
   );
@@ -100,14 +100,15 @@ export default function BlockBox({
 
 const Wrapper = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   width: 100%;
   margin-bottom: 8px;
+  border: 1px solid red;
 `;
 
-const Row = styled.div`
+const Column = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   width: 100%;
 `;
 

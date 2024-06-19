@@ -6,10 +6,8 @@
       {
         "id": "sdjfhlekjwhge123",
         "element": [
-          [
-            { "id": "02394035ef0", "type": "text", "content": "안녕" },
-            { "id": "023940358dsfkh", "type": "text", "content": "빙수" }
-          ]
+          [{ "id": "02394035ef0", "type": "text", "content": "안녕" }],
+          [{ "id": "023940358dsfkh", "type": "text", "content": "빙수" }]
         ]
       },
       {
