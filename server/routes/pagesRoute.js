@@ -1,11 +1,11 @@
 import express from "express";
-import Page from "../model/pages.js";
+import { Pages, Blocks } from "../model/pages.js";
 
 const pagesRouter = express.Router();
 
 pagesRouter.get("/api/pages", async (req, res) => {
   try {
-    const pagesList = await Page.find();
+    const pagesList = await Pages.find();
     res.json(pagesList);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -13,10 +13,9 @@ pagesRouter.get("/api/pages", async (req, res) => {
 });
 
 pagesRouter.post("/api/pages", async (req, res) => {
-  console.log(req.body);
   try {
     const pageData = req.body;
-    const newPage = new Page(pageData);
+    const newPage = new Pages(pageData);
     await newPage.save();
     res.status(200).json({ message: "추가 성공", data: newPage });
   } catch (error) {
@@ -27,7 +26,7 @@ pagesRouter.post("/api/pages", async (req, res) => {
 pagesRouter.get("/api/pages/:id", async (req, res) => {
   try {
     const pageId = req.params.id;
-    const page = await Page.findById(pageId);
+    const page = await Pages.findById(pageId);
     if (!page) {
       return res.status(404).json({ message: "Page not found" });
     }
@@ -45,7 +44,7 @@ pagesRouter.patch("/api/pages/:id", async (req, res) => {
     if (typeof title !== "string")
       return res.status(400).json({ error: "Title must be a string" });
 
-    const article = await Page.findById(pageId);
+    const article = await Pages.findById(pageId);
 
     if (!article) {
       return res.status(404).json({ error: "Article not found" });
@@ -63,7 +62,7 @@ pagesRouter.patch("/api/pages/:id", async (req, res) => {
 pagesRouter.delete("/api/pages/:id", async (req, res) => {
   try {
     const pageId = req.params.id;
-    const page = await Page.findByIdAndDelete(pageId);
+    const page = await Pages.findByIdAndDelete(pageId);
 
     if (!page) {
       return res.status(404).json({ error: "Page not found" });
@@ -79,7 +78,7 @@ pagesRouter.get("/api/pages/:id/blocks/:blockId", async (req, res) => {
   try {
     const { id: pageId, blockId } = req.params;
 
-    const page = await Page.findById(pageId);
+    const page = await Pages.findById(pageId);
     if (!page) {
       return res.status(404).json({ message: "Page not found" });
     }
@@ -98,10 +97,11 @@ pagesRouter.get("/api/pages/:id/blocks/:blockId", async (req, res) => {
 pagesRouter.post("/api/pages/:id/blocks", async (req, res) => {
   try {
     const pageId = req.params.id;
-    const newBlock = req.body;
 
-    const page = await Page.findById(pageId);
+    const page = await Pages.findById(pageId);
     if (!page) return res.status(404).json({ message: "Page not found" });
+
+    const newBlock = new Blocks({ type: "text", content: "", children: [] });
 
     page.blocklist.push(newBlock);
     await page.save();
@@ -117,7 +117,7 @@ pagesRouter.patch("/api/pages/:id/blocks/:blockId", async (req, res) => {
     const { id: pageId, blockId } = req.params;
     const updatedBlockData = req.body;
 
-    const page = await Page.findById(pageId);
+    const page = await Pages.findById(pageId);
     if (!page) {
       return res.status(404).json({ message: "Page not found" });
     }
@@ -130,7 +130,9 @@ pagesRouter.patch("/api/pages/:id/blocks/:blockId", async (req, res) => {
     block.set(updatedBlockData);
     await page.save();
 
-    res.status(200).json({ message: "Block updated successfully", data: block });
+    res
+      .status(200)
+      .json({ message: "Block updated successfully", data: block });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -140,12 +142,14 @@ pagesRouter.delete("/api/pages/:id/blocks/:blockId", async (req, res) => {
   try {
     const { id: pageId, blockId } = req.params;
 
-    const page = await Page.findById(pageId);
+    const page = await Pages.findById(pageId);
     if (!page) {
       return res.status(404).json({ message: "Page not found" });
     }
-    
-    const blockIndex = page.blocklist.findIndex(block => block.id === blockId);
+
+    const blockIndex = page.blocklist.findIndex(
+      (block) => block.id === blockId
+    );
     if (blockIndex === 0) {
       return res.status(404).json({ message: "Block not found" });
     }
@@ -158,6 +162,5 @@ pagesRouter.delete("/api/pages/:id/blocks/:blockId", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
 
 export default pagesRouter;

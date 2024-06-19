@@ -11,7 +11,7 @@ const ChildrenSchema = new Schema(
   }
 );
 
-const BlockSchema = new Schema(
+export const BlockSchema = new Schema(
   {
     type: String,
     content: String,
@@ -33,6 +33,5 @@ const PageSchema = new Schema(
   }
 );
 
-const Pages = mongoose.model("Page", PageSchema);
-
-export default Pages;
+export const Pages = mongoose.model("Page", PageSchema);
+export const Blocks = mongoose.model("Block", BlockSchema);
