@@ -1,22 +1,27 @@
 function h(type, props, ...children) {
 	if (typeof type === "function") {
-		return addComponentKey(type(), type.name);
+		return addComponentKeyAndParent(type(), type.name);
 	}
 	return { type, props, children: children.flat() };
 }
 
-function addComponentKey(component, componentKey) {
-	if (typeof component === "string") return;
+function addComponentKeyAndParent(
+	node,
+	componentKey,
+	parent = null
+) {
+	if (typeof node === "string") return;
 
-	if (component.props)
-		component.props.componentKey = componentKey;
-	else component.props = { componentKey };
+	if (node.props) node.props.componentKey = componentKey;
+	else node.props = { componentKey };
 
-	if (component.children.length > 0)
-		for (const child of component.children) {
-			addComponentKey(child, componentKey);
+	node.parent = parent;
+
+	if (node.children.length > 0)
+		for (const child of node.children) {
+			addComponentKeyAndParent(child, componentKey, node);
 		}
-	return component;
+	return node;
 }
 
 export { h };
