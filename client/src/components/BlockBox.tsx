@@ -4,7 +4,7 @@ import { Block } from "../model/types";
 import debounce from "../utils/debounce";
 import {
   updateBlockContent,
-  createNewBlock,
+  createNewBlockOrElement,
   deleteBlock,
 } from "../services/api";
 import { useParams } from "react-router-dom";
@@ -43,12 +43,18 @@ export default function BlockBox({
     };
 
   const handleKeyDown =
-    (elementId: string) => async (e: React.KeyboardEvent<HTMLDivElement>) => {
+    (elementId: string, columnIndex: number, elementIndex: number) =>
+    async (e: React.KeyboardEvent<HTMLDivElement>) => {
       if (e.nativeEvent.isComposing) return;
       if (e.key === "Enter") {
         e.preventDefault();
         try {
-          const newBlock = await createNewBlock(pageId, blockIndex);
+          const newBlock = await createNewBlockOrElement(
+            pageId,
+            blockId,
+            columnIndex,
+            elementIndex
+          );
           refetchCurrentArticle();
         } catch (error) {
           console.error(error);
@@ -72,7 +78,7 @@ export default function BlockBox({
     <Wrapper>
       {element.map((column, columnIndex) => (
         <Column key={`${blockId}-${columnIndex}`}>
-          {column.map((element) => (
+          {column.map((element, elementIndex) => (
             <Cell key={element._id}>
               <IconWrapper>
                 <HolderOutlined />
@@ -81,7 +87,11 @@ export default function BlockBox({
                 ref={blockRef}
                 contentEditable
                 onInput={handleContentChange(element._id)}
-                onKeyDown={handleKeyDown(element._id)}
+                onKeyDown={handleKeyDown(
+                  element._id,
+                  columnIndex,
+                  elementIndex
+                )}
                 suppressContentEditableWarning
                 id={element._id}
               >
@@ -113,7 +123,6 @@ const Cell = styled.div`
   display: flex;
   flex-direction: row;
   padding: 8px;
-  flex-grow: 1;
   flex-basis: 0;
   position: relative;
 `;

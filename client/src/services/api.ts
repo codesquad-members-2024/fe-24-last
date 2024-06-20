@@ -130,17 +130,23 @@ export async function updateBlockContent(
   return response.json();
 }
 
-export async function createNewBlock(
+export async function createNewBlockOrElement(
   pageId: string | undefined,
-  blockIndex: number
+  blockId: string | undefined,
+  columnIndex: number,
+  elementIndex: number
 ) {
   const response = await fetch(
-    `${import.meta.env.VITE_SERVER_URL}/pages/${pageId}/block`,
+    `${
+      import.meta.env.VITE_SERVER_URL
+    }/pages/${pageId}/block/${blockId}/element`,
     {
       method: "POST",
       body: JSON.stringify({
-        element: [[{ type: "text", content: "" }]],
-        insertIndex: blockIndex,
+        type: "text",
+        content: "",
+        columnIndex,
+        elementIndex,
       }),
       headers: {
         "Content-Type": "application/json",

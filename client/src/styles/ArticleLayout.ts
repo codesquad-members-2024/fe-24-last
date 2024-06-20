@@ -2,8 +2,8 @@ import styled from "styled-components";
 
 export const Wrapper = styled.div`
   padding-bottom: 30vh;
-  padding-left: 100px;
-  padding-right: 100px;
+  margin-left: 100px;
+  margin-right: 100px;
   flex-grow: 1;
 `;
 

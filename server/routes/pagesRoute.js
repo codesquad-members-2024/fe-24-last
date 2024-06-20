@@ -78,28 +78,45 @@ pagesRouter.delete("/:id", async (req, res) => {
   }
 });
 
-pagesRouter.post("/:id/block", async (req, res) => {
-  const { id: articleId } = req.params;
-  const { element, insertIndex } = req.body;
+pagesRouter.post("/:id/block/:blockId/element", async (req, res) => {
+  const { id: articleId, blockId } = req.params;
+  const { type, content, columnIndex, elementIndex } = req.body;
 
   try {
     const article = await Pages.findById(articleId);
-    const newBlock = { element };
 
-    if (
-      insertIndex !== undefined &&
-      insertIndex >= 0 &&
-      insertIndex < article.blocklist.length
-    ) {
-      article.blocklist.splice(insertIndex + 1, 0, newBlock);
+    if (!article) {
+      return res.status(404).json({ message: "Article not found" });
+    }
+
+    const blockIndex = article.blocklist.findIndex(
+      (block) => block._id.toString() === blockId
+    );
+
+    if (blockIndex === -1) {
+      return res.status(404).json({ message: "Block not found" });
+    }
+
+    const block = article.blocklist[blockIndex];
+
+    if (block.element.length === 1 && block.element[0].length === 1) {
+      const newBlock = {
+        element: [[{ type, content }]],
+      };
+      article.blocklist.splice(blockIndex + 1, 0, newBlock);
     } else {
-      article.blocklist.push(newBlock);
+      if (block.element[columnIndex]) {
+        block.element[columnIndex].splice(elementIndex + 1, 0, {
+          type,
+          content,
+        });
+      }
     }
 
     await article.save();
     res
       .status(201)
-      .json({ message: "Block added successfully", nextIdx: insertIndex + 1 });
+      .json({ message: "Element added successfully", data: article });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
