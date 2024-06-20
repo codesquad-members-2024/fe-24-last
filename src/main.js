@@ -8,7 +8,7 @@ init(App, $root);
 
 function App() {
 	return (
-		<div>
+		<div id="app">
 			<Todo />
 			<Div />
 		</div>
