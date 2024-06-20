@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "react-query";
 import debounce from "../utils/debounce";
-import { focusOnBlock } from "../utils/focus";
+import { focusOnElement } from "../utils/focus";
 import { Block } from "../model/types";
 import {
   fetchArticleById,
@@ -12,6 +12,7 @@ import {
 import { useArticles } from "../contexts/ArticlesProvider";
 import * as S from "../styles/ArticleLayout";
 import BlockBox from "./BlockBox";
+import BlockTypePopup from "./BlockTypePopup";
 
 function ArticleLayout() {
   const { id } = useParams<{ id: string }>();
@@ -67,11 +68,8 @@ function ArticleLayout() {
 
   useEffect(() => {
     if (focusedElementId) {
-      const newElement = document.getElementById(focusedElementId);
-      if (newElement) {
-        newElement.focus();
-        setFocusedElementId(null);
-      }
+      focusOnElement(focusedElementId);
+      setFocusedElementId(null);
     }
   }, [currentArticle, focusedElementId]);
 
@@ -99,10 +97,12 @@ function ArticleLayout() {
               refetchCurrentArticle={refetchCurrentArticle}
               blockIndex={index}
               setFocusedElementId={setFocusedElementId}
+              currentArticle={currentArticle}
             />
           );
         })}
       </S.Content>
+      <BlockTypePopup />
     </S.Wrapper>
   );
 }

@@ -9,12 +9,14 @@ import {
 } from "../services/api";
 import { useParams } from "react-router-dom";
 import { HolderOutlined } from "@ant-design/icons";
+import { Article } from "../model/types";
 
 interface BlockBoxProps {
   blockData: Block;
   refetchCurrentArticle: () => void;
   blockIndex: number;
   setFocusedElementId: (id: string) => void;
+  currentArticle: Article;
 }
 
 export default function BlockBox({
@@ -22,6 +24,7 @@ export default function BlockBox({
   refetchCurrentArticle,
   blockIndex,
   setFocusedElementId,
+  currentArticle,
 }: BlockBoxProps) {
   const { id: pageId } = useParams<{ id: string }>();
   const { element, _id: blockId } = blockData;
@@ -57,6 +60,7 @@ export default function BlockBox({
             columnIndex,
             elementIndex
           );
+          console.log(response.newElementId);
           setFocusedElementId(response.newElementId);
           refetchCurrentArticle();
         } catch (error) {
@@ -67,7 +71,29 @@ export default function BlockBox({
           e.preventDefault();
           try {
             clearDebouncedSaveContent();
-            const previousBlockIndex = blockIndex > 0 ? blockIndex - 1 : 0;
+
+            let previousElementId = null;
+
+            if (element[columnIndex].length > 1) {
+              previousElementId =
+                element[columnIndex][elementIndex - 1]?._id || null;
+            } else if (element.length > 1) {
+              previousElementId =
+                element[columnIndex - 1][element[columnIndex - 1].length - 1]
+                  ?._id || null;
+            } else if (blockIndex > 0) {
+              const previousBlock = currentArticle.blocklist[blockIndex - 1];
+              previousElementId =
+                previousBlock.element[previousBlock.element.length - 1][
+                  previousBlock.element[previousBlock.element.length - 1]
+                    .length - 1
+                ]._id;
+            }
+
+            if (previousElementId) {
+              setFocusedElementId(previousElementId);
+            }
+
             await deleteBlock(pageId, blockId, elementId);
             refetchCurrentArticle();
           } catch (error) {
