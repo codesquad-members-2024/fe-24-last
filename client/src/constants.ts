@@ -41,8 +41,8 @@ export type Block = HeaderBlock | ParagraphBlock | UnorderedItemBlock | OrderedL
 export interface BlockControllerProps {
   blocks: Block[];
   setBlocks: (blocks: Block[]) => void;
-  handleFetch: (blocks: Block[], cursorPosition: CursorPosition) => void;
-  handleContentChange: (block: Block, index: number) => void;
+  handleFetch: (blocks: Block[], option?: boolean) => void;
+  handleContentChange: (blocks: Block[]) => void;
 }
 
 export interface TeamspaceDescription {

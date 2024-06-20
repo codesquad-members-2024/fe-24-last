@@ -10,9 +10,9 @@ import {
 } from '../constants';
 import { ColumnGap, Flex } from '../styles/themes';
 import React, { useEffect, useLayoutEffect } from 'react';
-import { CursorPosition, specifyPositionOfCursor } from '../helpers/cursorHelpers';
+import { CursorPosition } from '../helpers/cursorHelpers';
 import BlockTag from './BlockTag';
-import { useCursorStore } from '../stores/cursorStore';
+import { useCursorStore } from '../stores/useCursorStore';
 
 export interface HandleInputProps {
   e: React.KeyboardEvent<HTMLElement>;
@@ -76,7 +76,7 @@ const ParagraphTag = ({
       contentEditable
       suppressContentEditableWarning
       onKeyUp={(e) => handleInput({ e: e as React.KeyboardEvent<HTMLElement>, index })}
-      onKeyDown={stopEnterDefaultEvent}
+      onKeyDown={(e) => stopEnterDefaultEvent(e)}
       onFocus={() => handleFocus(index)}
       style={{ backgroundColor: 'aliceblue' }}
     >
@@ -166,14 +166,15 @@ const ImageTag = ({ block: { url, alt }, index, handleInput }: EditableBlockProp
 
 export default function EditableBlock({ block, index, handleInput, showPopup }: EditableBlockProps) {
   const { type } = block;
-  const { cursorPosition, setCursorPosition } = useCursorStore();
-  const isFocusedBlock = index === cursorPosition.blockOffset;
-  const handleFocus = (blockIndex: number) => setCursorPosition({ blockOffset: blockIndex });
+  // const { cursorPosition, setCursorPosition } = useCursorStore();
+  const { setBlockOffset } = useCursorStore();
+  // const isFocusedBlock = index === cursorPosition.blockOffset;
+  const handleFocus = (blockIndex: number) => setBlockOffset(blockIndex);
   const tagProps = { index, handleInput, handleFocus };
 
-  useEffect(() => {
-    specifyPositionOfCursor({ cursorPosition, isFocusedBlock });
-  }, [block]);
+  // useEffect(() => {
+  //   specifyPositionOfCursor({ cursorPosition, isFocusedBlock });
+  // }, [block]);
 
   const blockTag = {
     header: <HeaderTag block={block as HeaderBlock} {...tagProps} />,
@@ -191,6 +192,7 @@ export const OrderedListIndex = styled.span`
 `;
 
 export const StyledBlockTag = styled.div`
+  width: 100%;
   white-space: pre-wrap; /* 줄 바꿈과 공백을 그대로 렌더링 */
   word-break: break-word;
 `;

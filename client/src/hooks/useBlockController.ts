@@ -1,9 +1,10 @@
 import { Block, BlockControllerProps, ParagraphBlock } from '../constants';
 import { HandleInputProps } from '../components/EditableBlock';
-import { CursorPosition, storeCursorPosition } from '../helpers/cursorHelpers';
-import { useCursorStore } from '../stores/cursorStore';
+import { generateRange } from '../helpers/cursorHelpers';
+import { useCursorStore } from '../stores/useCursorStore';
+import { useEffect, useRef } from 'react';
 
-const insertLineBreak = (blocks: Block[], blockIndex: number, offset: number): Block[] => {
+const insertLineBreak = (blocks: Block[], blockIndex: number, offset: number = 0): Block[] => {
   const block = blocks[blockIndex];
   if (block.type === 'paragraph') {
     const previousArr = blocks.slice(0, blockIndex);
@@ -28,11 +29,8 @@ const addNewBlock = (blocks: Block[], blockIndex: number) => {
   return array;
 };
 
-const isBlankBlock = (block: Block) => {
-  if (!(block.type === 'paragraph')) return false;
-
-  const { content } = block;
-  return content === '';
+const isEmptyContent = (text: string | null) => {
+  return text === '';
 };
 
 const removeBlock = (blocks: Block[], blockIndex: number) => {
@@ -49,7 +47,10 @@ export default function useBlockController({
   handleFetch,
   handleContentChange,
 }: BlockControllerProps) {
-  const { setCursorPosition } = useCursorStore();
+  const { setBlockOffset, setTextOffset } = useCursorStore();
+  const { blockOffset, textOffset } = useCursorStore();
+  const blockControllerRef = useRef<HTMLDivElement | null>(null);
+
   const handleInput = ({
     e: {
       key,
@@ -61,39 +62,38 @@ export default function useBlockController({
   }: HandleInputProps) => {
     let newBlocks = [...blocks];
     const block = newBlocks[blockIndex];
-    const cursorPosition = storeCursorPosition() as CursorPosition;
-    const { offset } = cursorPosition;
+    const newOffset = generateRange()?.startOffset || 0;
 
-    if (key === 'Backspace' && isBlankBlock(block)) {
-      const newCursorPosition = {
-        ...cursorPosition,
-        offset: Infinity,
-        blockOffset: blockIndex < 1 ? 0 : blockIndex - 1,
-      };
+    if (key === 'Backspace' && isEmptyContent(textContent)) {
+      const newBlockIndex = blockIndex < 1 ? 0 : blockIndex - 1;
 
       newBlocks = removeBlock(blocks, blockIndex);
       setBlocks(newBlocks);
-      handleFetch(newBlocks, newCursorPosition);
+      setBlockOffset(newBlockIndex);
+      setTextOffset(Infinity);
+      handleFetch(newBlocks, true);
       return;
     }
 
     if (key === 'Enter' && shiftKey) {
-      const newCursorPosition = { ...cursorPosition, offset: offset ? offset + 1 : 0 };
+      const newTextOffset = newOffset ? newOffset + 1 : 0;
 
-      newBlocks = insertLineBreak(blocks, blockIndex, offset); //?
+      newBlocks = insertLineBreak(blocks, blockIndex, newOffset);
       setBlocks(newBlocks);
-      setCursorPosition(newCursorPosition);
-      handleFetch(newBlocks, newCursorPosition);
-
+      setTextOffset(newTextOffset);
+      handleFetch(newBlocks);
       return;
     }
 
     if (key === 'Enter') {
-      const newCursorPosition = { ...cursorPosition, blockOffset: blockIndex + 1 };
+      const newBlockOffset = blockIndex + 1;
+      const newTextOffset = 0;
 
       newBlocks = addNewBlock(blocks, blockIndex);
       setBlocks(newBlocks);
-      handleFetch(newBlocks, newCursorPosition);
+      setBlockOffset(newBlockOffset);
+      setTextOffset(newTextOffset);
+      handleFetch(newBlocks, true);
       return;
     }
 
@@ -108,8 +108,34 @@ export default function useBlockController({
       newBlocks[blockIndex] = { ...block, items: updatedItems } as typeof block;
     }
 
-    handleContentChange(newBlocks[blockIndex], blockIndex);
+    setBlockOffset(blockIndex);
+    setTextOffset(newOffset);
+
+    handleContentChange(newBlocks);
   };
 
-  return { handleInput };
+  useEffect(() => {
+    const blockNodes = blockControllerRef.current?.querySelectorAll('[contenteditable="true"]');
+
+    if (!blockNodes || blockNodes.length === 0) return;
+
+    const selection = window.getSelection();
+    if (!selection) return;
+
+    const newNode = [...blockNodes][blockOffset];
+    if (!newNode) return;
+
+    const nodeLength = newNode.textContent?.length || 0;
+    const newOffset = Math.min(textOffset, nodeLength);
+
+    if (newOffset < 0 || newOffset > nodeLength) return;
+
+    if (newNode.childNodes.length > 0) {
+      selection.setPosition(newNode.childNodes[0], newOffset);
+    } else {
+      selection.setPosition(newNode, newOffset);
+    }
+  }, [blocks]);
+
+  return { blockControllerRef, handleInput };
 }

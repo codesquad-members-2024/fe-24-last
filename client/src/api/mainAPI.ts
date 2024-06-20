@@ -89,7 +89,6 @@ export const postNewTeamspace = async (title: string) => {
       const errorMessage = TEAMSPACES_ERROR_MESSAGE[response.status] || UNKNOWN_ERROR_MESSAGE;
       throw new Error(errorMessage);
     }
-    throw new Error(UNKNOWN_ERROR_MESSAGE);
 
     return response;
   } catch (error) {

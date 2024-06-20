@@ -5,7 +5,7 @@ import TeamspacePanel from './TeamspacePanel';
 import { useEffect, useState } from 'react';
 import { postNewTeamspace, sendTeamspaceListRequest } from '../../api/mainAPI';
 import TeamspaceCreateModal from './TeamspaceCreateModal';
-import useUserStore from '../../hooks/useUserStore';
+import useUserStore from '../../stores/useUserStore';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import Loading from '../loading/Loading';

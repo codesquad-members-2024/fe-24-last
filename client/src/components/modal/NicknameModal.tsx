@@ -3,7 +3,7 @@ import { themes, FlexColumn, BoxBorder, ButtonBorder } from '../../styles/themes
 import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 import { postLogin } from '../../api/mainAPI';
-import useUserStore from '../../hooks/useUserStore';
+import useUserStore from '../../stores/useUserStore';
 import { useMutation } from '@tanstack/react-query';
 import { message } from 'antd';
 
