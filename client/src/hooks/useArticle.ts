@@ -52,15 +52,10 @@ export default function useArticle() {
     []
   );
 
-  const handleContentChange = (updatedBlocks: Block[]) => {
-    clientBlocksRef.current = updatedBlocks;
-    debouncedFetch(updatedBlocks);
-  };
-
   return {
+    clientBlocksRef,
     blocks,
     setBlocks: (newBlocks: Block[]) => (clientBlocksRef.current = newBlocks),
     debouncedFetch,
-    handleContentChange,
   };
 }

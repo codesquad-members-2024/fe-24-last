@@ -13,3 +13,16 @@ export const sendTeamspaceRequestById = async (teamspaceId: string) => {
     console.error(error);
   }
 };
+
+export const sendTeamspaceDeleteRequest = async (teamspaceId: string) => {
+  try {
+    const response = await fetch(`${SERVER}/api/teamspace/${teamspaceId}`, { method: 'DELETE' });
+
+    if (!response.ok) throw new Error(UNKNOWN_ERROR_MESSAGE);
+
+    return response;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
+    throw new Error(message);
+  }
+};

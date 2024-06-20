@@ -41,12 +41,7 @@ const removeBlock = (blocks: Block[], blockIndex: number) => {
   return removedArray;
 };
 
-export default function useBlockController({
-  blocks,
-  setBlocks,
-  handleFetch,
-  handleContentChange,
-}: BlockControllerProps) {
+export default function useBlockController({ clientBlockRef, blocks, setBlocks, handleFetch }: BlockControllerProps) {
   const { setBlockOffset, setTextOffset } = useCursorStore();
   const { blockOffset, textOffset } = useCursorStore();
   const blockControllerRef = useRef<HTMLDivElement | null>(null);
@@ -71,26 +66,19 @@ export default function useBlockController({
       setBlocks(newBlocks);
       setBlockOffset(newBlockIndex);
       setTextOffset(Infinity);
+      clientBlockRef.current = newBlocks;
       handleFetch(newBlocks, true);
       return;
     }
 
-    if (key === 'Enter' && shiftKey) {
-      const newTextOffset = newOffset ? newOffset + 1 : 0;
-
-      newBlocks = insertLineBreak(blocks, blockIndex, newOffset);
-      setBlocks(newBlocks);
-      setTextOffset(newTextOffset);
-      handleFetch(newBlocks);
-      return;
-    }
-
     if (key === 'Enter') {
-      const newBlockOffset = blockIndex + 1;
-      const newTextOffset = 0;
+      const newTextOffset = shiftKey ? newOffset + 1 : 0;
+      const newBlockOffset = shiftKey ? blockIndex : blockIndex + 1;
 
-      newBlocks = addNewBlock(blocks, blockIndex);
-      setBlocks(newBlocks);
+      newBlocks = shiftKey
+        ? insertLineBreak(clientBlockRef.current, blockIndex, newOffset)
+        : addNewBlock(clientBlockRef.current, blockIndex);
+      clientBlockRef.current = newBlocks;
       setBlockOffset(newBlockOffset);
       setTextOffset(newTextOffset);
       handleFetch(newBlocks, true);
@@ -108,10 +96,10 @@ export default function useBlockController({
       newBlocks[blockIndex] = { ...block, items: updatedItems } as typeof block;
     }
 
+    clientBlockRef.current = newBlocks;
     setBlockOffset(blockIndex);
     setTextOffset(newOffset);
-
-    handleContentChange(newBlocks);
+    handleFetch(newBlocks);
   };
 
   useEffect(() => {

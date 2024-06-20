@@ -191,6 +191,6 @@ export const OrderedListIndex = styled.span`
 `;
 
 export const StyledBlockTag = styled.div`
-  white-space: pre-wrap; /* 줄 바꿈과 공백을 그대로 렌더링 */
+  white-space: pre-wrap;
   word-break: break-word;
 `;
