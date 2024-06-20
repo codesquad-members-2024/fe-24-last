@@ -1,73 +1,53 @@
 import styled from 'styled-components';
 import { CheckOutlined } from '@ant-design/icons';
-import { FlexColumn, FlexRow, PopupLine, PopupLineWrapper, PopupWrapper } from '../../styles/themes';
+import { FlexColumn, FlexRow, PopupLine, PopupLineWrapper, PopupWrapper, Position } from '../../styles/themes';
 import { themes } from '../../styles/themes';
+import { subPopupContents } from './AddPopup';
+import { useRef, useState } from 'react';
+import PreviewPopup from './PreviewPopup';
 
 const { BackgroudColor, WeakColor } = themes.Color;
 
-export default function SubPopup() {
+interface SubPopupProps {
+  $left: number;
+}
+
+export default function SubPopup({ $left = 10, usedType = 'paragraph' }) {
+  const [isShowPreviewPopup, setIsShowPreviewPopup] = useState<boolean>(false);
+  const [previewType, setPreviewType] = useState<string>('');
+  const [previewTop, setPreviewTop] = useState<number>(0);
+
+  const handlePreview = (key: string, { clientY }: React.MouseEvent) => {
+    setPreviewType(key);
+    setIsShowPreviewPopup(true);
+    setPreviewTop(clientY - 55);
+  };
+
+  const handleMouseLeave = () => {
+    setPreviewType('');
+    setIsShowPreviewPopup(false);
+  };
+
   return (
-    <SubPopupWrapper>
-      <PopupLineWrapper>
-        <PopupLine>
-          <FlexRow>
-            <StyledImg src="https://www.notion.so/images/blocks/text/ko-KR.png" />
-            <Item className="optionTitle">텍스트</Item>
-          </FlexRow>
-          <CheckOutlined />
-        </PopupLine>
-      </PopupLineWrapper>
-
-      <PopupLineWrapper>
-        <PopupLine>
-          <FlexRow>
-            <StyledImg src="https://www.notion.so/images/blocks/header.57a7576a.png" />
-            <Item className="optionTitle">제목1</Item>
-          </FlexRow>
-          <CheckOutlined />
-        </PopupLine>
-      </PopupLineWrapper>
-
-      <PopupLineWrapper>
-        <PopupLine>
-          <FlexRow>
-            <StyledImg src="https://www.notion.so/images/blocks/subheader.9aab4769.png" />
-            <Item className="optionTitle">제목2</Item>
-          </FlexRow>
-          <CheckOutlined />
-        </PopupLine>
-      </PopupLineWrapper>
-
-      <PopupLineWrapper>
-        <PopupLine>
-          <FlexRow>
-            <StyledImg src="https://www.notion.so/images/blocks/subsubheader.d0ed0bb3.png" />
-            <Item className="optionTitle">제목3</Item>
-          </FlexRow>
-          <CheckOutlined />
-        </PopupLine>
-      </PopupLineWrapper>
-
-      <PopupLineWrapper>
-        <PopupLine>
-          <FlexRow>
-            <StyledImg src="https://www.notion.so/images/blocks/bulleted-list.0e87e917.png" />
-            <Item className="optionTitle">글머리 기호 목록</Item>
-          </FlexRow>
-          <CheckOutlined />
-        </PopupLine>
-      </PopupLineWrapper>
-
-      <PopupLineWrapper>
-        <PopupLine>
-          <FlexRow>
-            <StyledImg src="	https://www.notion.so/images/blocks/numbered-list.0406affe.png" />
-            <Item className="optionTitle">번호 매기기 목록</Item>
-          </FlexRow>
-          <CheckOutlined />
-        </PopupLine>
-      </PopupLineWrapper>
-    </SubPopupWrapper>
+    <>
+      <SubPopupWrapper $left={$left}>
+        {Object.keys(subPopupContents).map((key) => {
+          const { img, optionTitle } = subPopupContents[key];
+          return (
+            <PopupLineWrapper key={`sub-popup-${key}`}>
+              <PopupLine onMouseEnter={(e) => handlePreview(key, e)} onMouseLeave={handleMouseLeave}>
+                <FlexRow>
+                  <StyledImg src={img} />
+                  <Item className="optionTitle">{optionTitle}</Item>
+                </FlexRow>
+                {key === usedType && <CheckOutlined />}
+              </PopupLine>
+            </PopupLineWrapper>
+          );
+        })}
+      </SubPopupWrapper>
+      {isShowPreviewPopup && previewType && <PreviewPopup $left={500} $top={previewTop} previewType={previewType} />}
+    </>
   );
 }
 
@@ -75,9 +55,16 @@ const Item = styled(FlexColumn)`
   justify-content: center;
   height: 100%;
 `;
-const SubPopupWrapper = styled(PopupWrapper)`
+
+const SubPopupWrapper = styled(PopupWrapper)<SubPopupProps>`
   width: 250px;
+  position: absolute;
+  top: 45px;
+  left: ${({ $left }) => $left}px;
+  background-color: ${BackgroudColor};
+  z-index: 2;
 `;
+
 const StyledImg = styled.img`
   display: block;
   object-fit: cover;

@@ -1,5 +1,3 @@
-import { CursorPosition } from './helpers/cursorHelpers';
-
 interface BlockBase {
   type: string;
 }

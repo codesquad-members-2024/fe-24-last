@@ -1,5 +1,5 @@
 import { Block, BlockControllerProps, ParagraphBlock } from '../constants';
-import { HandleInputProps } from '../components/EditableBlock';
+import { HandleInputProps } from '../components/article/EditableBlock';
 import { generateRange } from '../helpers/cursorHelpers';
 import { useCursorStore } from '../stores/useCursorStore';
 import { useEffect, useRef } from 'react';

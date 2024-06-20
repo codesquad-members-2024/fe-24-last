@@ -36,6 +36,7 @@ const Color = {
   ShadowColor: 'rgba(0, 0, 0, 0.377)',
   ErrorColor: 'red',
   BackgroudColor: 'white',
+  PreviewBgColor: 'black',
 };
 
 const FontSize = {
@@ -112,6 +113,10 @@ export const PopupWrapper = styled(FlexColumn)`
       color: ${Color.ErrorColor};
     }
   }
+`;
+
+export const Position = styled.div`
+  position: relative;
 `;
 
 export const themes = {

@@ -1,50 +1,66 @@
-import { PopupWrapper, PopupLineWrapper, PopupLine } from '../../styles/themes';
+import styled from 'styled-components';
+import themes, { PopupWrapper, PopupLineWrapper, PopupLine, Position } from '../../styles/themes';
 import { CommentOutlined, StarFilled, DeleteOutlined, RetweetOutlined, RightOutlined } from '@ant-design/icons';
+import { useRef, useState } from 'react';
+import AddPopup from './AddPopup';
+import SubPopup from './SubPopup';
+
+const { BackgroudColor } = themes.Color;
+interface EditPopupContent {
+  icon: React.ReactNode;
+  optionShortCutKey: React.ReactNode | string;
+  optionTitle: string;
+  className?: string;
+}
+const editPopupContents: { [key: string]: EditPopupContent } = {
+  comment: { icon: <CommentOutlined />, optionShortCutKey: 'Ctrl+Shift+M', optionTitle: '댓글' },
+  ai: { icon: <StarFilled />, optionShortCutKey: 'Ctrl+J', optionTitle: 'AI에게 요청' },
+  delete: { icon: <DeleteOutlined />, optionShortCutKey: 'Del', optionTitle: '삭제', className: 'deleteTitle' },
+  change: { icon: <RetweetOutlined />, optionShortCutKey: <RightOutlined />, optionTitle: '전환' },
+};
 
 export default function EditPopup() {
+  const [isShowSubPopup, setIsShowSubPopup] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleMouseEnter = (key: string) => {
+    if (key !== 'change') {
+      setIsShowSubPopup(false);
+      return;
+    }
+
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setIsShowSubPopup(true);
+    }, 300);
+  };
+
   return (
-    <PopupWrapper>
-      <PopupLineWrapper>
-        <PopupLine>
-          <div>
-            <CommentOutlined />
-            <span className="optionTitle">댓글</span>
-          </div>
-          <div className="optionShortCutKey">Ctrl+Shift+M</div>
-        </PopupLine>
-      </PopupLineWrapper>
-
-      <PopupLineWrapper>
-        <PopupLine>
-          <div>
-            <StarFilled />
-            <span className="optionTitle">AI에게 요청</span>
-          </div>
-          <div className="optionShortCutKey">Ctrl+J</div>
-        </PopupLine>
-      </PopupLineWrapper>
-
-      <PopupLineWrapper>
-        <PopupLine>
-          <div className="deleteTitle">
-            <DeleteOutlined />
-            <span className="optionTitle">삭제</span>
-          </div>
-          <div className="optionShortCutKey">Del</div>
-        </PopupLine>
-      </PopupLineWrapper>
-
-      <PopupLineWrapper>
-        <PopupLine>
-          <div>
-            <RetweetOutlined />
-            <span className="optionTitle">전환</span>
-          </div>
-          <div className="optionShortCutKey">
-            <RightOutlined />
-          </div>
-        </PopupLine>
-      </PopupLineWrapper>
-    </PopupWrapper>
+    <>
+      <EditPopupWrapper>
+        {Object.keys(editPopupContents).map((key) => {
+          const { icon, optionShortCutKey, optionTitle, className } = editPopupContents[key];
+          return (
+            <PopupLineWrapper key={`edit-popup-${key}`}>
+              <PopupLine onMouseEnter={() => handleMouseEnter(key)}>
+                <div className={className || ''}>
+                  {icon}
+                  <span className="optionTitle">{optionTitle}</span>
+                </div>
+                <div className="optionShortCutKey">{optionShortCutKey}</div>
+              </PopupLine>
+            </PopupLineWrapper>
+          );
+        })}
+      </EditPopupWrapper>
+      <Position>{isShowSubPopup && <SubPopup $left={250} usedType={'paragraph'} />}</Position>
+    </>
   );
 }
+
+const EditPopupWrapper = styled(PopupWrapper)`
+  position: absolute;
+  top: 0px;
+  background-color: ${BackgroudColor};
+  z-index: 1;
+`;

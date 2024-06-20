@@ -8,4 +8,4 @@ export default {
 
 const Template: StoryFn = () => <SubPopup />;
 
-export const DefaultEditPopup = Template.bind({});
+export const DefaultSubPopup = Template.bind({});

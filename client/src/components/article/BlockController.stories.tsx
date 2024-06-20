@@ -1,6 +1,6 @@
 import { Meta, StoryFn } from '@storybook/react';
 import BlockController from './BlockController';
-import { BlockControllerProps } from '../constants';
+import { BlockControllerProps } from '../../constants';
 
 export default {
   title: 'Article/BlockController',

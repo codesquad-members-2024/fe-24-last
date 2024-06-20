@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import BlockController from '../BlockController';
+import BlockController from './BlockController';
 import useArticle from '../../hooks/useArticle';
 import { Flex } from '../../styles/themes';
 

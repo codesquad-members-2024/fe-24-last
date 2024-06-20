@@ -2,7 +2,7 @@ import { Meta, StoryFn } from '@storybook/react';
 import BlockTag from './BlockTag';
 import { ReactNode } from 'react';
 import { OrderedListIndex, StyledBlockTag } from './EditableBlock';
-import { Flex } from '../styles/themes';
+import { Flex } from '../../styles/themes';
 
 const HeaderContentTag = (
   <h1 contentEditable suppressContentEditableWarning>
