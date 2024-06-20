@@ -50,6 +50,11 @@ const ButtonBox = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  &:hover {
+    background-color: rgb(239, 239, 239);
+    cursor: pointer;
+  }
 `;
 
 const ButtonEmoji = styled.div`

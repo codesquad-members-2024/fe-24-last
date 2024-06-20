@@ -52,9 +52,9 @@ function ArticleLayout() {
     const isInBottomPadding = clickY > wrapperRect.bottom - paddingBottom;
 
     if (isInBottomPadding) {
-      if (currentArticle && currentArticle.blocklist.length > 0) {
+      if (currentArticle && currentArticle.blockList.length > 0) {
         const lastBlock =
-          currentArticle.blocklist[currentArticle.blocklist.length - 1];
+          currentArticle.blockList[currentArticle.blockList.length - 1];
         try {
           const response = await createNewBlockOrElement(id, lastBlock._id);
           setFocusedElementId(response.newElementId);
@@ -76,7 +76,7 @@ function ArticleLayout() {
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading page</div>;
 
-  const { title, blocklist } = currentArticle;
+  const { title, blockList } = currentArticle;
 
   return (
     <S.Wrapper onClick={handleWrapperClick}>
@@ -89,7 +89,7 @@ function ArticleLayout() {
         {title}
       </S.TitleBox>
       <S.Content>
-        {blocklist.map((block: Block, index: number) => {
+        {blockList.map((block: Block, index: number) => {
           return (
             <BlockBox
               key={`block-${block._id}`}

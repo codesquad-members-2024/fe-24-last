@@ -2,7 +2,7 @@
   {
     "id": "1234567890abcdef1234567890abcdef",
     "title": "Home",
-    "blocklist": [
+    "blockList": [
       {
         "id": "sdjfhlekjwhge123",
         "element": [

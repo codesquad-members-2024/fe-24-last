@@ -14,18 +14,18 @@ export async function createNewPage() {
     },
     body: JSON.stringify({
       title: "",
-      blocklist: [
+      blockList: [
         {
-          element: [
+          block: [
             [{ type: "text", content: "안녕" }],
             [{ type: "text", content: "빙수" }],
           ],
         },
         {
-          element: [[{ type: "text", content: "" }]],
+          block: [[{ type: "text", content: "" }]],
         },
         {
-          element: [
+          block: [
             [
               { type: "text", content: "때구" },
               { type: "text", content: "째굼이" },

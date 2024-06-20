@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import styled from "styled-components";
 import { Block } from "../model/types";
 import debounce from "../utils/debounce";
@@ -27,8 +26,7 @@ export default function BlockBox({
   currentArticle,
 }: BlockBoxProps) {
   const { id: pageId } = useParams<{ id: string }>();
-  const { element, _id: blockId } = blockData;
-  const blockRef = useRef<HTMLDivElement>(null);
+  const { block, _id: blockId } = blockData;
 
   const [debouncedSaveContent, clearDebouncedSaveContent] = debounce(
     async (blockId, elementId, newContent) => {
@@ -60,33 +58,31 @@ export default function BlockBox({
             columnIndex,
             elementIndex
           );
-          console.log(response.newElementId);
           setFocusedElementId(response.newElementId);
           refetchCurrentArticle();
         } catch (error) {
           console.error(error);
         }
       } else if (e.key === "Backspace") {
-        if (blockRef.current && blockRef.current.innerText === "") {
+        if (e.currentTarget.innerText === "") {
           e.preventDefault();
           try {
             clearDebouncedSaveContent();
 
             let previousElementId = null;
 
-            if (element[columnIndex].length > 1) {
+            if (block[columnIndex].length > 1) {
               previousElementId =
-                element[columnIndex][elementIndex - 1]?._id || null;
-            } else if (element.length > 1) {
+                block[columnIndex][elementIndex - 1]?._id || null;
+            } else if (block.length > 1) {
               previousElementId =
-                element[columnIndex - 1][element[columnIndex - 1].length - 1]
+                block[columnIndex - 1][block[columnIndex - 1].length - 1]
                   ?._id || null;
             } else if (blockIndex > 0) {
-              const previousBlock = currentArticle.blocklist[blockIndex - 1];
+              const previousBlock = currentArticle.blockList[blockIndex - 1];
               previousElementId =
-                previousBlock.element[previousBlock.element.length - 1][
-                  previousBlock.element[previousBlock.element.length - 1]
-                    .length - 1
+                previousBlock.block[previousBlock.block.length - 1][
+                  previousBlock.block[previousBlock.block.length - 1].length - 1
                 ]._id;
             }
 
@@ -105,7 +101,7 @@ export default function BlockBox({
 
   return (
     <Wrapper>
-      {element.map((column, columnIndex) => (
+      {block.map((column, columnIndex) => (
         <Column key={`${blockId}-${columnIndex}`}>
           {column.map((element, elementIndex) => (
             <Cell key={element._id}>
@@ -113,7 +109,6 @@ export default function BlockBox({
                 <HolderOutlined />
               </IconWrapper>
               <BlockArea
-                ref={blockRef}
                 contentEditable
                 onInput={handleContentChange(element._id)}
                 onKeyDown={handleKeyDown(

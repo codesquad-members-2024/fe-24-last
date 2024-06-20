@@ -7,14 +7,13 @@ const ElementSchema = new Schema({
 });
 
 const BlockSchema = new Schema({
-  element: [[ElementSchema]],
+  columnList: [[ElementSchema]],
 });
 
-const PageSchema = new Schema({
+const ArticleSchema = new Schema({
   title: String,
-  blocklist: [BlockSchema],
+  blockList: [BlockSchema],
   parent_id: String,
 });
 
-export const Pages = mongoose.model("Page", PageSchema);
-export const Blocks = mongoose.model("Block", BlockSchema);
+export const Articles = mongoose.model("Article", ArticleSchema);

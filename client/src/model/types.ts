@@ -6,12 +6,12 @@ export interface BlockChildren {
 
 export interface Block {
   _id: string;
-  element: [[BlockChildren]];
+  block: [[BlockChildren]];
 }
 
 export interface Article {
   _id: string;
   title: string;
-  blocklist: [Block] | [];
+  blockList: [Block] | [];
   parent_id: string | null;
 }
