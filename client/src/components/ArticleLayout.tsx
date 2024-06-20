@@ -47,7 +47,7 @@ function ArticleLayout() {
       if (e.shiftKey) return;
       e.preventDefault();
       const newData = {
-        type: "text",
+        type: "p",
         content: "",
         children: [],
       };
