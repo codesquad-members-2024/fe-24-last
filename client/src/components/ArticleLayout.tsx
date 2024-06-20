@@ -3,7 +3,11 @@ import { useQuery } from "react-query";
 import debounce from "../utils/debounce";
 import { focusOnBlock } from "../utils/focus";
 import { Block } from "../model/types";
-import { fetchArticleById, updateArticleTitle } from "../services/api";
+import {
+  fetchArticleById,
+  updateArticleTitle,
+  createNewBlockOrElement,
+} from "../services/api";
 import { useArticles } from "../contexts/ArticlesProvider";
 import * as S from "../styles/ArticleLayout";
 import BlockBox from "./BlockBox";
@@ -35,13 +39,37 @@ function ArticleLayout() {
     debouncedSaveTitle(newTitle);
   };
 
+  const handleWrapperClick = async (e: React.MouseEvent<HTMLDivElement>) => {
+    const wrapper = e.currentTarget;
+    const paddingBottom = parseInt(
+      window.getComputedStyle(wrapper).paddingBottom,
+      10
+    );
+    const clickY = e.clientY;
+    const wrapperRect = wrapper.getBoundingClientRect();
+    const isInBottomPadding = clickY > wrapperRect.bottom - paddingBottom;
+
+    if (isInBottomPadding) {
+      if (currentArticle && currentArticle.blocklist.length > 0) {
+        const lastBlock =
+          currentArticle.blocklist[currentArticle.blocklist.length - 1];
+        try {
+          await createNewBlockOrElement(id, lastBlock._id);
+          refetchCurrentArticle();
+        } catch (error) {
+          console.error("Failed to create new block:", error);
+        }
+      }
+    }
+  };
+
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading page</div>;
 
   const { title, blocklist } = currentArticle;
 
   return (
-    <S.Wrapper>
+    <S.Wrapper onClick={handleWrapperClick}>
       <S.TitleBox
         contentEditable
         aria-placeholder="제목없음"

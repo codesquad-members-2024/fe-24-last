@@ -99,7 +99,12 @@ pagesRouter.post("/:id/block/:blockId/element", async (req, res) => {
 
     const block = article.blocklist[blockIndex];
 
-    if (block.element.length === 1 && block.element[0].length === 1) {
+    if (columnIndex === undefined || elementIndex === undefined) {
+      const newBlock = {
+        element: [[{ type, content }]],
+      };
+      article.blocklist.push(newBlock);
+    } else if (block.element.length === 1 && block.element[0].length === 1) {
       const newBlock = {
         element: [[{ type, content }]],
       };

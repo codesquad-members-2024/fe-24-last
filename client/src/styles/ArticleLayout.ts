@@ -5,6 +5,7 @@ export const Wrapper = styled.div`
   margin-left: 100px;
   margin-right: 100px;
   flex-grow: 1;
+  cursor: text;
 `;
 
 export const TitleBox = styled.h1`
