@@ -62,14 +62,17 @@ pagesRouter.patch("/:id", async (req, res) => {
   }
 });
 
-pagesRouter.delete("/api/pages", async (req, res) => {
+pagesRouter.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+
   try {
-    const pageData = req.body;
-    const newPage = new Pages(pageData);
-    await newPage.save();
+    const deletedPage = await Pages.findByIdAndDelete(id);
+    if (!deletedPage) {
+      return res.status(404).json({ message: "Page not found" });
+    }
     res
       .status(200)
-      .json({ message: "Page deleted successfully", data: newPage });
+      .json({ message: "Page deleted successfully", data: deletedPage });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

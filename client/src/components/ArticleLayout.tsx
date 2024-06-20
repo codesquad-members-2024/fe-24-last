@@ -20,7 +20,6 @@ function ArticleLayout() {
   } = useQuery(["article", id], () => fetchArticleById(id), {
     enabled: !!id,
   });
-  const [newBlockIndex, setNewBlockIndex] = useState<string | null>(null);
 
   const [debouncedSaveTitle] = debounce(async (newTitle: string) => {
     try {
@@ -35,13 +34,6 @@ function ArticleLayout() {
     const newTitle = e.currentTarget.innerText;
     debouncedSaveTitle(newTitle);
   };
-
-  useEffect(() => {
-    if (newBlockIndex && currentArticle.blocklist[newBlockIndex]._id) {
-      const newBlockId = currentArticle.blocklist[newBlockIndex]._id;
-      focusOnBlock(newBlockId);
-    }
-  }, [newBlockIndex, currentArticle?.blocklist]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading page</div>;
@@ -66,7 +58,6 @@ function ArticleLayout() {
               blockData={block}
               refetchCurrentArticle={refetchCurrentArticle}
               blockIndex={index}
-              setNewBlockIndex={setNewBlockIndex}
             />
           );
         })}

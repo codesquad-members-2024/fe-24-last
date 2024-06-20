@@ -31,8 +31,12 @@ export async function createNewPage() {
               { type: "text", content: "째굼이" },
             ],
             [
-              { type: "text", content: "마아롱" },
-              { type: "text", content: "오리" },
+              { type: "text", content: "초코" },
+              { type: "text", content: "딸기" },
+            ],
+            [
+              { type: "text", content: "치즈" },
+              { type: "text", content: "빙수" },
             ],
           ],
         },
@@ -43,6 +47,21 @@ export async function createNewPage() {
 
   if (!response.ok) {
     throw new Error("Failed to create a new page");
+  }
+
+  return response.json();
+}
+
+export async function deletePage(pageId: string) {
+  const response = await fetch(
+    `${import.meta.env.VITE_SERVER_URL}/pages/${pageId}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to delete page");
   }
 
   return response.json();

@@ -14,14 +14,12 @@ interface BlockBoxProps {
   blockData: Block;
   refetchCurrentArticle: () => void;
   blockIndex: number;
-  setNewBlockIndex: (id: string) => void;
 }
 
 export default function BlockBox({
   blockData,
   refetchCurrentArticle,
   blockIndex,
-  setNewBlockIndex,
 }: BlockBoxProps) {
   const { id: pageId } = useParams<{ id: string }>();
   const { element, _id: blockId } = blockData;
@@ -51,7 +49,6 @@ export default function BlockBox({
         e.preventDefault();
         try {
           const newBlock = await createNewBlock(pageId, blockIndex);
-          setNewBlockIndex(newBlock.nextIdx);
           refetchCurrentArticle();
         } catch (error) {
           console.error(error);
@@ -62,7 +59,6 @@ export default function BlockBox({
           try {
             clearDebouncedSaveContent();
             const previousBlockIndex = blockIndex > 0 ? blockIndex - 1 : 0;
-            setNewBlockIndex(previousBlockIndex.toString());
             await deleteBlock(pageId, blockId, elementId);
             refetchCurrentArticle();
           } catch (error) {
@@ -138,4 +134,5 @@ const IconWrapper = styled.div`
 const BlockArea = styled.div`
   width: 100%;
   padding: 3px 2px;
+  height: fit-content;
 `;
