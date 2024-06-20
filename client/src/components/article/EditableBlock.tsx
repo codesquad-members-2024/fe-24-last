@@ -9,10 +9,9 @@ import {
   OrderedListBlock,
 } from '../../constants';
 import { ColumnGap, Flex } from '../../styles/themes';
-import React, { useEffect, useLayoutEffect } from 'react';
-import { CursorPosition, specifyPositionOfCursor } from '../../helpers/cursorHelpers';
+import React from 'react';
 import BlockTag from './BlockTag';
-import { useCursorStore } from '../../stores/cursorStore';
+import { useCursorStore } from '../../stores/useCursorStore';
 
 export interface HandleInputProps {
   e: React.KeyboardEvent<HTMLElement>;
@@ -166,14 +165,9 @@ const ImageTag = ({ block: { url, alt }, index, handleInput }: EditableBlockProp
 
 export default function EditableBlock({ block, index, handleInput, showPopup }: EditableBlockProps) {
   const { type } = block;
-  const { cursorPosition, setCursorPosition } = useCursorStore();
-  const isFocusedBlock = index === cursorPosition.blockOffset;
-  const handleFocus = (blockIndex: number) => setCursorPosition({ blockOffset: blockIndex });
+  const { setBlockOffset } = useCursorStore();
+  const handleFocus = (blockIndex: number) => setBlockOffset(blockIndex);
   const tagProps = { index, handleInput, handleFocus };
-
-  useEffect(() => {
-    specifyPositionOfCursor({ cursorPosition, isFocusedBlock });
-  }, [block]);
 
   const blockTag = {
     header: <HeaderTag block={block as HeaderBlock} {...tagProps} />,
@@ -191,6 +185,7 @@ export const OrderedListIndex = styled.span`
 `;
 
 export const StyledBlockTag = styled.div`
+  width: 100%;
   white-space: pre-wrap;
   word-break: break-word;
 `;

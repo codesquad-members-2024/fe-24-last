@@ -5,7 +5,6 @@ import { io } from 'socket.io-client';
 import { debounce } from '../utils/timeoutUtils';
 import { useParams } from 'react-router-dom';
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
-import { useCursorStore } from '../stores/cursorStore';
 
 const SERVER = import.meta.env.VITE_SERVER;
 
@@ -26,7 +25,6 @@ export default function useArticle() {
   const { mutate: updateArticle } = useMutation({
     mutationFn: updateArticleRequestById,
   });
-  const { setCursorPosition } = useCursorStore();
 
   useEffect(() => {
     const socket = io(SERVER);
