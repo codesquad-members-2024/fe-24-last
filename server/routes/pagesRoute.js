@@ -101,7 +101,7 @@ pagesRouter.post("/api/pages/:id/blocks", async (req, res) => {
     const page = await Pages.findById(pageId);
     if (!page) return res.status(404).json({ message: "Page not found" });
 
-    const newBlock = new Blocks({ type: "text", content: "", children: [] });
+    const newBlock = new Blocks({ type: "p", content: "", children: [] });
 
     page.blocklist.push(newBlock);
     await page.save();

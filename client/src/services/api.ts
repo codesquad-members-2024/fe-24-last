@@ -205,7 +205,7 @@ export const createBlock = async (pageId: string, index: number) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        type: "text",
+        type: "p",
         content: "",
         index: index,
         children: [],
