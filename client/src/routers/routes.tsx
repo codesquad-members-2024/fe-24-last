@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
-import Pages from "../pages/Pages";
-import Layout from "../pages/Layout"
+import Articles from "../pages/Articles";
+import Layout from "../pages/Layout";
 const routes = createBrowserRouter([
   {
     path: "/",
@@ -8,7 +8,7 @@ const routes = createBrowserRouter([
     children: [
       {
         path: "/:id",
-        element: <Pages />,
+        element: <Articles />,
       },
     ],
   },

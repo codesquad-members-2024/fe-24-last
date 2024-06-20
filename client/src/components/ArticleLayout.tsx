@@ -74,7 +74,7 @@ function ArticleLayout() {
   }, [currentArticle, focusedElementId]);
 
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading page</div>;
+  if (error) return <div>Error loading Article</div>;
 
   const { title, blockList } = currentArticle;
 

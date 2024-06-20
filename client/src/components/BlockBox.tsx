@@ -26,7 +26,7 @@ export default function BlockBox({
   currentArticle,
 }: BlockBoxProps) {
   const { id: pageId } = useParams<{ id: string }>();
-  const { block, _id: blockId } = blockData;
+  const { columnList, _id: blockId } = blockData;
 
   const [debouncedSaveContent, clearDebouncedSaveContent] = debounce(
     async (blockId, elementId, newContent) => {
@@ -71,18 +71,20 @@ export default function BlockBox({
 
             let previousElementId = null;
 
-            if (block[columnIndex].length > 1) {
+            if (columnList[columnIndex].length > 1) {
               previousElementId =
-                block[columnIndex][elementIndex - 1]?._id || null;
-            } else if (block.length > 1) {
+                columnList[columnIndex][elementIndex - 1]?._id || null;
+            } else if (columnList.length > 1) {
               previousElementId =
-                block[columnIndex - 1][block[columnIndex - 1].length - 1]
-                  ?._id || null;
+                columnList[columnIndex - 1][
+                  columnList[columnIndex - 1].length - 1
+                ]?._id || null;
             } else if (blockIndex > 0) {
               const previousBlock = currentArticle.blockList[blockIndex - 1];
               previousElementId =
-                previousBlock.block[previousBlock.block.length - 1][
-                  previousBlock.block[previousBlock.block.length - 1].length - 1
+                previousBlock.columnList[previousBlock.columnList.length - 1][
+                  previousBlock.columnList[previousBlock.columnList.length - 1]
+                    .length - 1
                 ]._id;
             }
 
@@ -101,14 +103,14 @@ export default function BlockBox({
 
   return (
     <Wrapper>
-      {block.map((column, columnIndex) => (
+      {columnList.map((column, columnIndex) => (
         <Column key={`${blockId}-${columnIndex}`}>
           {column.map((element, elementIndex) => (
-            <Cell key={element._id}>
+            <Element key={element._id}>
               <IconWrapper>
                 <HolderOutlined />
               </IconWrapper>
-              <BlockArea
+              <ElementContent
                 contentEditable
                 onInput={handleContentChange(element._id)}
                 onKeyDown={handleKeyDown(
@@ -120,8 +122,8 @@ export default function BlockBox({
                 id={element._id}
               >
                 {element.content}
-              </BlockArea>
-            </Cell>
+              </ElementContent>
+            </Element>
           ))}
         </Column>
       ))}
@@ -143,7 +145,7 @@ const Column = styled.div`
   width: 100%;
 `;
 
-const Cell = styled.div`
+const Element = styled.div`
   display: flex;
   flex-direction: row;
   padding: 8px;
@@ -159,12 +161,12 @@ const IconWrapper = styled.div`
   cursor: pointer;
   height: fit-content;
 
-  ${Cell}:hover & {
+  ${Element}:hover & {
     visibility: visible;
   }
 `;
 
-const BlockArea = styled.div`
+const ElementContent = styled.div`
   width: 100%;
   padding: 3px 2px;
   height: fit-content;

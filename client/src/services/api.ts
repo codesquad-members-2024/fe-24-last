@@ -1,13 +1,13 @@
 export async function fetchArticles() {
-  const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/pages`);
+  const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/articles`);
   if (!response.ok) {
     throw new Error("Network response was not ok");
   }
   return response.json();
 }
 
-export async function createNewPage() {
-  const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/pages`, {
+export async function createNewArticle() {
+  const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/articles`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -16,16 +16,16 @@ export async function createNewPage() {
       title: "",
       blockList: [
         {
-          block: [
+          columnList: [
             [{ type: "text", content: "안녕" }],
             [{ type: "text", content: "빙수" }],
           ],
         },
         {
-          block: [[{ type: "text", content: "" }]],
+          columnList: [[{ type: "text", content: "" }]],
         },
         {
-          block: [
+          columnList: [
             [
               { type: "text", content: "때구" },
               { type: "text", content: "째굼이" },
@@ -46,22 +46,22 @@ export async function createNewPage() {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to create a new page");
+    throw new Error("Failed to create a new article");
   }
 
   return response.json();
 }
 
-export async function deletePage(pageId: string) {
+export async function deleteArticle(articleId: string) {
   const response = await fetch(
-    `${import.meta.env.VITE_SERVER_URL}/pages/${pageId}`,
+    `${import.meta.env.VITE_SERVER_URL}/articles/${articleId}`,
     {
       method: "DELETE",
     }
   );
 
   if (!response.ok) {
-    throw new Error("Failed to delete page");
+    throw new Error("Failed to delete article");
   }
 
   return response.json();
@@ -69,7 +69,7 @@ export async function deletePage(pageId: string) {
 
 export async function fetchArticleById(id: string | undefined) {
   const response = await fetch(
-    `${import.meta.env.VITE_SERVER_URL}/pages/${id}`
+    `${import.meta.env.VITE_SERVER_URL}/articles/${id}`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch article");
@@ -82,7 +82,7 @@ export async function updateArticleTitle(
   newTitle: string
 ) {
   const response = await fetch(
-    `${import.meta.env.VITE_SERVER_URL}/pages/${id}`,
+    `${import.meta.env.VITE_SERVER_URL}/articles/${id}`,
     {
       method: "PATCH",
       body: JSON.stringify({ title: newTitle }),
@@ -100,7 +100,7 @@ export async function updateArticleTitle(
 }
 
 export async function updateBlockContent(
-  pageId: string | undefined,
+  articleId: string | undefined,
   blockId: string | undefined,
   elementId: string | undefined,
   newContent: string
@@ -108,7 +108,7 @@ export async function updateBlockContent(
   const response = await fetch(
     `${
       import.meta.env.VITE_SERVER_URL
-    }/pages/${pageId}/block/${blockId}/element/${elementId}`,
+    }/articles/${articleId}/block/${blockId}/element/${elementId}`,
     {
       method: "PATCH",
       body: JSON.stringify({ content: newContent }),
@@ -126,12 +126,11 @@ export async function updateBlockContent(
       }`
     );
   }
-
   return response.json();
 }
 
 export async function createNewBlockOrElement(
-  pageId: string | undefined,
+  articleId: string | undefined,
   blockId: string | undefined,
   columnIndex?: number,
   elementIndex?: number
@@ -143,7 +142,7 @@ export async function createNewBlockOrElement(
   const response = await fetch(
     `${
       import.meta.env.VITE_SERVER_URL
-    }/pages/${pageId}/block/${blockId}/element`,
+    }/articles/${articleId}/block/${blockId}/element`,
     {
       method: "POST",
       body: JSON.stringify(body),
@@ -161,14 +160,14 @@ export async function createNewBlockOrElement(
 }
 
 export async function deleteBlock(
-  pageId: string | undefined,
+  articleId: string | undefined,
   blockId: string | undefined,
   elementId: string | undefined
 ) {
   const response = await fetch(
     `${
       import.meta.env.VITE_SERVER_URL
-    }/pages/${pageId}/block/${blockId}/element/${elementId}`,
+    }/articles/${articleId}/block/${blockId}/element/${elementId}`,
     {
       method: "DELETE",
     }

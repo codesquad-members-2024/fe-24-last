@@ -25,7 +25,7 @@ export const UserInfo = styled.div`
   padding: 0 10px;
 `;
 
-export const NewPageButton = styled.div`
+export const NewArticleButton = styled.div`
   height: 100%;
   display: flex;
   align-items: center;
@@ -40,7 +40,7 @@ export const NewPageButton = styled.div`
 
 export const MiddleBox = styled.div`
   padding: 0 5px;
-  .mypages {
+  .my-articles {
     color: gray;
     font-size: 13px;
     margin-bottom: 10px;
@@ -48,7 +48,7 @@ export const MiddleBox = styled.div`
   }
 `;
 
-export const Pages = styled.div`
+export const Articles = styled.div`
   display: flex;
   flex-direction: column;
 `;
