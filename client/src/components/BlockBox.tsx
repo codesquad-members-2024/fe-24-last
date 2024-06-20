@@ -14,12 +14,14 @@ interface BlockBoxProps {
   blockData: Block;
   refetchCurrentArticle: () => void;
   blockIndex: number;
+  setFocusedElementId: (id: string) => void;
 }
 
 export default function BlockBox({
   blockData,
   refetchCurrentArticle,
   blockIndex,
+  setFocusedElementId,
 }: BlockBoxProps) {
   const { id: pageId } = useParams<{ id: string }>();
   const { element, _id: blockId } = blockData;
@@ -49,12 +51,13 @@ export default function BlockBox({
       if (e.key === "Enter") {
         e.preventDefault();
         try {
-          const newBlock = await createNewBlockOrElement(
+          const response = await createNewBlockOrElement(
             pageId,
             blockId,
             columnIndex,
             elementIndex
           );
+          setFocusedElementId(response.newElementId);
           refetchCurrentArticle();
         } catch (error) {
           console.error(error);

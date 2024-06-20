@@ -98,30 +98,42 @@ pagesRouter.post("/:id/block/:blockId/element", async (req, res) => {
     }
 
     const block = article.blocklist[blockIndex];
+    let newElementId = null;
 
     if (columnIndex === undefined || elementIndex === undefined) {
+      const newElement = { _id: new mongoose.Types.ObjectId(), type, content };
       const newBlock = {
-        element: [[{ type, content }]],
+        _id: new mongoose.Types.ObjectId(),
+        element: [[newElement]],
       };
       article.blocklist.push(newBlock);
+      newElementId = newElement._id;
     } else if (block.element.length === 1 && block.element[0].length === 1) {
+      const newElement = { _id: new mongoose.Types.ObjectId(), type, content };
       const newBlock = {
-        element: [[{ type, content }]],
+        _id: new mongoose.Types.ObjectId(),
+        element: [[newElement]],
       };
       article.blocklist.splice(blockIndex + 1, 0, newBlock);
+      newElementId = newElement._id;
     } else {
       if (block.element[columnIndex]) {
-        block.element[columnIndex].splice(elementIndex + 1, 0, {
+        const newElement = {
+          _id: new mongoose.Types.ObjectId(),
           type,
           content,
-        });
+        };
+        block.element[columnIndex].splice(elementIndex + 1, 0, newElement);
+        newElementId = newElement._id;
       }
     }
 
     await article.save();
-    res
-      .status(201)
-      .json({ message: "Element added successfully", data: article });
+    res.status(201).json({
+      message: "Element added successfully",
+      newElementId,
+      data: article,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

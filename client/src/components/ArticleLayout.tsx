@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery } from "react-query";
 import debounce from "../utils/debounce";
@@ -11,7 +12,6 @@ import {
 import { useArticles } from "../contexts/ArticlesProvider";
 import * as S from "../styles/ArticleLayout";
 import BlockBox from "./BlockBox";
-import { useEffect, useState } from "react";
 
 function ArticleLayout() {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +24,7 @@ function ArticleLayout() {
   } = useQuery(["article", id], () => fetchArticleById(id), {
     enabled: !!id,
   });
+  const [focusedElementId, setFocusedElementId] = useState<string | null>(null);
 
   const [debouncedSaveTitle] = debounce(async (newTitle: string) => {
     try {
@@ -54,7 +55,8 @@ function ArticleLayout() {
         const lastBlock =
           currentArticle.blocklist[currentArticle.blocklist.length - 1];
         try {
-          await createNewBlockOrElement(id, lastBlock._id);
+          const response = await createNewBlockOrElement(id, lastBlock._id);
+          setFocusedElementId(response.newElementId);
           refetchCurrentArticle();
         } catch (error) {
           console.error("Failed to create new block:", error);
@@ -62,6 +64,16 @@ function ArticleLayout() {
       }
     }
   };
+
+  useEffect(() => {
+    if (focusedElementId) {
+      const newElement = document.getElementById(focusedElementId);
+      if (newElement) {
+        newElement.focus();
+        setFocusedElementId(null);
+      }
+    }
+  }, [currentArticle, focusedElementId]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error loading page</div>;
@@ -86,6 +98,7 @@ function ArticleLayout() {
               blockData={block}
               refetchCurrentArticle={refetchCurrentArticle}
               blockIndex={index}
+              setFocusedElementId={setFocusedElementId}
             />
           );
         })}
