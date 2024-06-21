@@ -33,6 +33,9 @@ const Wrapper = styled.div`
   border-radius: 7px;
   padding-top: 6px;
   overflow-y: scroll;
+  z-index: 1000;
+  position: absolute;
+  background-color: white;
 `;
 
 const PopupTitle = styled.div`

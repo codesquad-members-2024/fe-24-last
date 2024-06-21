@@ -7,8 +7,8 @@ import {
   deleteBlock,
 } from "../services/api";
 import { useParams } from "react-router-dom";
-import { HolderOutlined } from "@ant-design/icons";
 import { Article } from "../model/types";
+import ElementBox from "./ElementBox";
 
 interface BlockBoxProps {
   blockData: Block;
@@ -106,24 +106,14 @@ export default function BlockBox({
       {columnList.map((column, columnIndex) => (
         <Column key={`${blockId}-${columnIndex}`}>
           {column.map((element, elementIndex) => (
-            <Element key={element._id}>
-              <IconWrapper>
-                <HolderOutlined />
-              </IconWrapper>
-              <ElementContent
-                contentEditable
-                onInput={handleContentChange(element._id)}
-                onKeyDown={handleKeyDown(
-                  element._id,
-                  columnIndex,
-                  elementIndex
-                )}
-                suppressContentEditableWarning
-                id={element._id}
-              >
-                {element.content}
-              </ElementContent>
-            </Element>
+            <ElementBox
+              key={element._id}
+              element={element}
+              columnIndex={columnIndex}
+              elementIndex={elementIndex}
+              handleContentChange={handleContentChange}
+              handleKeyDown={handleKeyDown}
+            />
           ))}
         </Column>
       ))}

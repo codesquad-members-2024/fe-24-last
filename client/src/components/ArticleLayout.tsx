@@ -12,7 +12,6 @@ import {
 import { useArticles } from "../contexts/ArticlesProvider";
 import * as S from "../styles/ArticleLayout";
 import BlockBox from "./BlockBox";
-import BlockTypePopup from "./BlockTypePopup";
 
 function ArticleLayout() {
   const { id } = useParams<{ id: string }>();
@@ -102,7 +101,6 @@ function ArticleLayout() {
           );
         })}
       </S.Content>
-      <BlockTypePopup />
     </S.Wrapper>
   );
 }
