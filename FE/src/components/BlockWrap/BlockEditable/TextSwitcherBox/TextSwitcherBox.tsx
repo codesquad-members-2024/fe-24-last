@@ -4,10 +4,10 @@ import { BoldOutlined, ItalicOutlined, UnderlineOutlined, StrikethroughOutlined 
 import useOnClickOutside from '../../../../hooks/useOnClickOutSide';
 
 const FONT_LIST = [
-    { type: <BoldOutlined/>, tag: "bold" },
-    { type: <ItalicOutlined/>, tag: "italic" },
-    { type: <UnderlineOutlined/>, tag: "underline" },
-    { type: <StrikethroughOutlined/>, tag: "line-through" }
+    { type: <BoldOutlined/>, tag: "bold"},
+    { type: <ItalicOutlined/>, tag: "italic"},
+    { type: <UnderlineOutlined/>, tag: "underline"},
+    { type: <StrikethroughOutlined/>, tag: "line-through"}
 ]
 
 interface TextSwitcherProps {
@@ -19,19 +19,52 @@ const TextSwitcherBox = ({setIsTextSwitcher}: TextSwitcherProps) => {
     const textSwitcherRef = useRef<HTMLDivElement>(null)
     useOnClickOutside(textSwitcherRef, setIsTextSwitcher)
 
+    const toggleStyle = (style: string, span: HTMLElement) => {
+        switch (style) {
+            case 'bold':
+                span.style.fontWeight = span.style.fontWeight === 'bold' ? 'normal' : 'bold';
+                break;
+            case 'italic':
+                span.style.fontStyle = span.style.fontStyle === 'italic' ? 'normal' : 'italic';
+                break;
+            case 'underline':
+                span.style.textDecoration = span.style.textDecoration === 'underline' ? 'none' : 'underline';
+                break;
+            case 'line-through':
+                span.style.textDecoration = span.style.textDecoration === 'line-through' ? 'none' : 'line-through';
+                break;
+            default:
+                break;
+        }
+    }
+
     const applyStyle = (style: string) => {
         const selection = window.getSelection();
         if (!selection?.rangeCount) return;
+
         const range = selection.getRangeAt(0);
-        const span = document.createElement('span');
-        span.style.fontWeight = style === 'bold' ? 'bold' : 'normal';
-        span.style.fontStyle = style === 'italic' ? 'italic' : 'normal';
-        span.style.textDecoration = style === 'underline' ? 'underline' : (style === 'line-through' ? 'line-through' : 'none');
-        range.surroundContents(span);
-        // handleContentChange(index, blockRef.current?.innerHTML || "");
-        setIsTextSwitcher(false)
-        // span이 중첩으로 쌓임 
-        // 새로운 방법이 필요
+        const cloneRange = range.cloneContents();
+        const fragment = document.createDocumentFragment();
+
+        const spans: HTMLElement[] = [];
+        cloneRange.childNodes.forEach(node => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                spans.push(node as HTMLElement);
+            } else {
+                const span = document.createElement('span');
+                span.appendChild(node.cloneNode(true));
+                spans.push(span);
+            }
+        });
+
+        spans.forEach(node => {
+            toggleStyle(style, node);
+            fragment.appendChild(node);
+        });
+        range.deleteContents();
+        range.insertNode(fragment);
+        setIsTextSwitcher(false);
+        // 블럭의 innerHTML을  디비에 저장하기
     };
     
     return (
