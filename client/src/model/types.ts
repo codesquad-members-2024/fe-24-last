@@ -1,17 +1,17 @@
-export interface BlockChildren {
+export interface Element {
+  _id: string;
   type: string;
   content: string;
 }
 
 export interface Block {
   _id: string;
-  type: string;
-  content: string;
+  columnList: [[Element]];
 }
 
 export interface Article {
   _id: string;
   title: string;
-  blocklist: [Block] | [];
+  blockList: [Block] | [];
   parent_id: string | null;
 }

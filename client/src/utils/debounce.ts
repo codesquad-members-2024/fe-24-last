@@ -1,18 +1,25 @@
 function debounce<T extends (...args: string[]) => void>(
   callback: T,
   delay: number
-): (...args: Parameters<T>) => void {
+): [(...args: Parameters<T>) => void, () => void] {
   let timer: ReturnType<typeof setTimeout> | undefined;
 
-  return function (...args: Parameters<T>) {
-    if (timer) {
-      clearTimeout(timer);
-    }
+  function cancel() {
+    clearTimeout(timer);
+  }
 
-    timer = setTimeout(() => {
-      callback(...args);
-    }, delay);
-  };
+  return [
+    function (...args: Parameters<T>) {
+      if (timer) {
+        clearTimeout(timer);
+      }
+
+      timer = setTimeout(() => {
+        callback(...args);
+      }, delay);
+    },
+    cancel,
+  ];
 }
 
 export default debounce;

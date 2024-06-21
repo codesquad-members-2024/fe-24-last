@@ -1,5 +1,5 @@
 import express from "express";
-import pagesRouter from "./routes/pagesRoute.js";
+import router from "./routes/router.js";
 import "dotenv/config";
 import cors from "cors";
 import connectDB from "./mongodb.js";
@@ -11,12 +11,7 @@ app.use(cors());
 connectDB();
 
 app.use(express.json());
-// app.use(bodyParser.json());
-app.use("/", pagesRouter);
-
-app.get("/", (req, res) => {
-  res.send("하이!");
-});
+app.use("/api/articles", router);
 
 app.listen(port, () => {
   console.log(`port ${port}`);

@@ -2,9 +2,10 @@ import styled from "styled-components";
 
 export const Wrapper = styled.div`
   padding-bottom: 30vh;
-  padding-left: 100px;
-  padding-right: 100px;
+  margin-left: 100px;
+  margin-right: 100px;
   flex-grow: 1;
+  cursor: text;
 `;
 
 export const TitleBox = styled.h1`
@@ -14,10 +15,14 @@ export const TitleBox = styled.h1`
   margin-top: 100px;
   display: flex;
   align-items: center;
+  margin-left: 20px;
   &:empty:before {
     content: attr(aria-placeholder);
     color: gray;
   }
 `;
 
-export const Content = styled.div``;
+export const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+`;

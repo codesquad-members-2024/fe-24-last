@@ -23,14 +23,14 @@
     {
       id: "1234567890abcdef1234567890abcdef",
       title: "Home",
-      blocklist: [],
+      blockList: [],
       owner_id: "jsfhkewhfn1234",
       parent_id: null,
     },
     {
       id: "abcdef1234567890abcdef1234567890",
       title: "Subpage 1",
-      blocklist: [],
+      blockList: [],
       owner_id: "jsfhkewhfn1234",
       parent_id: "1234567890abcdef1234567890abcdef",
     },

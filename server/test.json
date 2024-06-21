@@ -2,25 +2,29 @@
   {
     "id": "1234567890abcdef1234567890abcdef",
     "title": "Home",
-    "blocklist": [
+    "blockList": [
       {
-        "id": "eluhtwiu3o2874",
-        "type": "text",
-        "content": "안녕하세요",
-        "page_id": "eiluhwiuhegl2143",
-        "children": [
-          {
-            "id": "sleujfhtliue",
-            "type": "text",
-            "content": "오리고기1",
-            "page_id": "eluhtwiu3o2874"
-          },
-          {
-            "id": "sleujfhtliuc",
-            "type": "text",
-            "content": "오리고기2",
-            "page_id": "eluhtwiu3o2874"
-          }
+        "id": "sdjfhlekjwhge123",
+        "element": [
+          [{ "id": "02394035ef0", "type": "text", "content": "안녕" }],
+          [{ "id": "023940358dsfkh", "type": "text", "content": "빙수" }]
+        ]
+      },
+      {
+        "id": "euhuie3p9w8ty3",
+        "element": [[{ "id": "0239403580w", "type": "text", "content": "" }]]
+      },
+      {
+        "id": "p9238uelir298e",
+        "element": [
+          [
+            { "id": "0239403589", "type": "text", "content": "때구" },
+            { "id": "0239403580", "type": "text", "content": "째굼이" }
+          ],
+          [
+            { "id": "0239403599", "type": "text", "content": "마아롱" },
+            { "id": "0239803589", "type": "text", "content": "오리" }
+          ]
         ]
       }
     ],
