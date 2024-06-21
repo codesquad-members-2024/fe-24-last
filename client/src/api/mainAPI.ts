@@ -1,3 +1,5 @@
+import { LOGIN_PATH, REGISTRATION_PATH, TEAMSPACES_PATH, TEAMSPACE_PATH } from '@/constants';
+
 const SERVER = import.meta.env.VITE_SERVER;
 
 const LOGIN_ERROR_MESSAGE: { [key: number]: string } = {
@@ -17,7 +19,7 @@ const UNKNOWN_ERROR_MESSAGE = '알 수 없는 에러가 발생하였습니다.';
 
 export const postLogin = async (nickname: string) => {
   try {
-    const response = await fetch(`${SERVER}/login`, {
+    const response = await fetch(`${SERVER}${LOGIN_PATH}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -39,7 +41,7 @@ export const postLogin = async (nickname: string) => {
 
 export const postRegistration = async (nickname: string) => {
   try {
-    const response = await fetch(`${SERVER}/registration`, {
+    const response = await fetch(`${SERVER}${REGISTRATION_PATH}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -61,7 +63,7 @@ export const postRegistration = async (nickname: string) => {
 
 export const sendTeamspaceListRequest = async () => {
   try {
-    const response = await fetch(`${SERVER}/teamspaces`);
+    const response = await fetch(`${SERVER}${TEAMSPACES_PATH}`);
 
     if (!response.ok) {
       const errorMessage = TEAMSPACES_ERROR_MESSAGE[response.status] || UNKNOWN_ERROR_MESSAGE;
@@ -77,7 +79,7 @@ export const sendTeamspaceListRequest = async () => {
 
 export const postNewTeamspace = async (title: string) => {
   try {
-    const response = await fetch(`${SERVER}/api/teamspace`, {
+    const response = await fetch(`${SERVER}${TEAMSPACE_PATH}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

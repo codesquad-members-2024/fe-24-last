@@ -61,3 +61,9 @@ export interface UserDescription {
   nickname: string;
   isActive: boolean;
 }
+
+export const LOGIN_PATH = '/login';
+export const REGISTRATION_PATH = '/registration';
+export const TEAMSPACES_PATH = '/teamspaces';
+export const TEAMSPACE_PATH = '/api/teamspace';
+export const ARTICLE_PATH = '/article';

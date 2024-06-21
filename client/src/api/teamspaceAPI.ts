@@ -1,10 +1,12 @@
+import { TEAMSPACE_PATH } from '@/constants';
+
 const SERVER = import.meta.env.VITE_SERVER;
 
 const UNKNOWN_ERROR_MESSAGE = '알 수 없는 에러가 발생하였습니다.';
 
 export const sendTeamspaceRequestById = async (teamspaceId: string) => {
   try {
-    const response = await fetch(`${SERVER}/api/teamspace/${teamspaceId}`);
+    const response = await fetch(`${SERVER}${TEAMSPACE_PATH}/${teamspaceId}`);
 
     if (!response.ok) throw new Error(UNKNOWN_ERROR_MESSAGE);
 
@@ -16,7 +18,7 @@ export const sendTeamspaceRequestById = async (teamspaceId: string) => {
 
 export const sendTeamspaceDeleteRequest = async (teamspaceId: string) => {
   try {
-    const response = await fetch(`${SERVER}/api/teamspace/${teamspaceId}`, { method: 'DELETE' });
+    const response = await fetch(`${SERVER}${TEAMSPACE_PATH}/${teamspaceId}`, { method: 'DELETE' });
 
     if (!response.ok) throw new Error(UNKNOWN_ERROR_MESSAGE);
 

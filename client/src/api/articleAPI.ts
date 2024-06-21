@@ -1,4 +1,4 @@
-import { Block } from '../constants';
+import { ARTICLE_PATH, Block, TEAMSPACE_PATH } from '../constants';
 
 interface ArticleRequestProps {
   teamspaceId: string | undefined;
@@ -15,7 +15,7 @@ const UNKNOWN_ERROR_MESSAGE = '알 수 없는 에러가 발생하였습니다.';
 
 export const sendArticleRequestById = async ({ teamspaceId = '', articleId = '' }: ArticleRequestProps) => {
   try {
-    const response = await fetch(`${SERVER}/api/teamspace/${teamspaceId}/article/${articleId}`);
+    const response = await fetch(`${SERVER}${TEAMSPACE_PATH}/${teamspaceId}${ARTICLE_PATH}/${articleId}`);
 
     if (!response.ok) throw new Error(UNKNOWN_ERROR_MESSAGE);
 
@@ -31,7 +31,7 @@ export const updateArticleRequestById = async ({
   blocks = [],
 }: UpdateArticleProps) => {
   try {
-    const response = await fetch(`${SERVER}/api/teamspace/${teamspaceId}/article/${articleId}`, {
+    const response = await fetch(`${SERVER}${TEAMSPACE_PATH}/${teamspaceId}${ARTICLE_PATH}/${articleId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
