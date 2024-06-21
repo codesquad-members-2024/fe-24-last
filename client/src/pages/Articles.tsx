@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import ArticleLayout from "../components/ArticleLayout";
 
-function Pages() {
+function Articles() {
   return (
     <Wrapper>
       <ArticleLayout />
@@ -13,4 +13,4 @@ const Wrapper = styled.div`
   display: flex;
 `;
 
-export default Pages;
+export default Articles;

@@ -1,26 +1,67 @@
 export async function fetchArticles() {
-  const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/pages`);
+  const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/articles`);
   if (!response.ok) {
     throw new Error("Network response was not ok");
   }
   return response.json();
 }
 
-export async function createNewPage() {
-  const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/pages`, {
+export async function createNewArticle() {
+  const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/articles`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
       title: "",
-      blocklist: [{ element: [[{ type: "text", content: "" }]] }],
+      blockList: [
+        {
+          columnList: [
+            [{ type: "text", content: "안녕" }],
+            [{ type: "text", content: "빙수" }],
+          ],
+        },
+        {
+          columnList: [[{ type: "text", content: "" }]],
+        },
+        {
+          columnList: [
+            [
+              { type: "text", content: "때구" },
+              { type: "text", content: "째굼이" },
+            ],
+            [
+              { type: "text", content: "초코" },
+              { type: "text", content: "딸기" },
+            ],
+            [
+              { type: "text", content: "치즈" },
+              { type: "text", content: "빙수" },
+            ],
+          ],
+        },
+      ],
       parent_id: "",
     }),
   });
 
   if (!response.ok) {
-    throw new Error("Failed to create a new page");
+    throw new Error("Failed to create a new article");
+  }
+
+  return response.json();
+}
+
+export async function deleteArticle(articleId: string) {
+  const response = await fetch(
+    `${import.meta.env.VITE_SERVER_URL}/articles/${articleId}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to delete article");
   }
 
   return response.json();
@@ -28,7 +69,7 @@ export async function createNewPage() {
 
 export async function fetchArticleById(id: string | undefined) {
   const response = await fetch(
-    `${import.meta.env.VITE_SERVER_URL}/pages/${id}`
+    `${import.meta.env.VITE_SERVER_URL}/articles/${id}`
   );
   if (!response.ok) {
     throw new Error("Failed to fetch article");
@@ -41,7 +82,7 @@ export async function updateArticleTitle(
   newTitle: string
 ) {
   const response = await fetch(
-    `${import.meta.env.VITE_SERVER_URL}/pages/${id}`,
+    `${import.meta.env.VITE_SERVER_URL}/articles/${id}`,
     {
       method: "PATCH",
       body: JSON.stringify({ title: newTitle }),
@@ -58,13 +99,16 @@ export async function updateArticleTitle(
   return response.json();
 }
 
-export async function updateBlockContent(
-  pageId: string | undefined,
+export async function updateElementContent(
+  articleId: string | undefined,
   blockId: string | undefined,
+  elementId: string | undefined,
   newContent: string
 ) {
   const response = await fetch(
-    `${import.meta.env.VITE_SERVER_URL}/pages/${pageId}/block/${blockId}`,
+    `${
+      import.meta.env.VITE_SERVER_URL
+    }/articles/${articleId}/block/${blockId}/element/${elementId}`,
     {
       method: "PATCH",
       body: JSON.stringify({ content: newContent }),
@@ -82,22 +126,56 @@ export async function updateBlockContent(
       }`
     );
   }
-
   return response.json();
 }
 
-export async function createNewBlock(
-  pageId: string | undefined,
-  blockIndex: number
+export async function updateElementType(
+  articleId: string | undefined,
+  blockId: string | undefined,
+  elementId: string | undefined,
+  newType: string
 ) {
   const response = await fetch(
-    `${import.meta.env.VITE_SERVER_URL}/pages/${pageId}/block`,
+    `${
+      import.meta.env.VITE_SERVER_URL
+    }/articles/${articleId}/block/${blockId}/element/${elementId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ type: newType }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const errorResponse = await response.json();
+    throw new Error(
+      `Failed to update block content: ${
+        errorResponse.error || response.statusText
+      }`
+    );
+  }
+  return response.json();
+}
+
+export async function createNewBlockOrElement(
+  articleId: string | undefined,
+  blockId: string | undefined,
+  columnIndex?: number,
+  elementIndex?: number
+) {
+  const body =
+    columnIndex !== undefined && elementIndex !== undefined
+      ? { type: "text", content: "", columnIndex, elementIndex }
+      : { type: "text", content: "" };
+  const response = await fetch(
+    `${
+      import.meta.env.VITE_SERVER_URL
+    }/articles/${articleId}/block/${blockId}/element`,
     {
       method: "POST",
-      body: JSON.stringify({
-        element: [[{ type: "text", content: "" }]],
-        insertIndex: blockIndex,
-      }),
+      body: JSON.stringify(body),
       headers: {
         "Content-Type": "application/json",
       },
@@ -112,11 +190,14 @@ export async function createNewBlock(
 }
 
 export async function deleteBlock(
-  pageId: string | undefined,
-  blockId: string | undefined
+  articleId: string | undefined,
+  blockId: string | undefined,
+  elementId: string | undefined
 ) {
   const response = await fetch(
-    `${import.meta.env.VITE_SERVER_URL}/pages/${pageId}/block/${blockId}`,
+    `${
+      import.meta.env.VITE_SERVER_URL
+    }/articles/${articleId}/block/${blockId}/element/${elementId}`,
     {
       method: "DELETE",
     }
