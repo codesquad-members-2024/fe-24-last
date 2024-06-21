@@ -144,7 +144,7 @@ router.post("/:id/block/:blockId/element", async (req, res) => {
 
 router.patch("/:id/block/:blockId/element/:elementId", async (req, res) => {
   const { id: articleId, blockId, elementId } = req.params;
-  const { content } = req.body;
+  const { content, type } = req.body;
 
   try {
     const article = await Articles.findById(articleId);
@@ -152,39 +152,38 @@ router.patch("/:id/block/:blockId/element/:elementId", async (req, res) => {
       return res.status(404).json({ message: "Article not found" });
     }
 
-    //리팩토링이 필요해 보인다
-    let blockFound = false;
-    for (let block of article.blockList) {
-      if (block._id.toString() === blockId) {
-        let columnFound = false;
-        for (let column of block.columnList) {
-          for (let element of column) {
-            if (element._id.toString() === elementId) {
-              element.content = content;
-              columnFound = true;
-              break;
-            }
-          }
-          if (columnFound) break;
-        }
+    const block = article.blockList.find(
+      (block) => block._id.toString() === blockId
+    );
+    if (!block) {
+      return res.status(404).json({ message: "Block not found" });
+    }
 
-        if (!columnFound) {
-          return res.status(404).json({ message: "Element not found" });
-        }
+    let elementFound = false;
 
-        blockFound = true;
+    //리팩토링 필요
+    for (let column of block.columnList) {
+      const element = column.find(
+        (element) => element._id.toString() === elementId
+      );
+      if (element) {
+        if (content !== undefined) {
+          element.content = content;
+        }
+        if (type !== undefined) {
+          element.type = type;
+        }
+        elementFound = true;
         break;
       }
     }
 
-    if (!blockFound) {
-      return res.status(404).json({ message: "Block not found" });
+    if (!elementFound) {
+      return res.status(404).json({ message: "Element not found" });
     }
 
     await article.save();
-    res
-      .status(200)
-      .json({ message: "Element content updated successfully", article });
+    res.status(200).json({ message: "Element updated successfully", article });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

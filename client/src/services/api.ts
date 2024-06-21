@@ -99,7 +99,7 @@ export async function updateArticleTitle(
   return response.json();
 }
 
-export async function updateBlockContent(
+export async function updateElementContent(
   articleId: string | undefined,
   blockId: string | undefined,
   elementId: string | undefined,
@@ -112,6 +112,36 @@ export async function updateBlockContent(
     {
       method: "PATCH",
       body: JSON.stringify({ content: newContent }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const errorResponse = await response.json();
+    throw new Error(
+      `Failed to update block content: ${
+        errorResponse.error || response.statusText
+      }`
+    );
+  }
+  return response.json();
+}
+
+export async function updateElementType(
+  articleId: string | undefined,
+  blockId: string | undefined,
+  elementId: string | undefined,
+  newType: string
+) {
+  const response = await fetch(
+    `${
+      import.meta.env.VITE_SERVER_URL
+    }/articles/${articleId}/block/${blockId}/element/${elementId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ type: newType }),
       headers: {
         "Content-Type": "application/json",
       },

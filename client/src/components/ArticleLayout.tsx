@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery } from "react-query";
+import { useQuery, useQueryClient } from "react-query";
 import debounce from "../utils/debounce";
 import { focusOnElement } from "../utils/focus";
 import { Block } from "../model/types";
@@ -16,11 +16,11 @@ import BlockBox from "./BlockBox";
 function ArticleLayout() {
   const { id } = useParams<{ id: string }>();
   const { refetch: refetchArticles } = useArticles();
+  const queryClient = useQueryClient();
   const {
     data: currentArticle,
     error,
     isLoading,
-    refetch: refetchCurrentArticle,
   } = useQuery(["article", id], () => fetchArticleById(id), {
     enabled: !!id,
   });
@@ -57,7 +57,7 @@ function ArticleLayout() {
         try {
           const response = await createNewBlockOrElement(id, lastBlock._id);
           setFocusedElementId(response.newElementId);
-          refetchCurrentArticle();
+          queryClient.invalidateQueries(["article", id]);
         } catch (error) {
           console.error("Failed to create new block:", error);
         }
@@ -93,7 +93,6 @@ function ArticleLayout() {
             <BlockBox
               key={`block-${block._id}`}
               blockData={block}
-              refetchCurrentArticle={refetchCurrentArticle}
               blockIndex={index}
               setFocusedElementId={setFocusedElementId}
               currentArticle={currentArticle}

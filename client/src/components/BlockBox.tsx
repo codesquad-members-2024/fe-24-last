@@ -1,8 +1,10 @@
+import { useState } from "react";
+import { useQueryClient } from "react-query";
 import styled from "styled-components";
 import { Block } from "../model/types";
 import debounce from "../utils/debounce";
 import {
-  updateBlockContent,
+  updateElementContent,
   createNewBlockOrElement,
   deleteBlock,
 } from "../services/api";
@@ -12,7 +14,6 @@ import ElementBox from "./ElementBox";
 
 interface BlockBoxProps {
   blockData: Block;
-  refetchCurrentArticle: () => void;
   blockIndex: number;
   setFocusedElementId: (id: string) => void;
   currentArticle: Article;
@@ -20,18 +21,19 @@ interface BlockBoxProps {
 
 export default function BlockBox({
   blockData,
-  refetchCurrentArticle,
   blockIndex,
   setFocusedElementId,
   currentArticle,
 }: BlockBoxProps) {
-  const { id: pageId } = useParams<{ id: string }>();
+  const { id: articleId } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
   const { columnList, _id: blockId } = blockData;
+  const [popupElementId, setPopupElementId] = useState<string | null>(null);
 
   const [debouncedSaveContent, clearDebouncedSaveContent] = debounce(
     async (blockId, elementId, newContent) => {
       try {
-        await updateBlockContent(pageId, blockId, elementId, newContent);
+        await updateElementContent(articleId, blockId, elementId, newContent);
       } catch (error) {
         console.error("Error:", error);
       }
@@ -53,13 +55,13 @@ export default function BlockBox({
         e.preventDefault();
         try {
           const response = await createNewBlockOrElement(
-            pageId,
+            articleId,
             blockId,
             columnIndex,
             elementIndex
           );
           setFocusedElementId(response.newElementId);
-          refetchCurrentArticle();
+          queryClient.invalidateQueries(["article", articleId]);
         } catch (error) {
           console.error(error);
         }
@@ -92,12 +94,15 @@ export default function BlockBox({
               setFocusedElementId(previousElementId);
             }
 
-            await deleteBlock(pageId, blockId, elementId);
-            refetchCurrentArticle();
+            await deleteBlock(articleId, blockId, elementId);
+            queryClient.invalidateQueries(["article", articleId]);
           } catch (error) {
             console.error("Error deleting block:", error);
           }
         }
+      } else if (e.key === "/") {
+        e.preventDefault();
+        setPopupElementId(elementId);
       }
     };
 
@@ -111,8 +116,12 @@ export default function BlockBox({
               element={element}
               columnIndex={columnIndex}
               elementIndex={elementIndex}
+              blockId={blockId}
               handleContentChange={handleContentChange}
               handleKeyDown={handleKeyDown}
+              showPopup={popupElementId === element._id}
+              setPopupElementId={setPopupElementId}
+              setFocusedElementId={setFocusedElementId}
             />
           ))}
         </Column>
@@ -133,31 +142,4 @@ const Column = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-`;
-
-const Element = styled.div`
-  display: flex;
-  flex-direction: row;
-  padding: 8px;
-  flex-basis: 0;
-  position: relative;
-`;
-
-const IconWrapper = styled.div`
-  visibility: hidden;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  cursor: pointer;
-  height: fit-content;
-
-  ${Element}:hover & {
-    visibility: visible;
-  }
-`;
-
-const ElementContent = styled.div`
-  width: 100%;
-  padding: 3px 2px;
-  height: fit-content;
 `;
