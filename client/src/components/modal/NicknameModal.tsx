@@ -2,10 +2,8 @@ import styled from 'styled-components';
 import { themes, FlexColumn, BoxBorder, ButtonBorder } from '../../styles/themes';
 import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
-import { postLogin } from '../../api/mainAPI';
 import useUserStore from '../../stores/useUserStore';
-import { useMutation } from '@tanstack/react-query';
-import { message } from 'antd';
+import { useLoginMutation } from '@/hooks/mutationHooks';
 
 const {
   Color: { BoxBackground, SubmitColor },
@@ -20,16 +18,13 @@ export default function NicknameModal() {
   };
   const navigate = useNavigate();
 
-  const { mutate: fetchLogin } = useMutation({
-    mutationFn: postLogin,
-    onSuccess: () => {
-      // 세션 구현 이전 로그인 상태를 임시로 클라이언트에서 관리
-      setUserId(getInputText());
-      setIsLoggedIn(true);
-      navigate('/');
-    },
-    onError: ({ message: errorMessage }) => message.warning(errorMessage),
-  });
+  const successFn = () => {
+    setUserId(getInputText());
+    setIsLoggedIn(true);
+    navigate('/');
+  };
+
+  const { fetchLogin } = useLoginMutation({ successFn });
 
   const handleSubmitClick = () => fetchLogin(getInputText() || '');
   const handleRegistrationClick = () => navigate('/registration');

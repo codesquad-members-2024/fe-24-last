@@ -2,8 +2,8 @@ import styled from 'styled-components';
 import { TeamspaceDescription } from '../../constants';
 import { FlexColumn } from '../../styles/themes';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { sendTeamspaceDeleteRequest } from '../../api/teamspaceAPI';
+import { useQueryClient } from '@tanstack/react-query';
+import { useTeamspaceDeleteMutation } from '@/hooks/mutationHooks';
 
 export interface TeamspacePanelProps {
   teamspace: TeamspaceDescription;
@@ -17,10 +17,9 @@ export default function TeamspacePanel({ teamspace }: TeamspacePanelProps) {
   const navigate = useNavigate();
   const defaultArticleId = teamspace.articles[FIRST_PAGE]._id || '';
 
-  const { mutate: deleteTeamspace } = useMutation({
-    mutationFn: sendTeamspaceDeleteRequest,
-    onSuccess: () => client.invalidateQueries({ queryKey: ['teamspaces'] }),
-  });
+  const successFn = () => client.invalidateQueries({ queryKey: ['teamspaces'] });
+
+  const { deleteTeamspace } = useTeamspaceDeleteMutation({ successFn });
 
   const handleDeleteClick = () => deleteTeamspace(_id);
   const handleButtonClick = () => navigate(`/teamspace/${_id}/article/${defaultArticleId}`);

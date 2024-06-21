@@ -3,13 +3,13 @@ import { TeamspaceDescription } from '../../constants';
 import { FlexColumn } from '../../styles/themes';
 import TeamspacePanel from './TeamspacePanel';
 import { useEffect, useState } from 'react';
-import { postNewTeamspace, sendTeamspaceListRequest } from '../../api/mainAPI';
+import { sendTeamspaceListRequest } from '../../api/mainAPI';
 import TeamspaceCreateModal from './TeamspaceCreateModal';
 import useUserStore from '../../stores/useUserStore';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import Loading from '../loading/Loading';
-import { message } from 'antd';
+import { useNewTeamsapceMutation } from '@/hooks/mutationHooks';
 
 export default function TeamspaceModal() {
   const client = useQueryClient();
@@ -23,14 +23,12 @@ export default function TeamspaceModal() {
     refetchOnWindowFocus: false,
   });
 
-  const { mutate: fetchNewTeamspace } = useMutation({
-    mutationFn: postNewTeamspace,
-    onSuccess: () => {
-      client.invalidateQueries({ queryKey: ['teamspaces'] });
-      setIsCreateFormOpen(false);
-    },
-    onError: ({ message: errorMessage }) => message.warning(errorMessage),
-  });
+  const successFn = () => {
+    client.invalidateQueries({ queryKey: ['teamspaces'] });
+    setIsCreateFormOpen(false);
+  };
+
+  const { fetchNewTeamspace } = useNewTeamsapceMutation({ successFn });
 
   useEffect(() => {
     // 세션 구현 이전 로그인 상태를 임시로 클라이언트에서 관리
