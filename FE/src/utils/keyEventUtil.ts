@@ -43,52 +43,29 @@ export const keyEvent = {
     ArrowUp({e, index}: ArrowEventParams){
         if (index > 0){
             e.preventDefault();
-            const prevBlock = document.querySelector<HTMLDivElement>(
-                `[data-position="${index - 1}"]`
-            );
-            if (prevBlock) {
-                setTimeout(
-                    () => moveCursorToStartEnd(prevBlock, false),
-                    0
-                );
-            }
+            const prevBlock = document.querySelector<HTMLDivElement>(`[data-position="${index - 1}"]`);
+            if (prevBlock) moveCursorToStartEnd(prevBlock, false)
         }
     },
     ArrowDown({e, index, blocks}: ArrowEventParams) {
         if(blocks &&  index < blocks.current.length - 1){
             e.preventDefault();
-            const nextBlock = document.querySelector<HTMLDivElement>(
-                `[data-position="${index + 1}"]`
-            )
-            if (nextBlock) {
-                moveCursorToStartEnd(nextBlock, false);
-            }
+            const nextBlock = document.querySelector<HTMLDivElement>(`[data-position="${index + 1}"]`)
+            if (nextBlock) moveCursorToStartEnd(nextBlock, false)
         }
     },
     ArrowRight({ e, index, range, curBlock, blocks }: ArrowEventParams) {
         if (range?.endOffset === curBlock?.textContent?.length && blocks && index < blocks.current.length - 1) {
             e.preventDefault();
-            const nextBlock = document.querySelector<HTMLDivElement>(
-                `[data-position="${index + 1}"]`
-            );
-            if (nextBlock) {
-                setTimeout(() => moveCursorToStartEnd(nextBlock, true), 0);
-            }
+            const nextBlock = document.querySelector<HTMLDivElement>(`[data-position="${index + 1}"]`);
+            if (nextBlock) moveCursorToStartEnd(nextBlock, true)
         }
     },
     ArrowLeft({e, index, range}: ArrowEventParams){
         if (range?.startOffset === 0 && index > 0) {
             e.preventDefault();
-            const prevBlock = document.querySelector<HTMLDivElement>(
-                `[data-position="${index - 1}"]`
-            );
-            if (prevBlock) {
-                setTimeout(
-                    () => moveCursorToStartEnd(prevBlock, false),
-                    0
-                );
-            }
-
+            const prevBlock = document.querySelector<HTMLDivElement>(`[data-position="${index - 1}"]`);
+            if (prevBlock) moveCursorToStartEnd(prevBlock, false)
         }
     }
 }
