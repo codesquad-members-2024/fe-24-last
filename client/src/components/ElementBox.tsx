@@ -3,7 +3,7 @@ import { useQueryClient } from "react-query";
 import { useParams } from "react-router-dom";
 import { HolderOutlined } from "@ant-design/icons";
 import { Element as ElementType } from "../model/types";
-import BlockTypePopup from "./BlockTypePopup";
+import BlockTypePopup from "./ElementTypePopup";
 import { updateElementType } from "../services/api";
 
 interface ElementBoxProps {
