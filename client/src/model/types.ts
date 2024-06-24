@@ -1,4 +1,4 @@
-export interface BlockChildren {
+export interface Element {
   _id: string;
   type: string;
   content: string;
@@ -6,12 +6,12 @@ export interface BlockChildren {
 
 export interface Block {
   _id: string;
-  element: [[BlockChildren]];
+  columnList: [[Element]];
 }
 
 export interface Article {
   _id: string;
   title: string;
-  blocklist: [Block] | [];
+  blockList: [Block] | [];
   parent_id: string | null;
 }

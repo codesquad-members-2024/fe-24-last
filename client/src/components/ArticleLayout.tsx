@@ -1,26 +1,30 @@
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery } from "react-query";
+import { useQuery, useQueryClient } from "react-query";
 import debounce from "../utils/debounce";
-import { focusOnBlock } from "../utils/focus";
+import { focusOnElement } from "../utils/focus";
 import { Block } from "../model/types";
-import { fetchArticleById, updateArticleTitle } from "../services/api";
+import {
+  fetchArticleById,
+  updateArticleTitle,
+  createNewBlockOrElement,
+} from "../services/api";
 import { useArticles } from "../contexts/ArticlesProvider";
 import * as S from "../styles/ArticleLayout";
 import BlockBox from "./BlockBox";
-import { useEffect, useState } from "react";
 
 function ArticleLayout() {
   const { id } = useParams<{ id: string }>();
   const { refetch: refetchArticles } = useArticles();
+  const queryClient = useQueryClient();
   const {
     data: currentArticle,
     error,
     isLoading,
-    refetch: refetchCurrentArticle,
   } = useQuery(["article", id], () => fetchArticleById(id), {
     enabled: !!id,
   });
-  const [newBlockIndex, setNewBlockIndex] = useState<string | null>(null);
+  const [focusedElementId, setFocusedElementId] = useState<string | null>(null);
 
   const [debouncedSaveTitle] = debounce(async (newTitle: string) => {
     try {
@@ -36,20 +40,45 @@ function ArticleLayout() {
     debouncedSaveTitle(newTitle);
   };
 
-  useEffect(() => {
-    if (newBlockIndex && currentArticle.blocklist[newBlockIndex]._id) {
-      const newBlockId = currentArticle.blocklist[newBlockIndex]._id;
-      focusOnBlock(newBlockId);
+  const handleWrapperClick = async (e: React.MouseEvent<HTMLDivElement>) => {
+    const wrapper = e.currentTarget;
+    const paddingBottom = parseInt(
+      window.getComputedStyle(wrapper).paddingBottom,
+      10
+    );
+    const clickY = e.clientY;
+    const wrapperRect = wrapper.getBoundingClientRect();
+    const isInBottomPadding = clickY > wrapperRect.bottom - paddingBottom;
+
+    if (isInBottomPadding) {
+      if (currentArticle && currentArticle.blockList.length > 0) {
+        const lastBlock =
+          currentArticle.blockList[currentArticle.blockList.length - 1];
+        try {
+          const response = await createNewBlockOrElement(id, lastBlock._id);
+          setFocusedElementId(response.newElementId);
+          queryClient.invalidateQueries(["article", id]);
+        } catch (error) {
+          console.error("Failed to create new block:", error);
+        }
+      }
     }
-  }, [newBlockIndex, currentArticle?.blocklist]);
+  };
+
+  useEffect(() => {
+    if (focusedElementId) {
+      focusOnElement(focusedElementId);
+      setFocusedElementId(null);
+    }
+  }, [currentArticle, focusedElementId]);
 
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error loading page</div>;
+  if (error) return <div>Error loading Article</div>;
 
-  const { title, blocklist } = currentArticle;
+  const { title, blockList } = currentArticle;
 
   return (
-    <S.Wrapper>
+    <S.Wrapper onClick={handleWrapperClick}>
       <S.TitleBox
         contentEditable
         aria-placeholder="제목없음"
@@ -59,14 +88,14 @@ function ArticleLayout() {
         {title}
       </S.TitleBox>
       <S.Content>
-        {blocklist.map((block: Block, index: number) => {
+        {blockList.map((block: Block, index: number) => {
           return (
             <BlockBox
               key={`block-${block._id}`}
               blockData={block}
-              refetchCurrentArticle={refetchCurrentArticle}
               blockIndex={index}
-              setNewBlockIndex={setNewBlockIndex}
+              setFocusedElementId={setFocusedElementId}
+              currentArticle={currentArticle}
             />
           );
         })}

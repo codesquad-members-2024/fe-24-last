@@ -1,36 +1,39 @@
-import { useRef } from "react";
+import { useState } from "react";
+import { useQueryClient } from "react-query";
 import styled from "styled-components";
 import { Block } from "../model/types";
 import debounce from "../utils/debounce";
 import {
-  updateBlockContent,
-  createNewBlock,
+  updateElementContent,
+  createNewBlockOrElement,
   deleteBlock,
 } from "../services/api";
 import { useParams } from "react-router-dom";
-import { HolderOutlined } from "@ant-design/icons";
+import { Article } from "../model/types";
+import ElementBox from "./ElementBox";
 
 interface BlockBoxProps {
   blockData: Block;
-  refetchCurrentArticle: () => void;
   blockIndex: number;
-  setNewBlockIndex: (id: string) => void;
+  setFocusedElementId: (id: string) => void;
+  currentArticle: Article;
 }
 
 export default function BlockBox({
   blockData,
-  refetchCurrentArticle,
   blockIndex,
-  setNewBlockIndex,
+  setFocusedElementId,
+  currentArticle,
 }: BlockBoxProps) {
-  const { id: pageId } = useParams<{ id: string }>();
-  const { element, _id: blockId } = blockData;
-  const blockRef = useRef<HTMLDivElement>(null);
+  const { id: articleId } = useParams<{ id: string }>();
+  const queryClient = useQueryClient();
+  const { columnList, _id: blockId } = blockData;
+  const [popupElementId, setPopupElementId] = useState<string | null>(null);
 
   const [debouncedSaveContent, clearDebouncedSaveContent] = debounce(
-    async (newContent: string) => {
+    async (blockId, elementId, newContent) => {
       try {
-        await updateBlockContent(pageId, blockId, newContent);
+        await updateElementContent(articleId, blockId, elementId, newContent);
       } catch (error) {
         console.error("Error:", error);
       }
@@ -38,60 +41,90 @@ export default function BlockBox({
     1000
   );
 
-  const handleContentChange = (e: React.FormEvent<HTMLDivElement>) => {
-    const newContent = e.currentTarget.innerText;
-    debouncedSaveContent(newContent);
-  };
+  const handleContentChange =
+    (elementId: string) => (e: React.FormEvent<HTMLDivElement>) => {
+      const newContent = e.currentTarget.innerText;
+      debouncedSaveContent(blockId, elementId, newContent);
+    };
 
-  const handleKeyDown = async (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.nativeEvent.isComposing) return;
-    if (e.key === "Enter") {
-      e.preventDefault();
-      try {
-        const newBlock = await createNewBlock(pageId, blockIndex);
-        setNewBlockIndex(newBlock.nextIdx);
-        refetchCurrentArticle();
-      } catch (error) {
-        console.error(error);
-      }
-    } else if (e.key === "Backspace") {
-      if (blockRef.current && blockRef.current.innerText === "") {
+  const handleKeyDown =
+    (elementId: string, columnIndex: number, elementIndex: number) =>
+    async (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (e.nativeEvent.isComposing) return;
+      if (e.key === "Enter") {
         e.preventDefault();
         try {
-          clearDebouncedSaveContent();
-          const previousBlockIndex = blockIndex > 0 ? blockIndex - 1 : 0;
-          setNewBlockIndex(previousBlockIndex.toString());
-          await deleteBlock(pageId, blockId);
-          refetchCurrentArticle();
+          const response = await createNewBlockOrElement(
+            articleId,
+            blockId,
+            columnIndex,
+            elementIndex
+          );
+          setFocusedElementId(response.newElementId);
+          queryClient.invalidateQueries(["article", articleId]);
         } catch (error) {
-          console.error("Error deleting block:", error);
+          console.error(error);
         }
+      } else if (e.key === "Backspace") {
+        if (e.currentTarget.innerText === "") {
+          e.preventDefault();
+          try {
+            clearDebouncedSaveContent();
+
+            let previousElementId = null;
+
+            if (columnList[columnIndex].length > 1) {
+              previousElementId =
+                columnList[columnIndex][elementIndex - 1]?._id || null;
+            } else if (columnList.length > 1) {
+              previousElementId =
+                columnList[columnIndex - 1][
+                  columnList[columnIndex - 1].length - 1
+                ]?._id || null;
+            } else if (blockIndex > 0) {
+              const previousBlock = currentArticle.blockList[blockIndex - 1];
+              previousElementId =
+                previousBlock.columnList[previousBlock.columnList.length - 1][
+                  previousBlock.columnList[previousBlock.columnList.length - 1]
+                    .length - 1
+                ]._id;
+            }
+
+            if (previousElementId) {
+              setFocusedElementId(previousElementId);
+            }
+
+            await deleteBlock(articleId, blockId, elementId);
+            queryClient.invalidateQueries(["article", articleId]);
+          } catch (error) {
+            console.error("Error deleting block:", error);
+          }
+        }
+      } else if (e.key === "/") {
+        e.preventDefault();
+        setPopupElementId(elementId);
       }
-    }
-  };
+    };
 
   return (
     <Wrapper>
-      {element.map((row, rowIndex) => (
-        <Row key={`${blockId}-${rowIndex}`}>
-          {row.map((child) => (
-            <Cell key={child._id}>
-              <IconWrapper>
-                <HolderOutlined />
-              </IconWrapper>
-              <BlockArea
-                ref={blockRef}
-                contentEditable
-                onInput={handleContentChange}
-                onKeyDown={handleKeyDown}
-                suppressContentEditableWarning
-                id={child._id}
-              >
-                {child.content}
-              </BlockArea>
-            </Cell>
+      {columnList.map((column, columnIndex) => (
+        <Column key={`${blockId}-${columnIndex}`}>
+          {column.map((element, elementIndex) => (
+            <ElementBox
+              key={element._id}
+              element={element}
+              columnIndex={columnIndex}
+              elementIndex={elementIndex}
+              blockId={blockId}
+              handleContentChange={handleContentChange}
+              handleKeyDown={handleKeyDown}
+              showPopup={popupElementId === element._id}
+              setPopupElementId={setPopupElementId}
+              setFocusedElementId={setFocusedElementId}
+            />
           ))}
-        </Row>
+        </Column>
       ))}
     </Wrapper>
   );
@@ -99,40 +132,14 @@ export default function BlockBox({
 
 const Wrapper = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   width: 100%;
   margin-bottom: 8px;
+  border: 1px solid red;
 `;
 
-const Row = styled.div`
+const Column = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   width: 100%;
-`;
-
-const Cell = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 8px;
-  flex-grow: 1;
-  flex-basis: 0;
-  position: relative;
-`;
-
-const IconWrapper = styled.div`
-  visibility: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-
-  ${Cell}:hover & {
-    visibility: visible;
-  }
-`;
-
-const BlockArea = styled.div`
-  width: 100%;
-  padding: 3px 2px;
 `;
