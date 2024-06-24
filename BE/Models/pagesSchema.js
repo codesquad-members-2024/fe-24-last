@@ -12,7 +12,7 @@ const BlockSchema = new Schema({
     children: [ChildrenSchema] || [],
 });
 
-const PageSchema = new Schema({
+export const PageSchema = new Schema({
     title: String,
     blocklist: [BlockSchema] || [],
     parent_id: String || null,
