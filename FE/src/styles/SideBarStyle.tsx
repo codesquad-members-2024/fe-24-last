@@ -29,14 +29,6 @@ const TitleBox = styled.h3`
     font-weight: bold;
 `;
 
-const PageCardWrap = styled.section`
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-`;
-
 const IconWrap = styled.div`
     display: flex;
     gap: 2px;
@@ -48,4 +40,10 @@ const RightIcon = styled.div`
     padding: 5px;
 `;
 
-export { SideBarContainer, SideBarHeader, TitleBox, PageCardWrap, IconWrap, RightIcon };
+const ContentWrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+`
+
+export { SideBarContainer, SideBarHeader, TitleBox, IconWrap, RightIcon, ContentWrapper };

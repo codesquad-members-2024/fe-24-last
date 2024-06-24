@@ -1,8 +1,8 @@
 const serverURL = process.env.REACT_APP_API;
 
-const getPagesData = async () => {
+const getPagesData = async (tableName: string) => {
     try {
-        const response = await fetch(serverURL + "pagesList");
+        const response = await fetch(serverURL + tableName);
         if (!response.ok) {
             throw new Error(
                 `요청이 잘못되었습니다. 상태 코드: ${response.status}`

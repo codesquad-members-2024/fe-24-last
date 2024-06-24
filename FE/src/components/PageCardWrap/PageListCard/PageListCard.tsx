@@ -1,13 +1,13 @@
 import React, { useCallback, useLayoutEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
-import { PageType } from "../../pages/SideBar";
-import * as S from "../../styles/PageListCardStyle";
+import { PageType } from "../PageCardWrap";
+import * as S from "../../../styles/PageListCardStyle";
 import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
-import NewPageBtn from "../NewPageBtn/NewPageBtn";
-import useDeletePage from "../../hooks/useDeletePage";
-import ModalComponent from "../Modal/Modal";
-import { useTitleContext } from "../../hooks/useTitleContext";
+import NewPageBtn from "../../NewPageBtn/NewPageBtn";
+import useDeletePage from "../../../hooks/useDeletePage";
+import ModalComponent from "../../Modal/Modal";
+import { useTitleContext } from "../../../hooks/useTitleContext";
 
 interface PageListCardProps {
     page: PageType;

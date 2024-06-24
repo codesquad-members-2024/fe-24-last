@@ -3,7 +3,7 @@ import PageSchema from "../Models/pagesSchema.js";
 
 const pagesListRouter = express.Router();
 
-pagesListRouter.get("/api/pagesList", async (req, res) => {
+pagesListRouter.get("/api/pageList", async (req, res) => {
     try {
         const pageData = await PageSchema.find();
         res.json(pageData);

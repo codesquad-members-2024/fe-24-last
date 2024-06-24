@@ -3,7 +3,7 @@ import TemplatesSchema from "../Models/templatesSchema.js"
 
 const TemplatesRouter = express.Router();
 
-TemplatesRouter.get("/api/templates", async (req, res) => {
+TemplatesRouter.get("/api/templateList", async (req, res) => {
     try {
         const pageData = await TemplatesSchema.find();
         res.json(pageData);

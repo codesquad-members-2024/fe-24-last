@@ -2,8 +2,8 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import '@testing-library/jest-dom/extend-expect';
 import SideBar from "../pages/SideBar";
-import usePageList from "../hooks/usePageList";
-import { PageType } from "../pages/SideBar";
+import usePageList from "../hooks/useFetchData";
+import { PageType } from "../components/PageCardWrap/PageCardWrap";
 import { QueryClient, QueryClientProvider } from "react-query";
 
 interface UseQueryResult<TData = unknown, TError = unknown> {

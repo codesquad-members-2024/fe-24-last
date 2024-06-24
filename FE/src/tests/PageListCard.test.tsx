@@ -1,9 +1,10 @@
+import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { useNavigate } from "react-router-dom";
 import useDeletePage from "../hooks/useDeletePage";
-import PageListCard from "../components/PageListCard/PageListCard";
-import { PageType } from "../pages/SideBar";
+import PageListCard from "../components/PageCardWrap/PageListCard/PageListCard";
+import { PageType } from "../components/PageCardWrap/PageCardWrap";
 
 jest.mock("react-router-dom", () => ({
     ...jest.requireActual("react-router-dom"),
