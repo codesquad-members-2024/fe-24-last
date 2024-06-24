@@ -1,20 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "react-query";
 import { BlockType, PageType } from "./SideBar";
 import { patchBlock } from "../services/pageService";
 import { keyEvent } from "../utils/keyEventUtil";
 import debounce from "../utils/debounce";
-import moveCursorToStartEnd from "../utils/MoveCursorToStartEnd";
-import BlockEditable from "../components/BlockEditable/BlockEditable";
 import TitleEditable from "../components/TitleEditable/TitleEditable";
 import styled from "styled-components";
-import {
-    DragDropContext,
-    Draggable,
-    Droppable,
-    DropResult,
-} from "@hello-pangea/dnd";
+import { DragDropContext, DropResult} from "@hello-pangea/dnd";
+import BlockWrap from "../components/BlockWrap/BlockWrap";
+
+type KeyMap = "Enter" | "Backspace" | "ArrowUp" | "ArrowDown" | "ArrowRight" | "ArrowLeft";
 
 const Page = () => {
     const { id } = useParams();
@@ -25,7 +21,8 @@ const Page = () => {
     const [currentBlockIdx, setCurrentBlockIdx] = useState<number | null>(null);
     const [, setBlockState] = useState<BlockType[]>([]);
     const blocks = useRef<BlockType[]>([]);
-
+    const ws = useRef<WebSocket | null>(null);
+    
     const { mutate } = useMutation({
         mutationFn: async ({id, blocks}: {id: string | undefined, blocks: BlockType[]}) => {
             await patchBlock(`page/block/${id}`, { block: blocks });
@@ -35,62 +32,52 @@ const Page = () => {
         },
     });
 
-    const handleBlockChange = (index: number, key: keyof BlockType, value: string) => {
-        const updatedBlocks = blocks.current.map((block, i) => {
-        if (i === index) {
-            const updatedBlock = { ...block, [key]: value || "" };
-            if (key === "type") {
-                updatedBlock.content = "";
-            }
-            return updatedBlock;
-        }
-        return block;
-    });
-    blocks.current = [...updatedBlocks];
-    debouncedMutation({ id, blocks: updatedBlocks });
-    };
-    
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, index: number) => {
-        if (e.nativeEvent.isComposing) return;
-        const updateBlock = [...blocks.current];
-        const selection = window.getSelection();
-        const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
-        const curBlock = document.querySelector<HTMLDivElement>(`[data-position="${index}"]`);
-        prevBlock.current = [...blocks.current];
-        switch (e.key) {
-            case "Enter":
-                keyEvent.enterEvent({e, blocks, updateBlock, setCurrentBlockIdx, index})
-                break;
-            case "Backspace":
-                if (index > 0 && !blocks.current[index].content) keyEvent.backspaceEvent({e, index, updateBlock, blocks, setCurrentBlockIdx})
-                break;
-            case "ArrowUp":
-                if (index > 0) keyEvent.arrowUpEvent({e, index})
-                break;
-            case "ArrowDown":
-                if (index < blocks.current.length - 1) keyEvent.arrowDownEvent({e, index})
-                break;
-            case "ArrowRight":
-                if (range?.endOffset === curBlock?.textContent?.length && index < blocks.current.length - 1) keyEvent.arrowRightEvent({e, index})
-                break;
-            case "ArrowLeft":
-                if (range?.startOffset === 0 && index > 0) keyEvent.arrowLeftEvent({e, index})
-                break;
-            default:
-                break;
-        }
-        debouncedMutation({ id, blocks: blocks.current });
-    };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     const debouncedMutation = useCallback(
         debounce(
             async ({ id, blocks }: { id: string | undefined; blocks: BlockType[] }) => {
-                mutate({ id, blocks });
-            }
-        ),
+                mutate({ id, blocks })
+                if (ws.current) {
+                    ws.current.send(JSON.stringify({ id, blocks }));
+                }
+            }),
+                
         [mutate]
     );
+
+    const handleTagChange = (index: number, newType: string) => {
+        const updatedBlocks = blocks.current.map((block, i) =>
+            i === index ? { ...block, type: newType || "", content: "" } : block
+        );
+        blocks.current = [...updatedBlocks];
+        setCurrentBlockIdx(index)
+        debouncedMutation({ id, blocks: updatedBlocks });
+    };
+
+    const handleContentChange = (index: number, newContent: string) => {
+        const updatedBlocks = blocks.current.map((block, i) =>
+            i === index ? { ...block, content: newContent } : block
+        );
+        blocks.current = [...updatedBlocks];
+        debouncedMutation({ id, blocks: updatedBlocks });
+    };
+    
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>, index: number) => {
+        if (!["Enter", "Backspace", "ArrowUp",
+            "ArrowDown", "ArrowRight", "ArrowLeft"].includes(e.key) ||
+            e.nativeEvent.isComposing) return;
+
+        const selection = window.getSelection();
+        const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+        const updateBlock = [...blocks.current];
+        const curBlock = document.querySelector<HTMLDivElement>(`[data-position="${index}"]`);
+        const parameter = (e.key === "Enter" || e.key === "Backspace") 
+        ? { e, blocks, updateBlock, setCurrentBlockIdx, index } 
+        : { e, index, blocks, range, curBlock };
+        prevBlock.current = [...blocks.current];
+
+        keyEvent[e.key as KeyMap](parameter as any);
+        debouncedMutation({ id, blocks: blocks.current });
+    };
 
     const handleOnDragEnd = (result: DropResult) => {
         if (!result.destination) return;
@@ -103,84 +90,45 @@ const Page = () => {
         debouncedMutation({ id, blocks: blocks.current });
     };
 
-    const focusChange = (currentBlockIdx: number, isNext: boolean) => {
-        const nextBlockPosition = currentBlockIdx;
-        setTimeout(() => {
-            const block = document.querySelector<HTMLDivElement>(
-                `[data-position="${nextBlockPosition}"]`
-            );
-            if (block) {
-                if (!isNext) {
-                    moveCursorToStartEnd(block, false);
-                }
-                block.focus();
-            }
-        }, 0);
-    };
-
-    useEffect(() => {
-        if (currentBlockIdx !== null && prevBlock.current.length + 1 === blocks.current.length
-        ) focusChange(currentBlockIdx, true);
-
-        if (currentBlockIdx !== null && prevBlock.current.length - 1 === blocks.current.length
-        ) focusChange(currentBlockIdx, false);
-
-        setCurrentBlockIdx(null);
-    }, [currentBlockIdx]);
-
     useEffect(() => {
         blocks.current = [...state.blocklist];
         setBlockState([...state.blocklist]);
-        setCurrentBlockIdx(null)
     }, [id, state]);
+
+    useEffect(() => {
+        ws.current = new WebSocket("ws://localhost:4001");
+        
+        ws.current.onmessage = (event) => {
+            const { id: receivedId, blocks: receivedBlocks } = JSON.parse(event.data);
+            if (receivedId === id) {
+                blocks.current = receivedBlocks;
+                setBlockState(receivedBlocks);
+                queryClient.invalidateQueries({ queryKey: ["pageList"] });
+            }
+        };
+
+        return () => {
+            if(ws.current) {
+                ws.current.close();
+            }
+        };
+    }, [id, queryClient, setBlockState])
+
 
     return (
         <PageContainer>
             <TitleEditable id={id} title={state.title} />
             <DragDropContext onDragEnd={handleOnDragEnd}>
-                <Droppable droppableId="droppable">
-                    {(provided) => (
-                        <div
-                            {...provided.droppableProps}
-                            ref={provided.innerRef}
-                        >
-                            {blocks.current &&
-                                blocks.current.length > 0 &&
-                                blocks.current.map((currentBlock, idx) => (
-                                    <Draggable
-                                        key={idx}
-                                        draggableId={String(idx)}
-                                        index={idx}
-                                    >
-                                        {(provided) => (
-                                            <div
-                                                ref={provided.innerRef}
-                                                {...provided.draggableProps}
-                                                style={{
-                                                    userSelect: 'none',
-                                                    backgroundColor: '#fff',
-                                                    color: '#333',
-                                                    ...provided.draggableProps.style,
-                                                }}
-                                            >
-                                                <BlockEditable
-                                                    key={idx}
-                                                    index={idx}
-                                                    id={id}
-                                                    type={currentBlock.type}
-                                                    content={currentBlock.content}
-                                                    handleBlockChange={handleBlockChange}
-                                                    handleKeyDown={handleKeyDown}
-                                                    dragHandleProps={provided.dragHandleProps}
-                                                />
-                                            </div>
-                                        )}
-                                    </Draggable>
-                                ))}
-                            {provided.placeholder}
-                        </div>
-                    )}
-                </Droppable>
+                <BlockWrap
+                    id={id}
+                    blocks={blocks.current}
+                    handleTagChange={handleTagChange}
+                    handleContentChange={handleContentChange}
+                    handleKeyDown={handleKeyDown}
+                    currentBlockIdx={currentBlockIdx}
+                    setCurrentBlockIdx={setCurrentBlockIdx}
+                    prevBlock={prevBlock.current}
+                />
             </DragDropContext>
         </PageContainer>
     );
