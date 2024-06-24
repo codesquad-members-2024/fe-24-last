@@ -1,4 +1,4 @@
-import { useState } from "./logic/ReactLike.js";
+import { useState } from "./logic/hooks.js";
 import { h } from "./logic/helper.js";
 /** @jsx h */
 
@@ -20,10 +20,8 @@ function Todo() {
 			prev.filter((todo) => todo.id !== id)
 		);
 
-	console.log("투두스", todos);
-
 	return (
-		<div id="app">
+		<div>
 			<ul>
 				{todos.map(({ id, completed, content }) => (
 					<li
@@ -54,7 +52,7 @@ function Todo() {
 }
 
 function Div() {
-	return <div>아무것도 안하는 디브</div>;
+	return <div>컴포넌트 확인하기 위한 디브</div>;
 }
 
 export { Div, Todo };
