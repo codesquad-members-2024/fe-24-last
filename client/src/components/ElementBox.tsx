@@ -67,6 +67,7 @@ function ElementBox({
       <ElementContent
         as={ElementContentTag}
         contentEditable
+        type={type}
         onInput={handleContentChange(elementId)}
         onKeyDown={handleKeyDown(elementId, columnIndex, elementIndex)}
         suppressContentEditableWarning
@@ -101,10 +102,19 @@ const IconWrapper = styled.div`
   }
 `;
 
-const ElementContent = styled.div`
+const ElementContent = styled.div<{ type: string }>`
   width: 100%;
   padding: 3px 2px;
   height: fit-content;
+
+  ${({ type }) =>
+    type === "bulletPoint" &&
+    `
+    &::before {
+      content: '• ';
+      font-weight: bold;
+    }
+  `}
 `;
 
 export default ElementBox;
