@@ -1,11 +1,17 @@
 import { Meta, StoryFn } from '@storybook/react';
-import TeamspaceCreateModal from './TeamspaceCreateModal';
+import TeamspaceCreateModal, { TeamspaceCreateModalProps } from './TeamspaceCreateModal';
+
+const mockHandlers = {
+  handleCancelClick: () => {},
+  handleSubmitClick: () => {},
+};
 
 export default {
   title: 'Modal/TeamspaceCreateModal',
   component: TeamspaceCreateModal,
 } as Meta;
 
-const Template: StoryFn = (...args) => <TeamspaceCreateModal />;
+const Template: StoryFn<TeamspaceCreateModalProps> = (args) => <TeamspaceCreateModal {...args} />;
 
 export const DefaultCreateModal = Template.bind({});
+DefaultCreateModal.args = mockHandlers;

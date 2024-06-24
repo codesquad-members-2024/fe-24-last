@@ -10,7 +10,7 @@ const teamspaceRouter = (io: Server): Router => {
 
   /**
    * @swagger
-   * /teamspaces/{teamspaceId}:
+   * /teamspace/{teamspaceId}:
    *   get:
    *     tags:
    *       - teamspace
@@ -51,7 +51,7 @@ const teamspaceRouter = (io: Server): Router => {
 
   /**
    * @swagger
-   * /teamspaces:
+   * /teamspace:
    *   post:
    *     tags:
    *       - teamspace
@@ -106,7 +106,7 @@ const teamspaceRouter = (io: Server): Router => {
 
   /**
    * @swagger
-   * /teamspaces/{teamspaceId}:
+   * /teamspace/{teamspaceId}:
    *   patch:
    *     tags:
    *       - teamspace
@@ -174,7 +174,7 @@ const teamspaceRouter = (io: Server): Router => {
 
   /**
    * @swagger
-   * /teamspaces/{teamspaceId}:
+   * /teamspace/{teamspaceId}:
    *   delete:
    *     tags:
    *       - teamspace
@@ -198,9 +198,8 @@ const teamspaceRouter = (io: Server): Router => {
   router.delete('/:teamspaceId', async (req: Request, res: Response) => {
     try {
       const { teamspaceId } = req.params;
-      const teamspaceIdNumber = Number(teamspaceId);
 
-      const deletedTeamspace = await Teamspace.findOneAndDelete({ _id: teamspaceIdNumber });
+      const deletedTeamspace = await Teamspace.findOneAndDelete({ _id: teamspaceId });
 
       if (!deletedTeamspace) return res.status(404).json({ message: 'Teamspace not found' });
 

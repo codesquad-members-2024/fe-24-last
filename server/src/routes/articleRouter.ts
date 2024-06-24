@@ -7,7 +7,7 @@ const articleRouter: Router = express.Router({ mergeParams: true });
 
 /**
  * @swagger
- * /teamspaces/{teamspaceId}/article/{articleId}:
+ * /teamspace/{teamspaceId}/article/{articleId}:
  *   get:
  *     tags:
  *       - article
@@ -57,7 +57,7 @@ articleRouter.get('/:articleId', async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /teamspaces/{teamspaceId}/article:
+ * /teamspace/{teamspaceId}/article:
  *   post:
  *     tags:
  *       - article
@@ -124,7 +124,7 @@ articleRouter.post('/', async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /teamspaces/{teamspaceId}/article/{articleId}:
+ * /teamspace/{teamspaceId}/article/{articleId}:
  *   patch:
  *     tags:
  *       - article
@@ -194,7 +194,7 @@ articleRouter.patch('/:articleId', async (req: Request, res: Response) => {
 
 /**
  * @swagger
- * /teamspaces/{teamspaceId}/article/{articleId}:
+ * /teamspace/{teamspaceId}/article/{articleId}:
  *   delete:
  *     tags:
  *       - article

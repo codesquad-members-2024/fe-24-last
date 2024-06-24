@@ -1,8 +1,10 @@
 import { Block, BlockControllerProps, ParagraphBlock } from '../constants';
-import { HandleInputProps } from '../components/EditableBlock';
-import { saveCursorPosition } from '../helpers/cursorHelpers';
+import { HandleInputProps } from '../components/article/EditableBlock';
+import { generateRange } from '../helpers/cursorHelpers';
+import { useCursorStore } from '../stores/useCursorStore';
+import { useEffect, useRef } from 'react';
 
-const insertLineBreak = (blocks: Block[], blockIndex: number, offset: number): Block[] => {
+const insertLineBreak = (blocks: Block[], blockIndex: number, offset: number = 0): Block[] => {
   const block = blocks[blockIndex];
   if (block.type === 'paragraph') {
     const previousArr = blocks.slice(0, blockIndex);
@@ -27,11 +29,8 @@ const addNewBlock = (blocks: Block[], blockIndex: number) => {
   return array;
 };
 
-const isBlankBlock = (block: Block) => {
-  if (!(block.type === 'paragraph')) return false;
-
-  const { content } = block;
-  return content === '';
+const isEmptyContent = (text: string | null) => {
+  return text === '';
 };
 
 const removeBlock = (blocks: Block[], blockIndex: number) => {
@@ -42,12 +41,11 @@ const removeBlock = (blocks: Block[], blockIndex: number) => {
   return removedArray;
 };
 
-export default function useBlockController({
-  blocks,
-  setBlocks,
-  handleFetch,
-  handleContentChange,
-}: BlockControllerProps) {
+export default function useBlockController({ clientBlockRef, blocks, setBlocks, handleFetch }: BlockControllerProps) {
+  const { setBlockOffset, setTextOffset } = useCursorStore();
+  const { blockOffset, textOffset } = useCursorStore();
+  const blockControllerRef = useRef<HTMLDivElement | null>(null);
+
   const handleInput = ({
     e: {
       key,
@@ -56,40 +54,34 @@ export default function useBlockController({
     },
     index: blockIndex,
     itemIndex,
-    cursorPositionRef,
-    updateCursorPosition,
   }: HandleInputProps) => {
     let newBlocks = [...blocks];
     const block = newBlocks[blockIndex];
+    const newOffset = generateRange()?.startOffset || 0;
 
-    const saveCursorPositionResult = saveCursorPosition(blockIndex);
-    if (!saveCursorPositionResult) return;
-    const { range, cursorPosition } = saveCursorPositionResult;
+    if (key === 'Backspace' && isEmptyContent(textContent)) {
+      const newBlockIndex = blockIndex < 1 ? 0 : blockIndex - 1;
 
-    if (!updateCursorPosition) return;
-    updateCursorPosition(cursorPosition);
-
-    if (key === 'Backspace' && isBlankBlock(block)) {
       newBlocks = removeBlock(blocks, blockIndex);
       setBlocks(newBlocks);
-      handleFetch(newBlocks);
-      return;
-    }
-
-    if (key === 'Enter' && shiftKey) {
-      updateCursorPosition({ ...cursorPosition, offset: range?.startOffset ? range?.startOffset + 1 : 0 });
-      newBlocks = insertLineBreak(blocks, blockIndex, cursorPosition.offset);
-      setBlocks(newBlocks);
-      handleFetch(newBlocks);
-
+      setBlockOffset(newBlockIndex);
+      setTextOffset(Infinity);
+      clientBlockRef.current = newBlocks;
+      handleFetch(newBlocks, true);
       return;
     }
 
     if (key === 'Enter') {
-      updateCursorPosition({ ...cursorPosition, blockOffset: blockIndex + 1 });
-      newBlocks = addNewBlock(blocks, blockIndex);
-      setBlocks(newBlocks);
-      handleFetch(newBlocks);
+      const newTextOffset = shiftKey ? newOffset + 1 : 0;
+      const newBlockOffset = shiftKey ? blockIndex : blockIndex + 1;
+
+      newBlocks = shiftKey
+        ? insertLineBreak(clientBlockRef.current, blockIndex, newOffset)
+        : addNewBlock(clientBlockRef.current, blockIndex);
+      clientBlockRef.current = newBlocks;
+      setBlockOffset(newBlockOffset);
+      setTextOffset(newTextOffset);
+      handleFetch(newBlocks, true);
       return;
     }
 
@@ -104,8 +96,34 @@ export default function useBlockController({
       newBlocks[blockIndex] = { ...block, items: updatedItems } as typeof block;
     }
 
-    handleContentChange(newBlocks[blockIndex], blockIndex);
+    clientBlockRef.current = newBlocks;
+    setBlockOffset(blockIndex);
+    setTextOffset(newOffset);
+    handleFetch(newBlocks);
   };
 
-  return { handleInput };
+  useEffect(() => {
+    const blockNodes = blockControllerRef.current?.querySelectorAll('[contenteditable="true"]');
+
+    if (!blockNodes || blockNodes.length === 0) return;
+
+    const selection = window.getSelection();
+    if (!selection) return;
+
+    const newNode = [...blockNodes][blockOffset];
+    if (!newNode) return;
+
+    const nodeLength = newNode.textContent?.length || 0;
+    const newOffset = Math.min(textOffset, nodeLength);
+
+    if (newOffset < 0 || newOffset > nodeLength) return;
+
+    if (newNode.childNodes.length > 0) {
+      selection.setPosition(newNode.childNodes[0], newOffset);
+    } else {
+      selection.setPosition(newNode, newOffset);
+    }
+  }, [blocks]);
+
+  return { blockControllerRef, handleInput };
 }

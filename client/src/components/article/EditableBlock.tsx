@@ -7,18 +7,16 @@ import {
   OrderedItemBlock,
   ParagraphBlock,
   OrderedListBlock,
-} from '../constants';
-import { ColumnGap, Flex } from '../styles/themes';
-import React, { useEffect } from 'react';
-import { CursorPosition, specifyPositionOfCursor } from '../helpers/cursorHelpers';
+} from '../../constants';
+import { ColumnGap, Flex } from '../../styles/themes';
+import React from 'react';
 import BlockTag from './BlockTag';
+import { useCursorStore } from '../../stores/useCursorStore';
 
 export interface HandleInputProps {
   e: React.KeyboardEvent<HTMLElement>;
   index: number;
   itemIndex?: number;
-  cursorPositionRef?: React.RefObject<{ node: Node | null; offset: number; blockOffset: number }>;
-  updateCursorPosition?: (positionObj: CursorPosition) => void;
 }
 
 export interface EditableBlockProps {
@@ -26,9 +24,10 @@ export interface EditableBlockProps {
   index: number;
   handleInput: (props: HandleInputProps) => void;
   showPopup?: () => void;
-  cursorPositionRef: React.RefObject<{ node: Node | null; offset: number; blockOffset: number }>;
-  updateCursorPosition: (positionObj: CursorPosition) => void;
-  isFocusedBlock: boolean;
+}
+
+export interface TagProps extends EditableBlockProps {
+  handleFocus: (blockIndex: number) => void;
 }
 
 export interface OrderedItemTagProps {
@@ -36,13 +35,19 @@ export interface OrderedItemTagProps {
   itemIndex: number;
   index: number;
   handleInput: (props: HandleInputProps) => void;
+  handleFocus: (blockIndex: number) => void;
 }
 
 const stopEnterDefaultEvent = (e: React.KeyboardEvent<HTMLElement>) => {
   if (e.key === 'Enter') e.preventDefault();
 };
 
-const HeaderTag = ({ block: { level, content }, index, handleInput }: EditableBlockProps & { block: HeaderBlock }) => {
+const HeaderTag = ({
+  block: { level, content },
+  index,
+  handleInput,
+  handleFocus,
+}: TagProps & { block: HeaderBlock }) => {
   const Tag = `h${level}` as keyof JSX.IntrinsicElements;
   const contentTag = (
     <Tag
@@ -50,6 +55,7 @@ const HeaderTag = ({ block: { level, content }, index, handleInput }: EditableBl
       suppressContentEditableWarning
       onKeyUp={(e) => handleInput({ e: e as React.KeyboardEvent<HTMLElement>, index })}
       onKeyDown={(e) => stopEnterDefaultEvent(e as React.KeyboardEvent<HTMLElement>)}
+      onFocus={() => handleFocus(index)}
     >
       {content}
     </Tag>
@@ -62,17 +68,15 @@ const ParagraphTag = ({
   block: { content },
   index,
   handleInput,
-  cursorPositionRef,
-  updateCursorPosition,
-}: EditableBlockProps & { block: ParagraphBlock }) => {
+  handleFocus,
+}: TagProps & { block: ParagraphBlock }) => {
   const contentTag = (
     <StyledBlockTag
       contentEditable
       suppressContentEditableWarning
-      onKeyUp={(e) =>
-        handleInput({ e: e as React.KeyboardEvent<HTMLElement>, index, cursorPositionRef, updateCursorPosition })
-      }
-      onKeyDown={stopEnterDefaultEvent}
+      onKeyUp={(e) => handleInput({ e: e as React.KeyboardEvent<HTMLElement>, index })}
+      onKeyDown={(e) => stopEnterDefaultEvent(e)}
+      onFocus={() => handleFocus(index)}
       style={{ backgroundColor: 'aliceblue' }}
     >
       {content}
@@ -86,7 +90,8 @@ const UnorderedItemTag = ({
   block: { content },
   index,
   handleInput,
-}: EditableBlockProps & { block: UnorderedItemBlock }) => {
+  handleFocus,
+}: TagProps & { block: UnorderedItemBlock }) => {
   const contentTag = (
     <Flex>
       <OrderedListIndex>•</OrderedListIndex>
@@ -95,25 +100,38 @@ const UnorderedItemTag = ({
         suppressContentEditableWarning
         onKeyUp={(e) => handleInput({ e: e as React.KeyboardEvent<HTMLElement>, index })}
         onKeyDown={(e) => stopEnterDefaultEvent(e)}
+        onFocus={() => handleFocus(index)}
       >
         {content}
       </div>
     </Flex>
   );
+
   return <BlockTag {...{ contentTag }} />;
 };
 
-const OrderedListTag = ({ block: { items }, index, handleInput }: EditableBlockProps & { block: OrderedListBlock }) => (
+const OrderedListTag = ({
+  block: { items },
+  index,
+  handleInput,
+  handleFocus,
+}: TagProps & { block: OrderedListBlock }) => (
   <ColumnGap>
     {items.map((item: OrderedItemBlock, itemIndex: number) => (
       <div key={`ol-wrapper-${index}-${itemIndex}`}>
-        <OrderedItemTag item={item} itemIndex={itemIndex} index={index} handleInput={handleInput} />
+        <OrderedItemTag
+          item={item}
+          itemIndex={itemIndex}
+          index={index}
+          handleInput={handleInput}
+          handleFocus={handleFocus}
+        />
       </div>
     ))}
   </ColumnGap>
 );
 
-const OrderedItemTag = ({ item, itemIndex, index, handleInput }: OrderedItemTagProps) => {
+const OrderedItemTag = ({ item, itemIndex, index, handleInput, handleFocus }: OrderedItemTagProps) => {
   const contentTag = (
     <Flex>
       <OrderedListIndex>{`${itemIndex + 1}.`}</OrderedListIndex>
@@ -123,6 +141,7 @@ const OrderedItemTag = ({ item, itemIndex, index, handleInput }: OrderedItemTagP
         suppressContentEditableWarning
         onKeyUp={(e) => handleInput({ e: e as React.KeyboardEvent<HTMLElement>, index, itemIndex })}
         onKeyDown={(e) => stopEnterDefaultEvent(e)}
+        onFocus={() => handleFocus(index)}
       >
         {item.content}
       </div>
@@ -144,22 +163,11 @@ const ImageTag = ({ block: { url, alt }, index, handleInput }: EditableBlockProp
   </div>
 );
 
-export default function EditableBlock({
-  block,
-  index,
-  handleInput,
-  showPopup,
-  cursorPositionRef,
-  updateCursorPosition,
-  isFocusedBlock,
-}: EditableBlockProps) {
-  useEffect(() => {
-    specifyPositionOfCursor({ cursorPositionRef, isFocusedBlock });
-  }, [block]);
-
+export default function EditableBlock({ block, index, handleInput, showPopup }: EditableBlockProps) {
   const { type } = block;
-
-  const tagProps = { index, handleInput, isFocusedBlock, cursorPositionRef, updateCursorPosition };
+  const { setBlockOffset } = useCursorStore();
+  const handleFocus = (blockIndex: number) => setBlockOffset(blockIndex);
+  const tagProps = { index, handleInput, handleFocus };
 
   const blockTag = {
     header: <HeaderTag block={block as HeaderBlock} {...tagProps} />,
@@ -172,11 +180,12 @@ export default function EditableBlock({
   return <>{blockTag[type]}</>;
 }
 
-const OrderedListIndex = styled.span`
+export const OrderedListIndex = styled.span`
   padding: 0 6px;
 `;
 
-const StyledBlockTag = styled.div`
-  white-space: pre-wrap; /* 줄 바꿈과 공백을 그대로 렌더링 */
+export const StyledBlockTag = styled.div`
+  width: 100%;
+  white-space: pre-wrap;
   word-break: break-word;
 `;

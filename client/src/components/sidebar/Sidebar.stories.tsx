@@ -1,43 +1,25 @@
 import { Meta, StoryFn } from '@storybook/react';
-import Sidebar, { SidebarProps } from './Sidebar';
+import Sidebar from './Sidebar';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 
-const mockTeamspace = {
-  id: 1234,
-  title: 'teamspace1',
-  articles: [
-    {
-      id: 1,
-      title: 'article1',
-      icon: 'src/anywhere',
-    },
-    {
-      id: 2,
-      title: 'article2',
-      icon: 'src/anywhere2',
-    },
-  ],
-};
-
-const mockUsers = [
-  {
-    nickname: 'user1',
-    isActive: true,
-  },
-  {
-    nickname: 'user2',
-    isActive: false,
-  },
-];
+const client = new QueryClient();
 
 export default {
   title: 'Sidebar/Sidebar',
   component: Sidebar,
+  decorators: [
+    (Story: StoryFn) => (
+      <QueryClientProvider client={client}>
+        <MemoryRouter>
+          <Story />
+        </MemoryRouter>
+      </QueryClientProvider>
+    ),
+  ],
 } as Meta;
 
-const Template: StoryFn<SidebarProps> = (args) => <Sidebar {...args} />;
+const Template: StoryFn = (args) => <Sidebar {...args} />;
 
 export const DefaultSidebar = Template.bind({});
-DefaultSidebar.args = {
-  teamspace: mockTeamspace,
-  users: mockUsers,
-};
+DefaultSidebar.args = {};

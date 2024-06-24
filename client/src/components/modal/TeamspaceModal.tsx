@@ -3,11 +3,13 @@ import { TeamspaceDescription } from '../../constants';
 import { FlexColumn } from '../../styles/themes';
 import TeamspacePanel from './TeamspacePanel';
 import { useEffect, useState } from 'react';
-import { postNewTeamspace, sendTeamspaceListRequest } from '../../api/indexAPI';
+import { sendTeamspaceListRequest } from '../../api/mainAPI';
 import TeamspaceCreateModal from './TeamspaceCreateModal';
-import useUserStore from '../../hooks/useUserStore';
+import useUserStore from '../../stores/useUserStore';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import Loading from '../loading/Loading';
+import { useNewTeamsapceMutation } from '@/hooks/mutationHooks';
 
 export default function TeamspaceModal() {
   const client = useQueryClient();
@@ -15,18 +17,18 @@ export default function TeamspaceModal() {
   const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
   const navigate = useNavigate();
 
-  const { data: teamspaces } = useQuery<TeamspaceDescription[]>({
+  const { data: teamspaces, isPending } = useSuspenseQuery<TeamspaceDescription[]>({
     queryKey: ['teamspaces'],
     queryFn: sendTeamspaceListRequest,
+    refetchOnWindowFocus: false,
   });
 
-  const { mutate: fetchNewTeamspace } = useMutation({
-    mutationFn: postNewTeamspace,
-    onSuccess: () => {
-      client.invalidateQueries({ queryKey: ['teamspaces'] });
-      setIsCreateFormOpen(false);
-    },
-  });
+  const successFn = () => {
+    client.invalidateQueries({ queryKey: ['teamspaces'] });
+    setIsCreateFormOpen(false);
+  };
+
+  const { fetchNewTeamspace } = useNewTeamsapceMutation({ successFn });
 
   useEffect(() => {
     // 세션 구현 이전 로그인 상태를 임시로 클라이언트에서 관리
@@ -42,14 +44,14 @@ export default function TeamspaceModal() {
       <span>팀 스페이스 목록</span>
       <TeamspaceListBox>
         <TeamspaceListContent>
-          {teamspaces &&
-            teamspaces.map((teamspace, index) => (
-              <TeamspacePanel key={`teamspace-panel-${index}`} {...{ teamspace }} />
-            ))}
+          {teamspaces.map((teamspace, index) => (
+            <TeamspacePanel key={`teamspace-panel-${index}`} {...{ teamspace }} />
+          ))}
         </TeamspaceListContent>
       </TeamspaceListBox>
       <AddButton onClick={handleAddButtonClick}>팀 스페이스 추가 +</AddButton>
       {isCreateFormOpen && <TeamspaceCreateModal {...{ handleCancelClick, handleSubmitClick }} />}
+      {isPending && <Loading />}
     </Wrapper>
   );
 }
