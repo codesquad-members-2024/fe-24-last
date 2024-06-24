@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
-import { createNewPage, deleteData } from "../services/api";
+import { useCreateNewData, useDeletePage, NewPageData } from "../services/api";
 import { PageTree } from "./SideBar";
 
 interface PageProps {
@@ -13,13 +13,21 @@ interface PageProps {
 const PageList = ({ page, children }: PageProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
+  const createNewData = useCreateNewData();
+  const deletePage = useDeletePage();
 
-  const handleNewChildPage = async () => {
-    await createNewPage(`${page._id}`);
+  const handleNewChildPage = () => {
+    const newChildPageData: NewPageData = {
+      title: "",
+      blocklist: [],
+      parent_id: `${page._id}`,
+    };
+
+    createNewData(newChildPageData);
   };
 
-  const handleDeletePage = async () => {
-    await deleteData(`pages/${page._id}`);
+  const handleDeletePage = () => {
+    deletePage(page._id);
     navigate(-1);
   };
 
