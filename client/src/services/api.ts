@@ -1,4 +1,6 @@
-export async function fetchArticles() {
+import { ElementIndexInfo } from "../model/types";
+
+export async function getArticles() {
   const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/articles`);
   if (!response.ok) {
     throw new Error("Network response was not ok");
@@ -6,7 +8,17 @@ export async function fetchArticles() {
   return response.json();
 }
 
-export async function createNewArticle() {
+export async function getArticleById(id?: string) {
+  const response = await fetch(
+    `${import.meta.env.VITE_SERVER_URL}/articles/${id}`
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch article");
+  }
+  return response.json();
+}
+
+export async function postNewArticle() {
   const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/articles`, {
     method: "POST",
     headers: {
@@ -67,17 +79,7 @@ export async function deleteArticle(articleId: string) {
   return response.json();
 }
 
-export async function fetchArticleById(id: string | undefined) {
-  const response = await fetch(
-    `${import.meta.env.VITE_SERVER_URL}/articles/${id}`
-  );
-  if (!response.ok) {
-    throw new Error("Failed to fetch article");
-  }
-  return response.json();
-}
-
-export async function updateArticleTitle(
+export async function patchArticleTitle(
   id: string | undefined,
   newTitle: string
 ) {
@@ -99,19 +101,24 @@ export async function updateArticleTitle(
   return response.json();
 }
 
-export async function updateElementContent(
-  articleId: string | undefined,
-  blockId: string | undefined,
-  elementId: string | undefined,
-  newContent: string
-) {
+interface PatchElementContentParams {
+  articleId: string;
+  type?: string | undefined;
+  newContent?: string | undefined;
+  elementIndexInfo: ElementIndexInfo;
+}
+
+export async function patchElement({
+  articleId,
+  type,
+  newContent,
+  elementIndexInfo,
+}: PatchElementContentParams) {
   const response = await fetch(
-    `${
-      import.meta.env.VITE_SERVER_URL
-    }/articles/${articleId}/block/${blockId}/element/${elementId}`,
+    `${import.meta.env.VITE_SERVER_URL}/articles/${articleId}/element`,
     {
       method: "PATCH",
-      body: JSON.stringify({ content: newContent }),
+      body: JSON.stringify({ type, content: newContent, elementIndexInfo }),
       headers: {
         "Content-Type": "application/json",
       },
@@ -129,6 +136,7 @@ export async function updateElementContent(
   return response.json();
 }
 
+//필요없으면 삭제
 export async function updateElementType(
   articleId: string | undefined,
   blockId: string | undefined,
@@ -159,23 +167,21 @@ export async function updateElementType(
   return response.json();
 }
 
-export async function createNewBlockOrElement(
-  articleId: string | undefined,
-  blockId: string | undefined,
-  columnIndex?: number,
-  elementIndex?: number
+export async function postNewBlockOrElement(
+  articleId: string,
+  targetIndexInfo: ElementIndexInfo
 ) {
-  const body =
-    columnIndex !== undefined && elementIndex !== undefined
-      ? { type: "text", content: "", columnIndex, elementIndex }
-      : { type: "text", content: "" };
+  const bodyData = {
+    blockIndex: targetIndexInfo.blockIndex,
+    columnIndex: targetIndexInfo.columnIndex,
+    elementIndex: targetIndexInfo.elementIndex,
+  };
+
   const response = await fetch(
-    `${
-      import.meta.env.VITE_SERVER_URL
-    }/articles/${articleId}/block/${blockId}/element`,
+    `${import.meta.env.VITE_SERVER_URL}/articles/${articleId}/blockOrElement`,
     {
       method: "POST",
-      body: JSON.stringify(body),
+      body: JSON.stringify(bodyData),
       headers: {
         "Content-Type": "application/json",
       },
@@ -183,28 +189,52 @@ export async function createNewBlockOrElement(
   );
 
   if (!response.ok) {
-    throw new Error("Failed to create new block");
+    throw new Error("Failed to create new block or Element");
   }
 
   return response.json();
 }
 
-export async function deleteBlock(
+export async function deleteElement(
   articleId: string | undefined,
-  blockId: string | undefined,
-  elementId: string | undefined
+  elementIndexInfo: ElementIndexInfo
 ) {
   const response = await fetch(
-    `${
-      import.meta.env.VITE_SERVER_URL
-    }/articles/${articleId}/block/${blockId}/element/${elementId}`,
+    `${import.meta.env.VITE_SERVER_URL}/articles/${articleId}/element`,
     {
       method: "DELETE",
+      body: JSON.stringify(elementIndexInfo),
+      headers: {
+        "Content-Type": "application/json",
+      },
     }
   );
 
   if (!response.ok) {
-    throw new Error("Failed to delete block");
+    throw new Error("Failed to delete Element");
+  }
+
+  return response.json();
+}
+
+export async function patchElementIndex(
+  articleId: string | undefined,
+  elementIndexInfo: ElementIndexInfo,
+  targetIndexInfo: Partial<ElementIndexInfo>
+) {
+  const response = await fetch(
+    `${import.meta.env.VITE_SERVER_URL}/articles/${articleId}/element/move`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ elementIndexInfo, targetIndexInfo }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to move element");
   }
 
   return response.json();
