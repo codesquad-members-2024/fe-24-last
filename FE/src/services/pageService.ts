@@ -43,6 +43,7 @@ const postNewPage = async (parentId: string | null) => {
         console.error("Failed!! error:", error);
     }
 };
+// new template 생성 post 함수 
 
 const deletePage = async (id: string) => {
     try {
@@ -62,7 +63,7 @@ const deletePage = async (id: string) => {
     }
 };
 
-const patchTitle = async (tableName: string, title: any) => {
+const patchTitle = async (tableName: string, title: {title: string;}) => {
     try {
         const response = await fetch(serverURL + tableName, {
             method: "PATCH",

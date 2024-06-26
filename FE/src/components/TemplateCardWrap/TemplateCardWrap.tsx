@@ -2,23 +2,26 @@ import React from "react";
 import useFetchData from "../../hooks/useFetchData";
 import Loading from "../../pages/Loading";
 import { PageType } from "../PageCardWrap/PageCardWrap";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import * as S from "../../styles/TemplateCardWrapStyle"
+import { useTitleContext } from "../../hooks/useTitleContext";
 
-export interface columnsType {
+export interface ColumnsType {
     title: string;
     pages: PageType[];
     _id: string;
 }
 
-interface TemplateType {
+export interface TemplateType {
     _id: string;
     title: string;
-    columns: columnsType[];
+    columns: ColumnsType[];
 }
 
 const TemplateCardWrap = () => {
     const { data, isLoading } = useFetchData("templateList");
+    const { id } = useParams()
+    const { currentTitle } = useTitleContext()
 
     return (
         <S.TemplateCardContainer>
@@ -27,9 +30,9 @@ const TemplateCardWrap = () => {
                 <Loading />
             ) : (
                 data.map((template: TemplateType) => (
-                    <Link to={`template/${template._id}`} key={template._id} state={template.columns}>
+                    <Link to={`template/${template._id}`} key={template._id} state={template}>
                         <S.TemplateCard>
-                            {template.title}
+                            {id === template._id ? currentTitle : template.title}
                         </S.TemplateCard>
                     </Link>
                 ))

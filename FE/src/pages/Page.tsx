@@ -117,7 +117,7 @@ const Page = () => {
 
     return (
         <PageContainer>
-            <TitleEditable id={id} title={state.title} />
+            <TitleEditable id={id} title={state.title} table={"page"}/>
             <DragDropContext onDragEnd={handleOnDragEnd}>
                 <BlockWrap
                     id={id}
