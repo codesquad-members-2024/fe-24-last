@@ -169,7 +169,7 @@ export async function updateElementType(
 
 export async function postNewBlockOrElement(
   articleId: string,
-  targetIndexInfo: ElementIndexInfo
+  targetIndexInfo: Partial<ElementIndexInfo>
 ) {
   const bodyData = {
     blockIndex: targetIndexInfo.blockIndex,
