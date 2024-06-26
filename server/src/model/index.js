@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 const Schema = mongoose.Schema;
 
 const ElementSchema = new Schema({
@@ -16,4 +17,4 @@ const ArticleSchema = new Schema({
   parent_id: String,
 });
 
-export const Articles = mongoose.model("Article", ArticleSchema);
+export const ArticlesModel = mongoose.model("Article", ArticleSchema);
