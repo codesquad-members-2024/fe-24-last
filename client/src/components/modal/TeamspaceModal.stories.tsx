@@ -5,8 +5,6 @@ import { MemoryRouter } from 'react-router-dom';
 
 const client = new QueryClient();
 
-const client = new QueryClient();
-
 export default {
   title: 'Modal/TeamspaceModal',
   component: TeamspaceModal,
