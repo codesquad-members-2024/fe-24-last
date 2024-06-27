@@ -199,7 +199,7 @@ router.patch("/:id/element", async (req, res) => {
       return res.status(404).json({ message: "Element not found" });
     }
     element.content = content;
-    element.type = type;
+    if (type !== undefined) element.type = type;
 
     await saveArticle(article);
     res.status(200).json({ message: "Element updated successfully", article });
