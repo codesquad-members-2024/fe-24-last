@@ -16,6 +16,7 @@ export const PageSchema = new Schema({
     title: String,
     blocklist: [BlockSchema] || [],
     parent_id: String || null,
+    category: String,
 });
 
 const Pages = mongoose.model("Page", PageSchema);

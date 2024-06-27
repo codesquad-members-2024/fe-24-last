@@ -29,7 +29,7 @@ const TitleEditable = ({ id, title, table }: TitleEditorProps) => {
             await patchTitle(`${table}/title/${id}`, title);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["pageList"] });
+            queryClient.invalidateQueries({ queryKey: [table === "page" ? "pageList" : "templateList"] });
         },
     });
 

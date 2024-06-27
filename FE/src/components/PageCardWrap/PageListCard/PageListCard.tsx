@@ -17,7 +17,7 @@ interface PageListCardProps {
 
 const PageListCard = ({ page, pages, depth = 0 }: PageListCardProps) => {
     const navigate = useNavigate();
-    const { mutate } = useDeletePage();
+    const { mutate } = useDeletePage("page");
     const { id } = useParams()
     const [isOpen, setIsOpen] = useState(false);
     const { currentTitle, setCurrentTitle } = useTitleContext();
@@ -55,6 +55,8 @@ const PageListCard = ({ page, pages, depth = 0 }: PageListCardProps) => {
                     <NewPageBtn
                         parentId={page._id}
                         iconComponent={<PlusOutlined />}
+                        type="page"
+                        queryURL="newPage"
                     />
                 </S.ControlBox>
             </S.CardContainer>

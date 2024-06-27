@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ColumnsType } from "../TemplateCardWrap/TemplateCardWrap";
 import {
     DragDropContext,
@@ -7,15 +7,29 @@ import {
     DropResult,
 } from "@hello-pangea/dnd";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
+import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
+import NewPageBtn from "../NewPageBtn/NewPageBtn";
+import ModalComponent from "../Modal/Modal";
+import useDeletePage from "../../hooks/useDeletePage";
+import { useQueryClient } from "react-query";
+import * as S from "../../styles/TaskListBoxStyle";
 
 const TASK_BG_COLOR = ['#FFE2DD', '#FDECC8', '#DAECDA'];
 
 interface TaskListBoxProps {
     columns: ColumnsType[];
+    id: string
 }
 
-const TaskListBox = ({ columns }: TaskListBoxProps) => {
+const TaskListBox = ({ columns, id }: TaskListBoxProps) => {
     const [columnsData, setColumnsData] = useState<ColumnsType[]>(columns)
+    const { mutate } = useDeletePage("page");
+    const queryClient = useQueryClient()
+    const handleDeletePage = async (id: string) => {
+        mutate(id);
+        queryClient.invalidateQueries({ queryKey: ["templateList"] });
+    }
 
     const handleDragEnd = (result: DropResult) => {
         const { destination, source } = result;
@@ -50,8 +64,13 @@ const TaskListBox = ({ columns }: TaskListBoxProps) => {
             setColumnsData(newColumnsData);
         }
     };
+
+    useEffect(() => {
+        setColumnsData(columns)
+    }, [columns, id])
+
     return (
-        <TaskListWrap>
+        <S.TaskListWrap>
             <DragDropContext onDragEnd={handleDragEnd}>
                 {columnsData.map((curColumns, idx) => {
                     return (
@@ -60,13 +79,29 @@ const TaskListBox = ({ columns }: TaskListBoxProps) => {
                             key={curColumns._id}
                         >
                             {(provided) => (
-                                <TaskContainer
+                                <S.TaskContainer
                                     {...provided.droppableProps}
                                     ref={provided.innerRef}
                                 >
-                                    <TaskNameBox $bgColor={TASK_BG_COLOR[idx]}>
-                                        {curColumns.title} {curColumns.pages.length}
-                                    </TaskNameBox>
+                                    <div
+                                        style={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                        }}
+                                    >
+                                        <S.TaskNameBox
+                                            $bgColor={TASK_BG_COLOR[idx]}
+                                        >
+                                            {curColumns.title}{" "}
+                                            {curColumns.pages.length}
+                                        </S.TaskNameBox>
+                                        <NewPageBtn
+                                            parentId={null}
+                                            iconComponent={<PlusOutlined />}
+                                            type="template"
+                                            queryURL={`template/${id}/column/${curColumns._id}/newPage`}
+                                        />
+                                    </div>
                                     {curColumns.pages.map((page, index) => (
                                         <Draggable
                                             key={page._id}
@@ -74,67 +109,55 @@ const TaskListBox = ({ columns }: TaskListBoxProps) => {
                                             index={index}
                                         >
                                             {(provided) => (
-                                                <PageName
-                                                    ref={provided.innerRef}
-                                                    {...provided.draggableProps}
-                                                    {...provided.dragHandleProps}
-                                                    style={{
-                                                        ...provided
-                                                            .draggableProps
-                                                            .style,
-                                                        width: `236px`,
-                                                    }}
-                                                >
-                                                    {page.title}
-                                                </PageName>
+                                                <S.PageContainer ref={
+                                                    provided.innerRef
+                                                }
+                                                {...provided.draggableProps}
+                                                {...provided.dragHandleProps}
+                                                style={{
+                                                    ...provided
+                                                        .draggableProps
+                                                        .style,
+                                                    width: `236px`,
+                                                }}>
+                                                    <Link
+                                                        to={`/page/${page._id}`}
+                                                        state={page}
+                                                    >
+                                                        <S.PageName
+                                                            
+                                                        >
+                                                            {page.title}
+                                                        </S.PageName>
+                                                    </Link>
+                                                    <S.ControlBox>
+                                                    <ModalComponent
+                                                        callBack={() =>
+                                                            handleDeletePage(
+                                                                page._id
+                                                            )
+                                                        }
+                                                        iconComponent={
+                                                            <MinusOutlined />
+                                                        }
+                                                        message="정말 삭제하시겠습니까?"
+                                                    />
+                                                    </S.ControlBox>
+                                                </S.PageContainer>
                                             )}
                                         </Draggable>
                                     ))}
                                     {provided.placeholder}
-                                </TaskContainer>
+                                </S.TaskContainer>
                             )}
                         </Droppable>
                     );
                 })}
             </DragDropContext>
-        </TaskListWrap>
+        </S.TaskListWrap>
     );
 };
 
 export default TaskListBox;
 
-const TaskListWrap = styled.div`
-    max-width: 708px;
-    outline: none;
-    margin: 50px auto 0px;
-    display: flex;
-    gap: 10px;
-`;
 
-const TaskContainer = styled.div`
-    flex-grow: 1;
-    width: auto;
-`
-
-const TaskNameBox = styled.span<{$bgColor: string}>`
-    background-color: ${({ $bgColor }) => ($bgColor)};
-    font-size: 15px;
-    padding: 2px 4px;
-    border-radius: 5px;
-`
-
-const PageName = styled.div`
-    width: auto;
-    height: 30px;
-    margin: 10px 0;
-    padding: 5px 10px;
-    display: flex;
-    align-items: center;
-    justify-content: start;
-    border: 1px solid #e0e0e0;
-    border-radius: 7px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    font-size: 16px;
-    background-color: #fff;
-    
-`

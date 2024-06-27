@@ -15,22 +15,14 @@ const getPagesData = async (tableName: string) => {
     }
 };
 
-const postNewPage = async (parentId: string | null) => {
+const postNewPage = async (parentId: string | null, queryURL: string) => {
     try {
-        const response = await fetch(serverURL + "newPage", {
+        const response = await fetch(serverURL + queryURL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-                title: "untitled",
-                blocklist: [{
-                    type: "p",
-                    content: "",
-                    children: [],
-                    }],
-                parent_id: !!parentId ? parentId : null,
-            }),
+            body: JSON.stringify({ parentId: parentId }),
         });
         if (!response.ok)
             throw new Error(
@@ -43,11 +35,10 @@ const postNewPage = async (parentId: string | null) => {
         console.error("Failed!! error:", error);
     }
 };
-// new template 생성 post 함수 
 
-const deletePage = async (id: string) => {
+const deletePage = async (id: string, type: string) => {
     try {
-        const response = await fetch(`${serverURL}delete/${id}`, {
+        const response = await fetch(`${serverURL}${type}/delete/${id}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",

@@ -5,19 +5,24 @@ import { useNavigate } from "react-router-dom";
 interface NewPageBtnProps {
     parentId: string | null;
     iconComponent: React.ReactNode;
+    type: string;
+    queryURL: string
 }
 
 const NewPageBtn = ({
     parentId,
     iconComponent,
+    type,
+    queryURL
 }: NewPageBtnProps) => {
     const navigate = useNavigate()
-    const { mutate } = useCreatePage();
+    const { mutate } = useCreatePage(type, queryURL);
 
     const handleCreatePage = () => {
         mutate(parentId, {
-            onSuccess: (newPageData) => {
-                navigate(`/page/${newPageData._id}`, { state: newPageData} );
+            onSuccess: (newData) => {
+                // if(queryURL !== "newPage" && queryURL !== "newTemplate") return;
+                navigate(`/${type}/${newData._id}`, { state: newData } );
             }
         })
     }
@@ -32,7 +37,7 @@ export default NewPageBtn;
 
 const BtnContainer = styled.button`
     border: none;
-    background-color: #f7f7f5;
+    background-color: transparent;
     margin-right: 10px;
     font-size: 15px;
 `;

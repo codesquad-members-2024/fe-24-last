@@ -1,10 +1,9 @@
 import mongoose from "mongoose";
-import { PageSchema } from "./pagesSchema.js";
 const Schema = mongoose.Schema;
 
 const ColumnSchema = new Schema({
     title: String,
-    pages: [PageSchema]
+    pages: [{ type: Schema.Types.ObjectId}]
 });
 
 const TemplatesSchema = new Schema({

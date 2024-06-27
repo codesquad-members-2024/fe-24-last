@@ -19,7 +19,7 @@ const SideBar = () => {
                 </S.TitleBox>
                 <S.IconWrap>
                     {!isSIdeToggle && <DoubleLeftOutlined onClick={handleSideToggle}/>}
-                    <NewPageBtn parentId={null} iconComponent={<FormOutlined />} />
+                    <NewPageBtn parentId={null} iconComponent={<FormOutlined />} type="page" queryURL="newPage"/>
                 </S.IconWrap>
             </S.SideBarHeader>
 

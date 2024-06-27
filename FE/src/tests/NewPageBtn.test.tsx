@@ -28,13 +28,13 @@ describe("NewPageBtn Component Test", () => {
     });
 
     it("아이콘 컴포넌트가 렌더링되는지 확인", () => {
-        render(<NewPageBtn parentId="123" iconComponent={<PlusOutlined />} />);
+        render(<NewPageBtn parentId="123" iconComponent={<PlusOutlined />} type="page" queryURL="newPage" />);
         const iconElement = screen.getByRole("button");
         expect(iconElement).toBeInTheDocument();
     });
 
     it("버튼 클릭 시 handleCreatePage가 호출되는지 확인", () => {
-        render(<NewPageBtn parentId="123" iconComponent={<PlusOutlined />} />);
+        render(<NewPageBtn parentId="123" iconComponent={<PlusOutlined />} type="page" queryURL="newPage" />);
         const buttonElement = screen.getByRole("button");
         fireEvent.click(buttonElement);
         expect(mockMutate).toHaveBeenCalledWith("123", expect.any(Object));
@@ -42,7 +42,7 @@ describe("NewPageBtn Component Test", () => {
 
     it("onSuccess 콜백이 올바르게 동작하는지 확인", () => {
         const newPageData = { _id: "newPageId", name: "New Page" };
-        render(<NewPageBtn parentId="123" iconComponent={<PlusOutlined />} />);
+        render(<NewPageBtn parentId="123" iconComponent={<PlusOutlined />} type="page" queryURL="newPage" />);
         const buttonElement = screen.getByRole("button");
         fireEvent.click(buttonElement);
 

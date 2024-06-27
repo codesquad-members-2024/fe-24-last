@@ -38,4 +38,5 @@ export default ModalComponent;
 
 const ButtonIcon = styled.button`
     border: none;
+    background-color: transparent;
 `

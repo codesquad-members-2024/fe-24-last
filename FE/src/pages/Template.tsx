@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react'
-import { useQueryClient } from 'react-query';
+import React, { useLayoutEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { TemplateType } from '../components/TemplateCardWrap/TemplateCardWrap';
 import styled from 'styled-components';
@@ -9,18 +8,17 @@ import TaskListBox from '../components/TaskListBox/TaskListBox';
 
 const Template = () => {
   const location = useLocation();
-  const queryClient = useQueryClient();
   const {columns, title, _id}: TemplateType = location.state;
   const { setCurrentTitle } = useTitleContext()
-
-  useEffect(() => {
+  
+  useLayoutEffect(() => {
     setCurrentTitle(title)
-  }, [_id])
+  }, [_id, columns, title])
 
   return (
     <TemplateContainer>
       <TitleEditable id={_id} title={title} table={"template"}/>
-      <TaskListBox columns={columns}/>
+      <TaskListBox columns={columns} id={_id}/>
     </TemplateContainer>
   )
 }

@@ -14,6 +14,15 @@ const TemplateText = styled.div`
     padding: 4px;
 `;
 
+const TemplateNav = styled.div`
+    display: flex;
+    justify-content: space-between;
+`;
+
+const ControlBox = styled.div`
+    visibility: hidden;
+`
+
 const TemplateCard = styled.div`
     cursor: pointer;
     padding: 0px 10px;
@@ -30,9 +39,11 @@ const TemplateCard = styled.div`
 
         background-color: #E8E8E6;
         border: 1px solid #E8E8E6;
-
+        ${ControlBox} {
+            visibility: visible;
+        }
 
     }
 `;
 
-export {TemplateCardContainer, TemplateText, TemplateCard}
+export {TemplateCardContainer, TemplateText, TemplateCard, TemplateNav, ControlBox}
