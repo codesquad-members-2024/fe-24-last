@@ -5,7 +5,9 @@ interface BlockTypePopupProps {
   onTypeChange: (newType: string) => void;
 }
 
-export default function BlockTypePopup({ onTypeChange }: BlockTypePopupProps) {
+export default function ElementTypePopup({
+  onTypeChange,
+}: BlockTypePopupProps) {
   return (
     <S.Wrapper onClick={(e) => e.stopPropagation()}>
       <S.PopupTitle>기본 블록</S.PopupTitle>
