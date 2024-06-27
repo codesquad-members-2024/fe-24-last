@@ -69,17 +69,30 @@ export function moveElement(blockList, elementIndexInfo, targetIndexInfo) {
   const { blockIndex, columnIndex, elementIndex } = elementIndexInfo;
   const movedElement =
     blockList[blockIndex]?.columnList[columnIndex]?.[elementIndex];
+  console.log(movedElement);
+  if (
+    targetIndexInfo.columnIndex === undefined &&
+    targetIndexInfo.elementIndex === undefined
+  ) {
+    const newBlock = createNewBlock(movedElement);
 
-  if (!movedElement) {
-    throw new Error("Element not found");
+    // 블록 리스트에 새로운 블록 추가
+    const blockAddedBlockList = [...blockList];
+    blockAddedBlockList.splice(targetIndexInfo.blockIndex, 0, newBlock);
+
+    // 원래 위치에서 요소 삭제
+    return deleteElement(blockAddedBlockList, elementIndexInfo);
   }
+  // if (!movedElement) {
+  //   throw new Error("Element not found");
+  // }
 
-  const elementAddedBlockList = addElement(
-    blockList,
-    targetIndexInfo,
-    movedElement
-  );
-  return deleteElement(elementAddedBlockList, elementIndexInfo);
+  // const elementAddedBlockList = addElement(
+  //   blockList,
+  //   targetIndexInfo,
+  //   movedElement
+  // );
+  // return deleteElement(elementAddedBlockList, elementIndexInfo);
 }
 
 export function indexGuard(
