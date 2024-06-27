@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { FormEvent, KeyboardEvent, useCallback, useEffect, useState } from "react";
 import debounce from "../utils/debounce";
 import { useParams } from "react-router-dom";
-import { createBlock, deleteData, updateData, usePatchNewBlock, useGetPage } from "../services/api";
+import { createBlock, deleteData, useGetPage, usePatchNewTitle, usePatchBlockContent, usePatchBlockOrder, usePatchBlockData } from "../services/api";
 import BlockList from "./BlockList";
 import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd";
 import { HolderOutlined } from "@ant-design/icons";
@@ -17,21 +17,27 @@ export interface Block {
 
 function ArticleLayout() {
   const { id: pageId } = useParams<{ id: string }>();
-  const mutate = usePatchNewBlock(pageId);
+  const updateNewTitle = usePatchNewTitle(pageId);
+  
+  const updateBlock = usePatchBlockData(pageId);
+  // usePatchBlock, usePatchBlockContent, usePatchBlockOrder 뭉치는 작업중
+  // const updateNewBlock = usePatchBlock(pageId);
+  const updateBlockContent = usePatchBlockContent(pageId);
+  const updateBlockOrder = usePatchBlockOrder(pageId);
+
   const [title, setTitle] = useState("");
   const [blocks, setBlocks] = useState<Block[]>([]);
   const { data: pageData } = useGetPage(`pages/${pageId}`);
 
   const saveTitle = useCallback(
-    debounce(async (newTitle: string) => {
-      await updateData(`pages/${pageId}`, { title: newTitle });
-    }, 1000),
-    [pageId]
+    debounce((newTitle: string) => {
+      updateNewTitle({ newTitle });
+    }, 500), // 일단 사이드바에 거의 실시간으로 반영되게 하려고 0.5초로. debounce 필요한가? 상태로 가지고 있는게 나은가?
+    []
   );
 
   const handleTitleChange = (e: FormEvent<HTMLDivElement>) => {
     const newTitle = e.currentTarget.innerText;
-    // setTitle(newTitle);
     saveTitle(newTitle);
   };
 
@@ -60,7 +66,8 @@ function ArticleLayout() {
         ...blocks.slice(index + 1).map((block) => ({ ...block, index: block.index + 1 })),
       ];
       setBlocks(updatedBlocks);
-      mutate({ newData, blockId });
+      // updateNewBlock({ newData, blockId });
+      updateBlock({endpoint: `pages/${pageId}/blocks/${blockId}`, data: {newData, blockId}});
     } else if (e.key === "Backspace" && blocks[index].content === "") {
       e.preventDefault();
       if (blocks.length > 1) {
@@ -76,10 +83,10 @@ function ArticleLayout() {
   };
 
   const saveBlock = useCallback(
-    debounce(async (blockId: string = "", newContent: string) => {
-      await updateData(`pages/${pageId}/blocks/${blockId}`, {
-        content: newContent,
-      });
+    debounce((blockId: string = "", newContent: string) => {
+      updateBlockContent({ newContent, blockId })
+      // 
+      // updateBlock({endpoint: `pages/${pageId}/blocks/${blockId}`,data: {newContent, blockId}})
     }, 1000),
     [pageId]
   );
@@ -100,19 +107,16 @@ function ArticleLayout() {
     return result.map((block, idx) => ({ ...block, index: idx }));
   };
 
-  const updateBlockOrder = async (blocks: Block[]) => {
-    try {
-      await updateData(`pages/${pageId}/blocks`, { blocks });
-    } catch (error) {
-      console.error("Failed to update block order:", error);
-    }
+  const handleUpdateBlockOrder = async (blocks: Block[]) => {
+      updateBlockOrder({ newData: blocks });
+      // updateBlock({endpoint: `pages/${pageId}/blocks`, data: { newData: blocks }})
   };
-  
+
   const handleOnDragEnd = (result: DropResult) => {
     if (!result.destination) return;
     const reorderedBlocks = reorder(blocks, result.source.index, result.destination.index);
     setBlocks(reorderedBlocks);
-    updateBlockOrder(reorderedBlocks);
+    handleUpdateBlockOrder(reorderedBlocks);
   };
 
   useEffect(() => {
