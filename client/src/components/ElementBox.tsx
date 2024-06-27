@@ -8,7 +8,8 @@ import BlockTypePopup from "./ElementTypePopup";
 import {
   useCreateNewBlockOrElement,
   useDeleteElement,
-  useUpdatePatchElement,
+  useUpdateElementContent,
+  useUpdateElementType,
 } from "../hooks/api";
 import debounce from "../utils/debounce";
 
@@ -32,7 +33,11 @@ function ElementBox({
   const { id: articleId = "" } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
   const { _id: elementId, content, type } = element;
-  const { mutate: updateElement } = useUpdatePatchElement(articleId);
+  const { mutate: updateElementContent } = useUpdateElementContent(articleId);
+  const { mutate: updateElementType } = useUpdateElementType(
+    articleId,
+    queryClient
+  );
   const { mutate: createNewBlockOrElement } = useCreateNewBlockOrElement(
     articleId,
     queryClient
@@ -41,7 +46,7 @@ function ElementBox({
   const [popupElementId, setPopupElementId] = useState<string | null>(null);
 
   const [debouncedUpdateElement, clearDebouncedUpdateElement] = debounce(
-    updateElement,
+    updateElementContent,
     1000
   );
 
@@ -54,7 +59,7 @@ function ElementBox({
   };
 
   const handleTypeChange = async (newType: string) => {
-    debouncedUpdateElement({
+    updateElementType({
       type: newType,
       elementIndexInfo: { blockIndex, columnIndex, elementIndex },
     });
@@ -113,18 +118,10 @@ function ElementBox({
             localBlockList[blockIndex].columnList[columnIndex].length === 1
           ) {
             // 현재 요소가 블록의 마지막 요소인 경우
-            if (columnIndex > 0) {
-              const prevColumn =
-                localBlockList[blockIndex].columnList[columnIndex - 1];
-              const lastElementIndex = prevColumn.length - 1;
-              previousElementId = prevColumn[lastElementIndex]._id;
-            } else if (elementIndex > 0) {
-              // 바로 이전 요소의 id가 previousElementId가 되어야 함
-              previousElementId =
-                localBlockList[blockIndex].columnList[columnIndex][
-                  elementIndex - 1
-                ]._id;
-            }
+            const prevColumn =
+              localBlockList[blockIndex].columnList[columnIndex - 1];
+            const lastElementIndex = prevColumn.length - 1;
+            previousElementId = prevColumn[lastElementIndex]._id;
           } else {
             // 바로 이전 요소의 id가 previousElementId가 되어야 함
             previousElementId =

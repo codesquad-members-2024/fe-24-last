@@ -46,10 +46,23 @@ interface MutatePatchElementParams {
   elementIndexInfo: ElementIndexInfo;
 }
 
-export function useUpdatePatchElement(articleId: string) {
+export function useUpdateElementType(
+  articleId: string,
+  queryClient: QueryClient
+) {
   return useMutation(
-    ({ type, newContent, elementIndexInfo }: MutatePatchElementParams) =>
-      patchElement({ articleId, type, newContent, elementIndexInfo })
+    ({ type, elementIndexInfo }: MutatePatchElementParams) =>
+      patchElement({ articleId, type, elementIndexInfo }),
+    {
+      onSuccess: () => queryClient.invalidateQueries(["article", articleId]),
+    }
+  );
+}
+
+export function useUpdateElementContent(articleId: string) {
+  return useMutation(
+    ({ newContent, elementIndexInfo }: MutatePatchElementParams) =>
+      patchElement({ articleId, newContent, elementIndexInfo })
   );
 }
 
