@@ -3,9 +3,9 @@ import PageSchema from "../Models/pagesSchema.js";
 
 const pagesListRouter = express.Router();
 
-pagesListRouter.get("/api/pagesList", async (req, res) => {
+pagesListRouter.get("/api/pageList", async (req, res) => {
     try {
-        const pageData = await PageSchema.find();
+        const pageData = await PageSchema.find({category: "page"});
         res.json(pageData);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -14,8 +14,17 @@ pagesListRouter.get("/api/pagesList", async (req, res) => {
 
 pagesListRouter.post("/api/newPage", async (req, res) => {
     try {
-        const pageData = req.body;
-        const newPage = new PageSchema(pageData);
+        const { parentId } = req.body;
+        const newPage = new PageSchema({
+            title: "untitled",
+            blocklist: [{
+                type: "p",
+                content: "",
+                children: [],
+            }],
+            parent_id: parentId !== null ? parentId : null,
+            category: "page" // 여기서 카테고리 설정
+        });
         await newPage.save();
         res.status(201).send(newPage);
     } catch (error) {
@@ -23,7 +32,7 @@ pagesListRouter.post("/api/newPage", async (req, res) => {
     }
 });
 
-pagesListRouter.delete("/api/delete/:id", async (req, res) => {
+pagesListRouter.delete("/api/page/delete/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const deletedPage = await PageSchema.findByIdAndDelete(id);
@@ -69,11 +78,10 @@ pagesListRouter.patch("/api/page/block/:id", async (req, res) => {
         if (!article) {
             return res.status(404).json({ error: "Article not found" });
         }
-        
 
         article.blocklist = [...block];
         await article.save();
-        res.json({ message: "Title updated successfully", article });
+        res.json({ message: "Blocklist updated successfully", article });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

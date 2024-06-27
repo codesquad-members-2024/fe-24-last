@@ -29,7 +29,7 @@ const CardContainer = styled.div`
     display: flex;
     justify-content: space-between;
     font-weight: bold;
-    font-size: 17px;
+    font-size: 15px;
     transition: background-color 0.3s;
 
     &:hover {

@@ -1,14 +1,14 @@
 import { useQueryClient, useMutation } from "react-query";
 import { deletePage } from "../services/pageService";
 
-const useDeletePage = () => {
+const useDeletePage = (type: string) => {
     const queryClient = useQueryClient();
     const { mutate } = useMutation({
         mutationFn: async (id: string) => {
-            await deletePage(id);
+            await deletePage(id, type);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["pageList"] });
+            queryClient.invalidateQueries({ queryKey: [type === "page" ? "pageList" : "templateList"] });
         },
     });
     return { mutate };

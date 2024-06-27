@@ -1,5 +1,5 @@
 import { KeyboardEvent } from 'react';
-import { BlockType } from '../pages/SideBar';
+import { BlockType } from '../components/PageCardWrap/PageCardWrap';
 import moveCursorToStartEnd from './MoveCursorToStartEnd';
 
 interface EventParams {

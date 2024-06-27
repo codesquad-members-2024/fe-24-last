@@ -1,13 +1,13 @@
 import React, { useCallback, useLayoutEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
-import { PageType } from "../../pages/SideBar";
-import * as S from "../../styles/PageListCardStyle";
+import { PageType } from "../PageCardWrap";
+import * as S from "../../../styles/PageListCardStyle";
 import { PlusOutlined, MinusOutlined } from "@ant-design/icons";
-import NewPageBtn from "../NewPageBtn/NewPageBtn";
-import useDeletePage from "../../hooks/useDeletePage";
-import ModalComponent from "../Modal/Modal";
-import { useTitleContext } from "../../hooks/useTitleContext";
+import NewPageBtn from "../../NewPageBtn/NewPageBtn";
+import useDeletePage from "../../../hooks/useDeletePage";
+import ModalComponent from "../../Modal/Modal";
+import { useTitleContext } from "../../../hooks/useTitleContext";
 
 interface PageListCardProps {
     page: PageType;
@@ -17,7 +17,7 @@ interface PageListCardProps {
 
 const PageListCard = ({ page, pages, depth = 0 }: PageListCardProps) => {
     const navigate = useNavigate();
-    const { mutate } = useDeletePage();
+    const { mutate } = useDeletePage("page");
     const { id } = useParams()
     const [isOpen, setIsOpen] = useState(false);
     const { currentTitle, setCurrentTitle } = useTitleContext();
@@ -55,6 +55,8 @@ const PageListCard = ({ page, pages, depth = 0 }: PageListCardProps) => {
                     <NewPageBtn
                         parentId={page._id}
                         iconComponent={<PlusOutlined />}
+                        type="page"
+                        queryURL="newPage"
                     />
                 </S.ControlBox>
             </S.CardContainer>
