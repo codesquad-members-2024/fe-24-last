@@ -12,6 +12,7 @@ import {
   useUpdateElementType,
 } from "../hooks/api";
 import debounce from "../utils/debounce";
+import Draggable from "./Dnd/Draggable";
 
 interface ElementBoxProps {
   element: ElementType;
@@ -148,25 +149,29 @@ function ElementBox({
   const ElementContentTag = getElementContentTag();
 
   return (
-    <Element>
-      <IconWrapper>
-        <HolderOutlined />
-      </IconWrapper>
-      <ElementContent
-        as={ElementContentTag}
-        contentEditable
-        type={type}
-        onInput={handleContentChange}
-        onKeyDown={handleKeyDown(elementId, columnIndex, elementIndex)}
-        suppressContentEditableWarning
-        id={elementId}
-      >
-        {content}
-      </ElementContent>
-      {elementId === popupElementId && (
-        <BlockTypePopup onTypeChange={handleTypeChange} />
+    <Draggable id={`${blockIndex}-${columnIndex}-${elementIndex}`}>
+      {(provided) => (
+        <Element>
+          <IconWrapper {...provided.dragHandlerProps}>
+            <HolderOutlined />
+          </IconWrapper>
+          <ElementContent
+            as={ElementContentTag}
+            contentEditable
+            type={type}
+            onInput={handleContentChange}
+            onKeyDown={handleKeyDown(elementId, columnIndex, elementIndex)}
+            suppressContentEditableWarning
+            id={elementId}
+          >
+            {content}
+          </ElementContent>
+          {elementId === popupElementId && (
+            <BlockTypePopup onTypeChange={handleTypeChange} />
+          )}
+        </Element>
       )}
-    </Element>
+    </Draggable>
   );
 }
 

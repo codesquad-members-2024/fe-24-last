@@ -11,6 +11,7 @@ import {
 } from "../hooks/api";
 import * as S from "../styles/ArticleLayout";
 import BlockBox from "./BlockBox";
+import DndProvider from "../contexts/DndProvider";
 
 function ArticleLayout() {
   const { id: articleId = "" } = useParams<{ id: string }>();
@@ -86,19 +87,21 @@ function ArticleLayout() {
       >
         {title}
       </S.TitleBox>
-      <S.Content>
-        {blockList.map((block: Block, index: number) => {
-          return (
-            <BlockBox
-              key={`block-${block._id}`}
-              blockData={block}
-              blockIndex={index}
-              setFocusedElementId={setFocusedElementId}
-              localBlockList={localBlockList}
-            />
-          );
-        })}
-      </S.Content>
+      <DndProvider>
+        <S.Content>
+          {blockList.map((block: Block, index: number) => {
+            return (
+              <BlockBox
+                key={`block-${block._id}`}
+                blockData={block}
+                blockIndex={index}
+                setFocusedElementId={setFocusedElementId}
+                localBlockList={localBlockList}
+              />
+            );
+          })}
+        </S.Content>
+      </DndProvider>
     </S.Wrapper>
   );
 }
