@@ -15,3 +15,9 @@ export interface Article {
   blockList: [Block] | [];
   parent_id: string | null;
 }
+
+export interface ElementIndexInfo {
+  blockIndex: number;
+  columnIndex: number;
+  elementIndex: number;
+}

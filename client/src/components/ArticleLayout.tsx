@@ -1,38 +1,40 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery, useQueryClient } from "react-query";
+import { useQueryClient } from "react-query";
 import debounce from "../utils/debounce";
 import { focusOnElement } from "../utils/focus";
 import { Block } from "../model/types";
 import {
-  fetchArticleById,
-  updateArticleTitle,
-  createNewBlockOrElement,
-} from "../services/api";
-import { useArticles } from "../contexts/ArticlesProvider";
+  useCreateNewBlockOrElement,
+  useGetArticle,
+  useUpdateArticleTitle,
+} from "../hooks/api";
 import * as S from "../styles/ArticleLayout";
 import BlockBox from "./BlockBox";
 
 function ArticleLayout() {
-  const { id } = useParams<{ id: string }>();
-  const { refetch: refetchArticles } = useArticles();
+  const { id: articleId = "" } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
-  const {
-    data: currentArticle,
-    error,
-    isLoading,
-  } = useQuery(["article", id], () => fetchArticleById(id), {
-    enabled: !!id,
-  });
+  const { data: currentArticle, isLoading, error } = useGetArticle(articleId);
+  const { mutate: updateArticleTitle } = useUpdateArticleTitle(
+    articleId,
+    queryClient
+  );
+  const { mutate: createNewBlockOrElement } = useCreateNewBlockOrElement(
+    articleId,
+    queryClient
+  );
+  const [localBlockList, setLocalBlockList] = useState<Block[]>([]);
   const [focusedElementId, setFocusedElementId] = useState<string | null>(null);
 
-  const [debouncedSaveTitle] = debounce(async (newTitle: string) => {
-    try {
-      await updateArticleTitle(id, newTitle);
-      refetchArticles();
-    } catch (error) {
-      console.error("Error:", error);
+  useEffect(() => {
+    if (currentArticle) {
+      setLocalBlockList(currentArticle.blockList);
     }
+  }, [currentArticle]);
+
+  const [debouncedSaveTitle] = debounce(async (newTitle: string) => {
+    updateArticleTitle(newTitle);
   }, 1000);
 
   const handleTitleChange = (e: React.FormEvent<HTMLDivElement>) => {
@@ -51,17 +53,14 @@ function ArticleLayout() {
     const isInBottomPadding = clickY > wrapperRect.bottom - paddingBottom;
 
     if (isInBottomPadding) {
-      if (currentArticle && currentArticle.blockList.length > 0) {
-        const lastBlock =
-          currentArticle.blockList[currentArticle.blockList.length - 1];
-        try {
-          const response = await createNewBlockOrElement(id, lastBlock._id);
-          setFocusedElementId(response.newElementId);
-          queryClient.invalidateQueries(["article", id]);
-        } catch (error) {
-          console.error("Failed to create new block:", error);
+      createNewBlockOrElement(
+        { blockIndex: localBlockList.length },
+        {
+          onSuccess: (newBlock) => {
+            setFocusedElementId(newBlock.newElementId);
+          },
         }
-      }
+      );
     }
   };
 
@@ -95,7 +94,7 @@ function ArticleLayout() {
               blockData={block}
               blockIndex={index}
               setFocusedElementId={setFocusedElementId}
-              currentArticle={currentArticle}
+              localBlockList={localBlockList}
             />
           );
         })}

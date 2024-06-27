@@ -1,13 +1,10 @@
 import mongoose from "mongoose";
 
-const mongoURL = process.env.MONGODB_URL;
+const mongoURL = process.env.MONGODB_URL ?? "";
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(mongoURL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(mongoURL, {});
     console.log("MongoDB Connected");
   } catch (err) {
     console.error(err);
