@@ -6,6 +6,7 @@ import { createBlock, deleteData, useGetPage, usePatchNewTitle, usePatchBlockCon
 import BlockList from "./BlockList";
 import { DragDropContext, Draggable, Droppable, DropResult } from "@hello-pangea/dnd";
 import { HolderOutlined } from "@ant-design/icons";
+import SocketIO, { socket } from "./SocketIO";
 
 export interface Block {
   type: string;
@@ -18,7 +19,7 @@ export interface Block {
 function ArticleLayout() {
   const { id: pageId } = useParams<{ id: string }>();
   const updateNewTitle = usePatchNewTitle(pageId);
-  
+
   const updateBlock = usePatchBlockData(pageId);
   // usePatchBlock, usePatchBlockContent, usePatchBlockOrder 뭉치는 작업중
   // const updateNewBlock = usePatchBlock(pageId);
@@ -32,6 +33,7 @@ function ArticleLayout() {
   const saveTitle = useCallback(
     debounce((newTitle: string) => {
       updateNewTitle({ newTitle });
+      socket.emit("title_updated", { pageId, newTitle });
     }, 500), // 일단 사이드바에 거의 실시간으로 반영되게 하려고 0.5초로. debounce 필요한가? 상태로 가지고 있는게 나은가?
     []
   );
@@ -46,9 +48,9 @@ function ArticleLayout() {
       e.preventDefault();
       await handleKeyDown(e, -1);
     }
-  }
+  };
 
-  const handleKeyDown = async (e: KeyboardEvent<HTMLDivElement>, index: number) => {
+  const handleKeyDown = async ( e: KeyboardEvent<HTMLDivElement>, index: number ) => {
     if (e.key === "Enter") {
       if (e.shiftKey) return;
       e.preventDefault();
@@ -63,29 +65,38 @@ function ArticleLayout() {
       const updatedBlocks = [
         ...blocks.slice(0, index + 1),
         newBlock,
-        ...blocks.slice(index + 1).map((block) => ({ ...block, index: block.index + 1 })),
+        ...blocks
+          .slice(index + 1)
+          .map((block) => ({ ...block, index: block.index + 1 })),
       ];
       setBlocks(updatedBlocks);
       // updateNewBlock({ newData, blockId });
-      updateBlock({endpoint: `pages/${pageId}/blocks/${blockId}`, data: {newData, blockId}});
+      updateBlock({
+        endpoint: `pages/${pageId}/blocks/${blockId}`,
+        data: { newData, blockId },
+      });
+      socket.emit("block_updated", { pageId, blocks: updatedBlocks }); // 소켓 블록 content 업데이트 전송
     } else if (e.key === "Backspace" && blocks[index].content === "") {
       e.preventDefault();
       if (blocks.length > 1) {
         const blockToDelete = blocks[index];
         const updatedBlocks = [
           ...blocks.slice(0, index),
-          ...blocks.slice(index + 1).map((block) => ({ ...block, index: block.index - 1 })),
+          ...blocks
+            .slice(index + 1)
+            .map((block) => ({ ...block, index: block.index - 1 })),
         ];
         setBlocks(updatedBlocks);
         await deleteData(`pages/${pageId}/blocks/${blockToDelete._id}`);
+        socket.emit("block_updated", { pageId, blocks: updatedBlocks }); // 소켓 블록(삭제) 업데이트 전송
       }
     }
   };
 
   const saveBlock = useCallback(
     debounce((blockId: string = "", newContent: string) => {
-      updateBlockContent({ newContent, blockId })
-      // 
+      updateBlockContent({ newContent, blockId });
+      socket.emit("block_content_updated", { pageId, blockId, newContent }); // 소켓 블록 업데이트 전송
       // updateBlock({endpoint: `pages/${pageId}/blocks/${blockId}`,data: {newContent, blockId}})
     }, 1000),
     [pageId]
@@ -96,7 +107,7 @@ function ArticleLayout() {
     const updatedBlocks = [...blocks];
     updatedBlocks[index].content = newContent;
     const blockId = updatedBlocks[index]._id;
-    saveBlock(blockId, newContent);
+    saveBlock(blockId, newContent); 
   };
 
   const reorder = (list: Block[], startIndex: number, endIndex: number) => {
@@ -108,13 +119,18 @@ function ArticleLayout() {
   };
 
   const handleUpdateBlockOrder = async (blocks: Block[]) => {
-      updateBlockOrder({ newData: blocks });
-      // updateBlock({endpoint: `pages/${pageId}/blocks`, data: { newData: blocks }})
+    updateBlockOrder({ newData: blocks });
+    socket.emit('block_updated', { pageId, blocks }); // 소켓 블록(순서) 업데이트 전송
+    // updateBlock({endpoint: `pages/${pageId}/blocks`, data: { newData: blocks }})
   };
 
   const handleOnDragEnd = (result: DropResult) => {
     if (!result.destination) return;
-    const reorderedBlocks = reorder(blocks, result.source.index, result.destination.index);
+    const reorderedBlocks = reorder(
+      blocks,
+      result.source.index,
+      result.destination.index
+    );
     setBlocks(reorderedBlocks);
     handleUpdateBlockOrder(reorderedBlocks);
   };
@@ -123,11 +139,16 @@ function ArticleLayout() {
     if (pageData) {
       setTitle(pageData.title);
       setBlocks(pageData.blocklist);
-    }       
+    }
   }, [pageData, pageId]);
 
   return (
     <Wrapper>
+      <SocketIO
+        pageId={pageId as string}
+        onBlockUpdate={(updatedBlocks) => setBlocks(updatedBlocks)}
+        onTitleUpdate={(newTitle) => setTitle(newTitle)}
+      />
       <StyledTitleBox
         contentEditable
         suppressContentEditableWarning
