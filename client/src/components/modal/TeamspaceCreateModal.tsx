@@ -10,7 +10,7 @@ import {
 } from '../../styles/themes';
 import { useRef } from 'react';
 
-interface TeamspaceCreateModalProps {
+export interface TeamspaceCreateModalProps {
   handleCancelClick: () => void;
   handleSubmitClick: (title: string) => void;
 }
@@ -26,13 +26,15 @@ export default function TeamspaceCreateModal({ handleCancelClick, handleSubmitCl
     return inputNode ? inputNode.value : '';
   };
 
+  const handleCreateClick = () => handleSubmitClick(getInputText() || '');
+
   return (
     <Wrapper>
       <span>팀 스페이스 생성</span>
       <NicknameInput ref={inputRef} type="text" placeholder="팀 스페이스 이름" />
       <ButtonWrapper>
         <CancelClick onClick={handleCancelClick}>취소</CancelClick>
-        <SubmitButton onClick={() => handleSubmitClick(getInputText() || '')}>확인</SubmitButton>
+        <SubmitButton onClick={handleCreateClick}>확인</SubmitButton>
       </ButtonWrapper>
     </Wrapper>
   );

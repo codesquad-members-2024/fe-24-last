@@ -13,11 +13,14 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.7",
+    "@tanstack/react-query": "^5.45.1",
+    "antd": "^5.18.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.23.1",
     "socket.io-client": "^4.7.5",
-    "styled-components": "^6.1.11"
+    "styled-components": "^6.1.11",
+    "zustand": "^4.5.2"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^1.5.0",

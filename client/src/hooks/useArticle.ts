@@ -1,62 +1,61 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Block } from '../constants';
-import { sendArticleRequestById, updateArticleRequestById } from '../api/articleAPI';
+import { useCallback, useEffect, useRef } from 'react';
+import { Article, Block } from '../constants';
+import { sendArticleRequestById } from '../api/articleAPI';
 import { io } from 'socket.io-client';
 import { debounce } from '../utils/timeoutUtils';
 import { useParams } from 'react-router-dom';
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import { useUpdateArticleMutation } from './mutationHooks';
 
 const SERVER = import.meta.env.VITE_SERVER;
 
 export default function useArticle() {
-  const [blocks, setBlocks] = useState<Block[]>([]);
   const clientBlocksRef = useRef<Block[]>([]);
   const { teamspaceId, articleId } = useParams();
+  const client = useQueryClient();
+
+  const { data: article } = useSuspenseQuery<Article>({
+    queryKey: ['article', `${articleId}`],
+    queryFn: async () => {
+      const response = await sendArticleRequestById({ teamspaceId, articleId });
+      const { content } = response;
+      clientBlocksRef.current = content;
+
+      return response;
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  const successFn = () => {};
+
+  const { updateArticle } = useUpdateArticleMutation({ successFn });
 
   useEffect(() => {
     const socket = io(SERVER);
 
-    socket.on('articleUpdated', (data) => {
-      setBlocks(data.content);
-    });
-
-    sendArticleRequestById({ teamspaceId: teamspaceId || '', articleId: articleId || '' }).then(({ content }) => {
-      setBlocks(content);
-    });
+    socket.on(`article-${articleId}`, () => client.invalidateQueries({ queryKey: ['article', `${articleId}`] }));
 
     return () => {
-      socket.off('articleUpdated');
+      socket.off(`article-${articleId}`);
     };
   }, [teamspaceId, articleId]);
 
-  useEffect(() => {
-    clientBlocksRef.current = blocks;
-  }, [blocks]);
-
   const debouncedFetch = useCallback(
     debounce((updatedBlocks: Block[]) => {
-      updateArticleRequestById({
-        teamspaceId: teamspaceId || '',
-        articleId: articleId || '',
+      updateArticle({
+        teamspaceId,
+        articleId,
         blocks: updatedBlocks,
-      }).then(({ content }) => {
-        setBlocks(content);
       });
     }, 1000),
-    []
+    [teamspaceId, articleId]
   );
 
-  const handleContentChange = (updatedBlock: Block, index: number) => {
-    const newBlocks = [...blocks];
-    newBlocks[index] = updatedBlock;
-    clientBlocksRef.current[index] = updatedBlock;
-    setBlocks(clientBlocksRef.current);
-    debouncedFetch(clientBlocksRef.current);
-  };
-
   return {
-    blocks,
-    setBlocks,
+    title: article.title,
+    clientBlocksRef,
+    blocks: article.content,
+    setBlocks: (newBlocks: Block[]) => (clientBlocksRef.current = newBlocks),
     debouncedFetch,
-    handleContentChange,
   };
 }

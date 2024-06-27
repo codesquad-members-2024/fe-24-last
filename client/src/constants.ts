@@ -1,3 +1,5 @@
+import { MutableRefObject } from 'react';
+
 interface BlockBase {
   type: string;
 }
@@ -37,10 +39,17 @@ export interface ImageBlock extends BlockBase {
 export type Block = HeaderBlock | ParagraphBlock | UnorderedItemBlock | OrderedListBlock | ImageBlock;
 
 export interface BlockControllerProps {
+  clientBlockRef: MutableRefObject<Block[]>;
   blocks: Block[];
   setBlocks: (blocks: Block[]) => void;
-  handleFetch: (blocks: Block[]) => void;
-  handleContentChange: (block: Block, index: number) => void;
+  handleFetch: (blocks: Block[], option?: boolean) => void;
+}
+
+export interface Article {
+  _id: string;
+  title: string;
+  content: Block[];
+  updatedAt: string;
 }
 
 export interface TeamspaceDescription {
@@ -59,3 +68,9 @@ export interface UserDescription {
   nickname: string;
   isActive: boolean;
 }
+
+export const LOGIN_PATH = '/login';
+export const REGISTRATION_PATH = '/registration';
+export const TEAMSPACES_PATH = '/teamspaces';
+export const TEAMSPACE_PATH = '/api/teamspace';
+export const ARTICLE_PATH = '/article';

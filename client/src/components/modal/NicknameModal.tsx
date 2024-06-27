@@ -2,13 +2,15 @@ import styled from 'styled-components';
 import { themes, FlexColumn, BoxBorder, ButtonBorder } from '../../styles/themes';
 import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
-import { postLogin } from '../../api/indexAPI';
+import useUserStore from '../../stores/useUserStore';
+import { useLoginMutation } from '@/hooks/mutationHooks';
 
 const {
   Color: { BoxBackground, SubmitColor },
 } = themes;
 
 export default function NicknameModal() {
+  const { setUserId, setIsLoggedIn } = useUserStore();
   const inputRef = useRef<HTMLInputElement>(null);
   const getInputText = () => {
     const inputNode = inputRef.current;
@@ -16,16 +18,23 @@ export default function NicknameModal() {
   };
   const navigate = useNavigate();
 
-  const handleSubmitClick = () => {
-    postLogin(getInputText() || '').then(() => navigate('/teamspaces'));
+  const successFn = () => {
+    setUserId(getInputText());
+    setIsLoggedIn(true);
+    navigate('/');
   };
+
+  const { fetchLogin } = useLoginMutation({ successFn });
+
+  const handleSubmitClick = () => fetchLogin(getInputText() || '');
+  const handleRegistrationClick = () => navigate('/registration');
 
   return (
     <Wrapper>
       <span>로그인</span>
       <NicknameInput ref={inputRef} type="text" placeholder="닉네임" />
       <SubmitButton onClick={handleSubmitClick}>확인</SubmitButton>
-      <RegistrationButton onClick={() => navigate('/registration')}>회원가입</RegistrationButton>
+      <RegistrationButton onClick={handleRegistrationClick}>회원가입</RegistrationButton>
     </Wrapper>
   );
 }

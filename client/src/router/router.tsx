@@ -5,7 +5,9 @@ import TeamspaceModal from '../components/modal/TeamspaceModal';
 import styled from 'styled-components';
 import { Flex, FlexColumn } from '../styles/themes';
 import Sidebar from '../components/sidebar/Sidebar';
-import Article from '../components/Article';
+import { Suspense } from 'react';
+import Loading from '../components/loading/Loading';
+import Article from '../components/article/Article';
 
 const Screen = styled(FlexColumn)`
   width: 100vw;
@@ -15,6 +17,16 @@ const Screen = styled(FlexColumn)`
 `;
 
 export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: (
+      <Suspense fallback={<Loading />}>
+        <Screen>
+          <TeamspaceModal />
+        </Screen>
+      </Suspense>
+    ),
+  },
   {
     path: '/login',
     element: (
@@ -32,20 +44,14 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: '/teamspaces',
-    element: (
-      <Screen>
-        <TeamspaceModal />
-      </Screen>
-    ),
-  },
-  {
     path: '/teamspace/:teamspaceId/article/:articleId',
     element: (
-      <Flex>
-        <Sidebar />
-        <Article />
-      </Flex>
+      <Suspense fallback={<Loading />}>
+        <Flex>
+          <Sidebar />
+          <Article />
+        </Flex>
+      </Suspense>
     ),
   },
 ]);

@@ -1,0 +1,25 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: ['main', 'dev']
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js path
+        run: echo "PATH=/home/linuxbrew/.linuxbrew/bin:$PATH" >> $GITHUB_ENV
+
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: SSH to EC2 and deploy
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_INSTANCE }} "MONGO_DB_URL='${MONGO_DB_URL}' bash -s" < deploy_script.sh

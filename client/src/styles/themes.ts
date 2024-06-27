@@ -28,10 +28,15 @@ export const ColumnGap = styled(FlexColumn)`
 
 const Color = {
   DefaultColor: '#5f5e5b',
+  SecondColor: '#EFEFEF',
   WeakColor: '#91918e',
   SubmitColor: '#fff',
   BoxBackground: '#f3f4f6',
   SubmitBackground: 'blue',
+  ShadowColor: 'rgba(0, 0, 0, 0.377)',
+  ErrorColor: 'red',
+  BackgroudColor: 'white',
+  PreviewBgColor: 'black',
 };
 
 const FontSize = {
@@ -40,7 +45,7 @@ const FontSize = {
 };
 
 export const BoxBorder = css`
-  border: 1px solid #f3f4f6;
+  border: 1px solid ${Color.BoxBackground};
   border-radius: 16px;
 `;
 
@@ -49,7 +54,7 @@ export const ButtonBorder = css`
 `;
 
 export const BoxBackground = css`
-  background-color: #f3f4f6;
+  background-color: ${Color.BoxBackground};
 `;
 
 export const SubmitBackground = css`
@@ -64,11 +69,69 @@ export const SideMenu = styled(RowGap)`
   width: 100%;
   height: 30px;
   padding: 0 8px;
-  justify-content: flex-start;
+  justify-content: space-between;
   border-radius: 4px;
-  &:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+  transition: all 1s;
+  cursor: pointer;
+
+  button {
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
   }
+
+  &:hover button {
+    opacity: 1;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  &:hover {
+    background-color: ${Color.SecondColor};
+  }
+`;
+
+export const PopupLine = styled(FlexRow)`
+  border-radius: 7px;
+  padding: 0 5px;
+  align-items: center;
+  height: 30px;
+
+  & .optionTitle {
+    margin-left: 15px;
+  }
+  & .optionShortCutKey {
+    color: ${Color.WeakColor};
+  }
+`;
+export const PopupLineWrapper = styled.div`
+  padding: 3px 5px;
+  overflow: hidden;
+`;
+
+export const PopupWrapper = styled(FlexColumn)`
+  box-sizing: border-box;
+  border: 2px solid ${Color.SecondColor};
+  overflow: hidden;
+  border-radius: 10px;
+  min-width: 250px;
+  max-width: 300px;
+
+  box-shadow: -8px 11px 39px -8px ${Color.ShadowColor};
+  -webkit-box-shadow: -8px 11px 39px -8px ${Color.ShadowColor};
+  -moz-box-shadow: -8px 11px 39px -8px ${Color.ShadowColor};
+
+  ${PopupLine}:hover {
+    background-color: ${Color.SecondColor};
+
+    .deleteTitle {
+      color: ${Color.ErrorColor};
+    }
+  }
+`;
+
+export const Position = styled.div`
+  position: relative;
 `;
 
 export const themes = {

@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 import { BoxBackground, BoxBorder, ButtonBorder, FlexColumn, SubmitBackground, themes } from '../../styles/themes';
 import { useRef } from 'react';
-import { postRegistration } from '../../api/indexAPI';
 import { useNavigate } from 'react-router-dom';
+import { useRegistrationMutation } from '@/hooks/mutationHooks';
 
 const {
   Color: { SubmitColor },
@@ -16,9 +16,11 @@ export default function RegistrationModal() {
   };
   const navigate = useNavigate();
 
-  const handleSubmitClick = () => {
-    postRegistration(getInputText() || '').then(() => navigate('/login'));
-  };
+  const successFn = () => navigate('/login');
+
+  const { fetchRegistration } = useRegistrationMutation({ successFn });
+
+  const handleSubmitClick = () => fetchRegistration(getInputText() || '');
 
   return (
     <Wrapper>
