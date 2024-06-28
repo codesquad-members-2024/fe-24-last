@@ -41,7 +41,6 @@ export default function BlockBox({
 
     const targetBlockIndex =
       dropDirection === "TOP" ? dropBlockIndex : dropBlockIndex + 1;
-    console.log(targetBlockIndex);
 
     moveElement({
       elementIndexInfo: {
@@ -55,6 +54,34 @@ export default function BlockBox({
     });
   };
 
+  const handleColumnDrop: OnDrop = ({
+    dropDirection,
+    draggingItemId,
+    dropTargetId,
+  }) => {
+    const [
+      draggedElementBlockIndex,
+      draggedElementColumnIndex,
+      draggedElementIndex,
+    ] = draggingItemId.split("-").map(Number);
+    const [dropBlockIndex, dropColumnIndex] = dropTargetId
+      .split("-")
+      .map(Number);
+    const targetColumnIndex =
+      dropDirection === "LEFT" ? dropColumnIndex : dropColumnIndex + 1;
+    moveElement({
+      elementIndexInfo: {
+        blockIndex: draggedElementBlockIndex,
+        columnIndex: draggedElementColumnIndex,
+        elementIndex: draggedElementIndex,
+      },
+      targetIndexInfo: {
+        blockIndex: dropBlockIndex,
+        columnIndex: targetColumnIndex,
+      },
+    });
+  };
+
   return (
     <Droppable
       id={`${blockIndex}`}
@@ -63,19 +90,28 @@ export default function BlockBox({
     >
       <Wrapper>
         {columnList.map((column, columnIndex) => (
-          <Column key={`${blockId}-${columnIndex}`}>
-            {column.map((element, elementIndex) => (
-              <ElementBox
-                key={element._id}
-                element={element}
-                blockIndex={blockIndex}
-                columnIndex={columnIndex}
-                elementIndex={elementIndex}
-                localBlockList={localBlockList}
-                setFocusedElementId={setFocusedElementId}
-              />
-            ))}
-          </Column>
+          <Droppable
+            key={`${blockId}-${columnIndex}`}
+            id={`${blockIndex}-${columnIndex}`}
+            onDrop={handleColumnDrop}
+            allowedDirections={
+              columnIndex === 0 ? ["LEFT", "RIGHT"] : ["RIGHT"]
+            }
+          >
+            <Column>
+              {column.map((element, elementIndex) => (
+                <ElementBox
+                  key={element._id}
+                  element={element}
+                  blockIndex={blockIndex}
+                  columnIndex={columnIndex}
+                  elementIndex={elementIndex}
+                  localBlockList={localBlockList}
+                  setFocusedElementId={setFocusedElementId}
+                />
+              ))}
+            </Column>
+          </Droppable>
         ))}
       </Wrapper>
     </Droppable>
@@ -87,6 +123,10 @@ const Wrapper = styled.div`
   flex-direction: row;
   width: 100%;
   border: 1px solid red;
+
+  > * {
+    flex: 1;
+  }
 `;
 
 const Column = styled.div`
