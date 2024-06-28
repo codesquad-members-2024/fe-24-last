@@ -28,7 +28,7 @@ const PageList = ({ page, children }: PageProps) => {
 
   const handleDeletePage = () => {
     deletePage(page._id);
-    navigate(-1);
+    navigate("/");
   };
 
   const handleNavPage = () => {

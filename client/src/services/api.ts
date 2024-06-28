@@ -59,7 +59,10 @@ export const useCreateNewData = () => {
 
   const { mutate } = useMutation({
     mutationFn: (newData: DataType) => requestAPI("pages", "POST", newData),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["pages"] }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["pages"] });
+      return data; // 생성된 페이지 데이터를 반환해야 _id 받아올 수 있음
+    },
   });
   return mutate;
 };

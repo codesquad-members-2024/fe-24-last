@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { NewPageData, useCreateNewData } from "../services/api";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
 
 interface PopupProps {
   position: { top: number; left: number };
@@ -8,13 +9,22 @@ interface PopupProps {
 }
 
 const BLOCK_POPUP_LIST = [
-  { type: "h2", name: "제목1", desc: "섹션 제목(대)",
+  {
+    type: "h2",
+    name: "제목1",
+    desc: "섹션 제목(대)",
     img: "https://www.notion.so/images/blocks/header.57a7576a.png",
   },
-  { type: "h3", name: "제목2", desc: "섹션 제목(중)",
+  {
+    type: "h3",
+    name: "제목2",
+    desc: "섹션 제목(중)",
     img: "https://www.notion.so/images/blocks/subheader.9aab4769.png",
   },
-  { type: "h4", name: "제목3", desc: "섹션 제목(소)",
+  {
+    type: "h4",
+    name: "제목3",
+    desc: "섹션 제목(소)",
     img: "https://www.notion.so/images/blocks/subsubheader.d0ed0bb3.png",
   },
 ];
@@ -22,6 +32,7 @@ const BLOCK_POPUP_LIST = [
 const Popup: React.FC<PopupProps> = ({ position, onChangeBlockType }) => {
   const { id: pageId } = useParams<{ id: string }>();
   const createNewData = useCreateNewData();
+  const navigate = useNavigate();
 
   const handleNewPage = () => {
     const newPageData: NewPageData = {
@@ -30,7 +41,13 @@ const Popup: React.FC<PopupProps> = ({ position, onChangeBlockType }) => {
       parent_id: `${pageId}`,
     };
 
-    createNewData(newPageData);
+    createNewData(newPageData, {
+      onSuccess: ({ data }) => {
+        const { _id } = data;
+        navigate(`/${_id}`); 
+      },
+    });
+    onChangeBlockType("button")
   };
 
   return (
@@ -40,12 +57,12 @@ const Popup: React.FC<PopupProps> = ({ position, onChangeBlockType }) => {
         <img src="https://www.notion.so/images/blocks/page.83b0bf31.png" />
         <div>페이지</div>
       </PopupBox>
-      {BLOCK_POPUP_LIST.map((cur, index) => (
-        <PopupBox key={index} onClick={() => onChangeBlockType(cur.type)}>
-          <img src={cur.img} />
+      {BLOCK_POPUP_LIST.map(({ type, name, desc, img }, index) => (
+        <PopupBox key={index} onClick={() => onChangeBlockType(type)}>
+          <img src={img} />
           <div>
-            <p>{cur.name}</p>
-            <p>{cur.desc}</p>
+            <p>{name}</p>
+            <p>{desc}</p>
           </div>
         </PopupBox>
       ))}

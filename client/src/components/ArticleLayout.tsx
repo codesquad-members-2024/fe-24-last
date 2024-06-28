@@ -212,6 +212,7 @@ const StyledTitleBox = styled.h1`
   margin-top: 100px;
   display: flex;
   align-items: center;
+  margin-left: 15px;
   &:empty:before {
     content: attr(aria-placeholder);
     color: gray;
