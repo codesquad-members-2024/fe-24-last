@@ -23,7 +23,7 @@ export default function Droppable({
   onDrop,
   allowedDirections,
   isDisabled,
-  threshold = 5,
+  threshold = 10,
   children,
 }: DroppableProps) {
   const { isDragging, draggingItemId, endDrag } = useDnd();
@@ -46,25 +46,33 @@ export default function Droppable({
         if (
           allowedDirections.includes("TOP") &&
           mouseY <= rect.top + threshold &&
-          mouseY >= rect.top - threshold
+          mouseY >= rect.top - threshold &&
+          mouseX >= rect.left &&
+          mouseX <= rect.right
         ) {
           newHighlight = "TOP";
         } else if (
           allowedDirections.includes("BOTTOM") &&
           mouseY >= rect.bottom - threshold &&
-          mouseY <= rect.bottom + threshold
+          mouseY <= rect.bottom + threshold &&
+          mouseX >= rect.left &&
+          mouseX <= rect.right
         ) {
           newHighlight = "BOTTOM";
         } else if (
           allowedDirections.includes("LEFT") &&
           mouseX <= rect.left + threshold &&
-          mouseX >= rect.left - threshold
+          mouseX >= rect.left - threshold &&
+          mouseY >= rect.top &&
+          mouseY <= rect.bottom
         ) {
           newHighlight = "LEFT";
         } else if (
           allowedDirections.includes("RIGHT") &&
           mouseX >= rect.right - threshold &&
-          mouseX <= rect.right + threshold
+          mouseX <= rect.right + threshold &&
+          mouseY >= rect.top &&
+          mouseY <= rect.bottom
         ) {
           newHighlight = "RIGHT";
         }
