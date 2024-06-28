@@ -1,8 +1,8 @@
-import styled from 'styled-components';
 import { RowGap, SideMenu } from '../../styles/themes';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDeleteArticleMutation, useNewArticleMutation } from '@/hooks/mutationHooks';
 import { useNavigate } from 'react-router-dom';
+import { CopyFilled, DatabaseFilled } from '@ant-design/icons';
 
 interface ArticleDescription {
   _id: string;
@@ -27,18 +27,18 @@ export default function Teamspace({ _id: teamspaceId, title, articles }: Teamspa
     <>
       <SideMenu>
         <RowGap>
-          <IconImage src={''} />
+          <DatabaseFilled />
           <span>{title}</span>
         </RowGap>
         <button onClick={() => fetchNewArticle({ teamspaceId })}>+</button>
       </SideMenu>
-      {articles.map(({ _id: articleId, title: articleTitle, icon }, index) => (
+      {articles.map(({ _id: articleId, title: articleTitle }, index) => (
         <SideMenu
           key={`sidemenu-article-${index}`}
           onClick={() => navigate(`/teamspace/${teamspaceId}/article/${articleId}`)}
         >
           <RowGap>
-            <IconImage src={icon} />
+            <CopyFilled />
             <span>{articleTitle}</span>
           </RowGap>
           <button onClick={() => deleteArticle({ teamspaceId, articleId })}>x</button>
@@ -47,7 +47,3 @@ export default function Teamspace({ _id: teamspaceId, title, articles }: Teamspa
     </>
   );
 }
-
-const IconImage = styled.img`
-  margin-left: 24px;
-`;

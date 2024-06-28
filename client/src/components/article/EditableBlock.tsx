@@ -98,7 +98,6 @@ const ParagraphTag = ({
       onKeyUp={(e) => handleInputWrapper({ e: e as React.KeyboardEvent<HTMLElement>, index })}
       onKeyDown={(e) => stopEnterDefaultEvent(e)}
       onFocus={() => handleFocus(index)}
-      style={{ backgroundColor: 'aliceblue' }}
     >
       {content}
     </StyledBlockTag>
@@ -166,9 +165,9 @@ const OrderedItemTag = ({ item, itemIndex, index, handleInput, handleFocus }: Or
   const plusIconRef = useRef<HTMLDivElement | null>(null);
 
   const handleInputWrapper = (props: { e: React.KeyboardEvent<HTMLElement>; index: number; itemIndex: number }) => {
-    // if (props.e.key === '/') {
-    //   plusIconRef.current?.click();
-    // }
+    if (props.e.key === '/') {
+      plusIconRef.current?.click();
+    }
     handleInput(props);
   };
 
@@ -228,6 +227,7 @@ export const OrderedListIndex = styled.span`
 
 export const StyledBlockTag = styled.div`
   width: 100%;
+  padding: 3px 10px;
   white-space: pre-wrap;
   word-break: break-word;
 `;

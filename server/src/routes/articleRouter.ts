@@ -233,9 +233,8 @@ articleRouter.delete('/:articleId', async (req: Request, res: Response) => {
 
     const articleIndex = teamspace.articles.findIndex((article) => article._id.toString() === articleId);
 
-    if (articleIndex === -1) {
-      return res.status(404).json({ message: 'Article not found' });
-    }
+    if (articleIndex === -1) return res.status(404).json({ message: 'Article not found' });
+    if (articleIndex === 0) return res.status(409).json({ message: 'Delete not allowed' });
 
     const article = teamspace.articles[articleIndex];
     await Article.findByIdAndDelete(article._id);

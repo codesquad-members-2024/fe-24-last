@@ -16,7 +16,7 @@ const { WeakColor, BackgroudColor } = themes.Color;
 
 interface AddPopupProps {
   $left: number;
-  isSlash: boolean;
+  $isSlash: boolean;
 }
 export interface PopupContent {
   img: string;
@@ -79,7 +79,7 @@ export default function AddPopup({ $left = 40, isSlash = false }) {
 
   return (
     <>
-      <AddPopupWrapper $left={$left} isSlash={isSlash}>
+      <AddPopupWrapper $left={$left} $isSlash={isSlash}>
         <Scroll>
           <PopupHeadLineWrapper>
             <span>기본 블록</span>
@@ -140,7 +140,7 @@ const AddPopupWrapper = styled(PopupWrapper)<AddPopupProps>`
   min-width: 350px;
   max-width: 350px;
   position: absolute;
-  top: ${({ isSlash }) => (isSlash ? 0 : 45)}px;
+  top: ${({ $isSlash }) => ($isSlash ? 0 : 45)}px;
   left: ${({ $left }) => $left}px;
   background-color: ${BackgroudColor};
   z-index: 2;

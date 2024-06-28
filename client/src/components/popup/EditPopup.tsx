@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import themes, { PopupWrapper, PopupLineWrapper, PopupLine, Position } from '@/styles/themes';
 import { CommentOutlined, StarFilled, DeleteOutlined, RetweetOutlined, RightOutlined } from '@ant-design/icons';
-import { useRef, useState } from 'react';
+import { MutableRefObject, useRef, useState } from 'react';
 import SubPopup from './SubPopup';
 
 const { BackgroudColor } = themes.Color;
@@ -18,7 +18,7 @@ const editPopupContents: { [key: string]: EditPopupContent } = {
   change: { icon: <RetweetOutlined />, optionShortCutKey: <RightOutlined />, optionTitle: '전환' },
 };
 
-export default function EditPopup() {
+export default function EditPopup({ contentTagRef }: { contentTagRef: MutableRefObject<HTMLDivElement | null> }) {
   const [isShowSubPopup, setIsShowSubPopup] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -34,6 +34,19 @@ export default function EditPopup() {
     }, 300);
   };
 
+  const handleClick = (key: string) => {
+    if (key !== 'delete') return;
+    if (!contentTagRef.current) return;
+
+    contentTagRef.current.textContent = '';
+    const event = new KeyboardEvent('keyup', {
+      key: 'Backspace',
+      bubbles: true,
+      cancelable: true,
+    });
+    contentTagRef.current.dispatchEvent(event);
+  };
+
   return (
     <>
       <EditPopupWrapper>
@@ -41,7 +54,7 @@ export default function EditPopup() {
           const { icon, optionShortCutKey, optionTitle, className } = editPopupContents[key];
           return (
             <PopupLineWrapper key={`edit-popup-${key}`}>
-              <PopupLine onMouseEnter={() => handleMouseEnter(key)}>
+              <PopupLine onMouseEnter={() => handleMouseEnter(key)} onClick={() => handleClick(key)}>
                 <div className={className || ''}>
                   {icon}
                   <span className="optionTitle">{optionTitle}</span>
@@ -58,6 +71,7 @@ export default function EditPopup() {
 }
 
 const EditPopupWrapper = styled(PopupWrapper)`
+  cursor: pointer;
   position: absolute;
   background-color: ${BackgroudColor};
   z-index: 1;

@@ -22,7 +22,7 @@ export default function BlockTag({
     setIsShowSubPopup((prev) => ({ ...prev, plus: !prev.plus }));
     setIsSlash(false);
 
-    if (eventRef.current?.key === '/') {
+    if (eventRef.current?.key === '/' && !eventRef.current.shiftKey) {
       setIsSlash(true);
       eventRef.current = null;
       return;
@@ -99,7 +99,7 @@ export default function BlockTag({
       )}
       {isShowSubPopup.edit && (
         <Position ref={popupRef}>
-          <EditPopup />
+          <EditPopup {...{ contentTagRef }} />
         </Position>
       )}
     </>
