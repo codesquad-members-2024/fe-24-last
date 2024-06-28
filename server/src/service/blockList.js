@@ -69,30 +69,58 @@ export function moveElement(blockList, elementIndexInfo, targetIndexInfo) {
   const { blockIndex, columnIndex, elementIndex } = elementIndexInfo;
   const movedElement =
     blockList[blockIndex]?.columnList[columnIndex]?.[elementIndex];
-  console.log(movedElement);
-  if (
-    targetIndexInfo.columnIndex === undefined &&
-    targetIndexInfo.elementIndex === undefined
-  ) {
-    const newBlock = createNewBlock(movedElement);
 
-    // 블록 리스트에 새로운 블록 추가
-    const blockAddedBlockList = [...blockList];
-    blockAddedBlockList.splice(targetIndexInfo.blockIndex, 0, newBlock);
+  let newBlockList = [...blockList];
 
-    // 원래 위치에서 요소 삭제
-    return deleteElement(blockAddedBlockList, elementIndexInfo);
+  const isElementAfterTarget =
+    blockIndex > targetIndexInfo.blockIndex ||
+    (blockIndex === targetIndexInfo.blockIndex &&
+      columnIndex > targetIndexInfo.columnIndex) ||
+    (blockIndex === targetIndexInfo.blockIndex &&
+      columnIndex === targetIndexInfo.columnIndex &&
+      elementIndex > targetIndexInfo.elementIndex);
+
+  if (isElementAfterTarget) {
+    // 요소가 타겟보다 뒤에 있으면 삭제 먼저하고 추가
+    newBlockList = deleteElement(newBlockList, elementIndexInfo);
+    if (
+      targetIndexInfo.columnIndex === undefined &&
+      targetIndexInfo.elementIndex === undefined
+    ) {
+      const newBlock = createNewBlock(movedElement);
+      newBlockList.splice(targetIndexInfo.blockIndex, 0, newBlock);
+    } else if (targetIndexInfo.elementIndex === undefined) {
+      const newColumn = [movedElement];
+      newBlockList[targetIndexInfo.blockIndex].columnList.splice(
+        targetIndexInfo.columnIndex,
+        0,
+        newColumn
+      );
+    } else {
+      newBlockList = addElement(newBlockList, targetIndexInfo, movedElement);
+    }
+  } else {
+    // 요소가 타겟보다 앞에 있으면 추가 먼저하고 삭제
+    if (
+      targetIndexInfo.columnIndex === undefined &&
+      targetIndexInfo.elementIndex === undefined
+    ) {
+      const newBlock = createNewBlock(movedElement);
+      newBlockList.splice(targetIndexInfo.blockIndex, 0, newBlock);
+    } else if (targetIndexInfo.elementIndex === undefined) {
+      const newColumn = [movedElement];
+      newBlockList[targetIndexInfo.blockIndex].columnList.splice(
+        targetIndexInfo.columnIndex,
+        0,
+        newColumn
+      );
+    } else {
+      newBlockList = addElement(newBlockList, targetIndexInfo, movedElement);
+    }
+    newBlockList = deleteElement(newBlockList, elementIndexInfo);
   }
-  // if (!movedElement) {
-  //   throw new Error("Element not found");
-  // }
 
-  // const elementAddedBlockList = addElement(
-  //   blockList,
-  //   targetIndexInfo,
-  //   movedElement
-  // );
-  // return deleteElement(elementAddedBlockList, elementIndexInfo);
+  return newBlockList;
 }
 
 export function indexGuard(
