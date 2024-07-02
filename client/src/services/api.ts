@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Block } from "../components/ArticleLayout";
 const server = import.meta.env.VITE_SERVER_URL;
 
 interface RequestOptions {
@@ -58,7 +59,10 @@ export const useCreateNewData = () => {
 
   const { mutate } = useMutation({
     mutationFn: (newData: DataType) => requestAPI("pages", "POST", newData),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["pages"] }),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["pages"] });
+      return data; // 생성된 페이지 데이터를 반환해야 _id 받아올 수 있음
+    },
   });
   return mutate;
 };
@@ -76,12 +80,53 @@ export const useDeletePage = () => {
   return mutate;
 };
 
-interface NewBlockMutate {
-  newData: NewBlockData;
-  blockId: string | number;
+export interface NewTitleMutate {
+  newTitle: string;
 }
 
-export const usePatchNewBlock = (pageId: string = "") => {
+export interface NewBlockMutate {
+  newData: NewBlockData;
+  blockId: string | number;
+}  
+
+export interface BlockContentMutate {
+  newContent: string;
+  blockId: string | number;
+}  
+
+export interface BlockOrderMutate {
+  newData: Block[];
+}  
+
+type PatchBlockMutate = NewTitleMutate | NewBlockMutate | BlockContentMutate | BlockOrderMutate
+
+export const usePatchNewTitle = (pageId: string = "") => {
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation({
+    mutationFn: async ({ newTitle }: NewTitleMutate) => {
+      return await requestAPI(`pages/${pageId}`, "PATCH", { title: newTitle });
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["pages"] }),
+  });
+  return mutate;
+};
+
+export const usePatchBlockData = (pageId: string = "") => { // 수정중
+  const queryClient = useQueryClient();
+
+  const { mutate } = useMutation({
+    mutationFn: async ({ endpoint, data }: { endpoint: string; data: PatchBlockMutate }) => {
+      return await requestAPI(endpoint, "PATCH", data);
+    },
+    onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: [`pages/${pageId}`] });
+    },
+  });
+
+  return mutate;
+};
+
+export const usePatchBlock = (pageId: string = "") => {
   const queryClient = useQueryClient();
   const { mutate } = useMutation({
     mutationFn: async ({ newData, blockId }: NewBlockMutate) => {
@@ -90,6 +135,20 @@ export const usePatchNewBlock = (pageId: string = "") => {
         "PATCH",
         newData
       );
+    }, 
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: [`pages/${pageId}`] }),
+  });
+  return mutate;
+};
+
+export const usePatchBlockContent = (pageId: string = "") => {
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation({
+    mutationFn: async ({ newContent, blockId }: BlockContentMutate) => {
+      return await requestAPI(`pages/${pageId}/blocks/${blockId}`, "PATCH", {
+        content: newContent,
+      });
     },
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: [`pages/${pageId}`] }),
@@ -97,51 +156,18 @@ export const usePatchNewBlock = (pageId: string = "") => {
   return mutate;
 };
 
-/**
- *
- * @param parent_id
- * @url ${server}/pages
- */
-
-export const createNewPage = async (parent_id = "") => {
-  try {
-    const response = await fetch(`${server}/pages`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: "",
-        blocklist: [],
-        parent_id,
-      }),
-    });
-    if (!response.ok) {
-      console.log("실패 !");
-    }
-  } catch (error) {
-    console.error("Failed to submit new Pages:", error);
-  }
-};
-
-/**
- *
- * @param endpoint
- * @url ${server}/${endpoint}
- */
-
-export const fetchData = async (endpoint: string) => {
-  try {
-    const response = await fetch(`${server}/${endpoint}`);
-    if (!response.ok) {
-      throw new Error("Failed to fetch data");
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    throw error;
-  }
+export const usePatchBlockOrder = (pageId: string = "") => {
+  const queryClient = useQueryClient();
+  const { mutate } = useMutation({
+    mutationFn: async ({ newData }: BlockOrderMutate) => {
+      return await requestAPI(`pages/${pageId}/blocks`, "PATCH", {
+        blocks: newData,
+      });
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: [`pages/${pageId}`] }),
+  });
+  return mutate;
 };
 
 /**

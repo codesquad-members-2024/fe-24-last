@@ -5,6 +5,7 @@
 #### **페이지 API**
 
 ---
+
 ##### `GET /api/pages`
 
 - **응답:**
@@ -88,6 +89,19 @@
 
 ---
 
+##### `PATCH /api/pages/:pageId/blocks`
+
+- **매개변수:**
+  - `pageId` - 페이지 Id
+- **요청 본문:**
+  - 블록 전체 데이터 (위치 수정)
+- **응답:**
+  - **200 OK:** 수정된 블록 데이터
+  - **404 Not Found**
+  - **500 Internal Server Error**
+
+---
+
 ##### `PATCH /api/pages/:pageId/blocks/:blockId`
 
 - **매개변수:**
@@ -132,7 +146,7 @@
   - 고유한 아이디로 라우팅. `_id`
   - 데이터 구조 고민중.
 
-  ``js
+  ```js
   const pages = [
   {
   Id: "1234567890abcdef1234567890abcdef",
@@ -157,7 +171,7 @@
   page_Id: "eiluhwiuhegl2143",
   position: "애매함",
   };
-  ``
+  ```
 
 - 블록
 
