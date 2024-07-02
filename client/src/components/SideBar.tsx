@@ -4,46 +4,45 @@ import {
   MinusOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { useArticles } from "../contexts/ArticlesProvider";
-import { createNewArticle, deleteArticle } from "../services/api";
+import {
+  useCreateNewArticle,
+  useDeleteArticle,
+  useGetArticles,
+} from "../hooks/api";
 import * as S from "../styles/SideBar";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "react-query";
+import { Article } from "../model/types";
 
 export function SideBar() {
-  const { articlesData, refetch: refetchArticles } = useArticles();
+  const queryClient = useQueryClient();
+  const { data: articlesData, isLoading, error } = useGetArticles();
+  const { mutate: createNewArticle } = useCreateNewArticle(queryClient);
+  const { mutate: deleteArticle } = useDeleteArticle(queryClient);
   const navigate = useNavigate();
 
-  const handleNewArticle = async () => {
-    try {
-      await createNewArticle();
-      refetchArticles();
-    } catch (error) {
-      console.error("Failed to submit new Articles:", error);
-    }
+  const handleNewArticle = () => {
+    createNewArticle();
   };
 
   const handleDeleteArticle = async (articleId: string) => {
-    try {
-      const articleIndex = articlesData.findIndex(
-        (article) => article._id === articleId
-      );
-
-      await deleteArticle(articleId);
-      refetchArticles();
-
-      if (articleIndex > 0) {
-        const previousArticle = articlesData[articleIndex - 1];
-        navigate(`/${previousArticle._id}`);
-      } else if (articlesData.length > 1) {
-        const nextArticle = articlesData[articleIndex + 1];
-        navigate(`/${nextArticle._id}`);
-      } else {
-        navigate(`/`);
-      }
-    } catch (error) {
-      console.error("Failed to delete article:", error);
+    deleteArticle(articleId);
+    const articleIndex = articlesData.findIndex(
+      (article: Article) => article._id === articleId
+    );
+    if (articleIndex > 0) {
+      const previousArticle = articlesData[articleIndex - 1];
+      navigate(`/${previousArticle._id}`);
+    } else if (articlesData.length > 1) {
+      const nextArticle = articlesData[articleIndex + 1];
+      navigate(`/${nextArticle._id}`);
+    } else {
+      navigate(`/`);
     }
   };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error loading Article</div>;
 
   return (
     <>
@@ -57,7 +56,7 @@ export function SideBar() {
         <S.MiddleBox>
           <div className="my-articles">개인 페이지</div>
           <S.Articles>
-            {articlesData.map((article) => (
+            {articlesData.map((article: Article) => (
               <S.SideBarArticleWrapper key={article._id}>
                 <S.ArticleTitleBox>
                   <S.ArticleLink to={`/${article._id}`} state={article}>
