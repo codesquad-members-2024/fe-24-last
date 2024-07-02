@@ -1,8 +1,8 @@
 const serverURL = process.env.REACT_APP_API;
 
-const getPagesData = async () => {
+const getPagesData = async (tableName: string) => {
     try {
-        const response = await fetch(serverURL + "pagesList");
+        const response = await fetch(serverURL + tableName);
         if (!response.ok) {
             throw new Error(
                 `요청이 잘못되었습니다. 상태 코드: ${response.status}`
@@ -15,22 +15,14 @@ const getPagesData = async () => {
     }
 };
 
-const postNewPage = async (parentId: string | null) => {
+const postNewPage = async (parentId: string | null, queryURL: string) => {
     try {
-        const response = await fetch(serverURL + "newPage", {
+        const response = await fetch(serverURL + queryURL, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-                title: "untitled",
-                blocklist: [{
-                    type: "p",
-                    content: "",
-                    children: [],
-                    }],
-                parent_id: !!parentId ? parentId : null,
-            }),
+            body: JSON.stringify({ parentId: parentId }),
         });
         if (!response.ok)
             throw new Error(
@@ -44,9 +36,9 @@ const postNewPage = async (parentId: string | null) => {
     }
 };
 
-const deletePage = async (id: string) => {
+const deletePage = async (id: string, type: string) => {
     try {
-        const response = await fetch(`${serverURL}delete/${id}`, {
+        const response = await fetch(`${serverURL}${type}/delete/${id}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -62,7 +54,7 @@ const deletePage = async (id: string) => {
     }
 };
 
-const patchTitle = async (tableName: string, title: any) => {
+const patchTitle = async (tableName: string, title: {title: string;}) => {
     try {
         const response = await fetch(serverURL + tableName, {
             method: "PATCH",

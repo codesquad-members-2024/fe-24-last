@@ -1,31 +1,12 @@
 import React,{ useState } from "react";
 import { Link } from "react-router-dom";
-import Loading from "./Loading";
-import usePageList from "../hooks/usePageList";
 import NewPageBtn from "../components/NewPageBtn/NewPageBtn";
-import PageListCard from "../components/PageListCard/PageListCard";
 import * as S from "../styles/SideBarStyle";
 import { FormOutlined, DoubleLeftOutlined, DoubleRightOutlined } from "@ant-design/icons";
-interface ChildrenType {
-    type: string;
-    content: string;
-}
-
-export interface BlockType {
-    type: string;
-    content: string;
-    children: [ChildrenType] | [];
-}
-
-export interface PageType {
-    _id: string;
-    title: string;
-    blocklist: [BlockType] | [];
-    parent_id: string | null;
-}
+import PageCardWrap from "../components/PageCardWrap/PageCardWrap";
+import TemplateCardWrap from "../components/TemplateCardWrap/TemplateCardWrap";
 
 const SideBar = () => {
-    const { data, isLoading } = usePageList();
     const [isSIdeToggle, setSideToggle] = useState(false)
 
     const handleSideToggle = () => setSideToggle(!isSIdeToggle)
@@ -38,24 +19,15 @@ const SideBar = () => {
                 </S.TitleBox>
                 <S.IconWrap>
                     {!isSIdeToggle && <DoubleLeftOutlined onClick={handleSideToggle}/>}
-                    <NewPageBtn parentId={null} iconComponent={<FormOutlined />} />
+                    <NewPageBtn parentId={null} iconComponent={<FormOutlined />} type="page" queryURL="newPage"/>
                 </S.IconWrap>
             </S.SideBarHeader>
-            <S.PageCardWrap>
-                {isLoading ? (
-                    <Loading />
-                ) : (
-                    data
-                        .filter((page: PageType) => !page.parent_id)
-                        .map((page: PageType) => (
-                            <PageListCard
-                                key={page._id}
-                                page={page}
-                                pages={data}
-                            />
-                        ))
-                )}
-            </S.PageCardWrap>
+
+            <S.ContentWrapper>
+                <PageCardWrap/>
+                <TemplateCardWrap/>
+            </S.ContentWrapper>
+
         </S.SideBarContainer>
         <S.RightIcon>
         {isSIdeToggle && <DoubleRightOutlined onClick={handleSideToggle}/>}

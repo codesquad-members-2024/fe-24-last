@@ -10,8 +10,9 @@ interface TitleForm {
 }
 
 interface TitleEditorProps {
-    id: string | undefined, 
-    title: string
+    id: string | undefined; 
+    title: string;
+    table: string
 }
 
 interface TitleMutateType {
@@ -19,16 +20,16 @@ interface TitleMutateType {
     title: TitleForm
 }
 
-const TitleEditable = ({ id, title }: TitleEditorProps) => {
+const TitleEditable = ({ id, title, table }: TitleEditorProps) => {
     const queryClient = useQueryClient();
     const { setCurrentTitle } = useTitleContext();
 
     const { mutate } = useMutation({
         mutationFn: async ({ id, title }: TitleMutateType) => {
-            await patchTitle(`page/title/${id}`, title);
+            await patchTitle(`${table}/title/${id}`, title);
         },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["pageList"] });
+            queryClient.invalidateQueries({ queryKey: [table === "page" ? "pageList" : "templateList"] });
         },
     });
 

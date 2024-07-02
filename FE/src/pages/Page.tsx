@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { useMutation, useQueryClient } from "react-query";
-import { BlockType, PageType } from "./SideBar";
+import { BlockType, PageType } from "../components/PageCardWrap/PageCardWrap";
 import { patchBlock } from "../services/pageService";
 import { keyEvent } from "../utils/keyEventUtil";
 import debounce from "../utils/debounce";
@@ -117,7 +117,7 @@ const Page = () => {
 
     return (
         <PageContainer>
-            <TitleEditable id={id} title={state.title} />
+            <TitleEditable id={id} title={state.title} table={"page"}/>
             <DragDropContext onDragEnd={handleOnDragEnd}>
                 <BlockWrap
                     id={id}

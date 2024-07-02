@@ -3,10 +3,12 @@ import cors from "cors";
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import pagesListRouter from "./routes/pageListRouter.js";
+import TemplatesRouter from "./routes/templatesRouter.js";
 import data from "./data.json" assert { type: "json" };
 import Pages from "./Models/pagesSchema.js";
+import Templates from "./Models/templatesSchema.js";
 import 'dotenv/config';
-import WebSocket, { WebSocketServer } from "ws";
+import { WebSocketServer } from "ws";
 
 const url = process.env.REACT_APP_MONGODB_URL;
 
@@ -20,9 +22,12 @@ app.use(express.static("public"))
 
 const initData = async() => {
     // await Pages.deleteMany({});
+    // await Templates.deleteMany({});
     try {
-        const dbCount = await Pages.countDocuments();
-        if (!dbCount) await Pages.insertMany(data);
+        const pagesCount = await Pages.countDocuments();
+        const templatesCount = await Templates.countDocuments();
+        if (!pagesCount) await Pages.insertMany(data.pages);
+        if (!templatesCount) await Templates.insertMany(data.templates);
     } catch (error) {
         console.error("insertMany 에러:", error);
     }
@@ -57,6 +62,7 @@ wss.on("connection", (ws, request) => {
 });
 
 app.use("/", pagesListRouter);
+app.use("/", TemplatesRouter);
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import BlockEditable from './BlockEditable/BlockEditable';
 import { Draggable, Droppable } from "@hello-pangea/dnd";
-import { BlockType } from '../../pages/SideBar';
+import { BlockType } from '../PageCardWrap/PageCardWrap';
 import moveCursorToStartEnd from '../../utils/MoveCursorToStartEnd';
 
 interface BlockWrapProps {

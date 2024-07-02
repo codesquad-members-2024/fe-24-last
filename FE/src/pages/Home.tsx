@@ -23,7 +23,6 @@ const Home = () => {
         nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn		
           nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
     `}</pre>
-    노션 HOME 입니다!
     </HomeStyle>;
 };
 
