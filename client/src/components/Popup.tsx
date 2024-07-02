@@ -1,7 +1,6 @@
 import styled from "styled-components";
 import { NewPageData, useCreateNewData } from "../services/api";
 import { useNavigate, useParams } from "react-router-dom";
-import { useState } from "react";
 
 interface PopupProps {
   position: { top: number; left: number };
