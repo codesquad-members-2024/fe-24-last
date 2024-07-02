@@ -1,21 +1,22 @@
 import styled from 'styled-components';
-import themes, { FlexColumn, FlexRow, PopupLine, PopupLineWrapper, PopupWrapper } from '../../styles/themes';
-import pragraphImg from '../../assets/images/sub_pragraph.png';
-import header1Img from '../../assets/images/sub_header1.png';
-import header2Img from '../../assets/images/sub_header2.png';
-import header3Img from '../../assets/images/sub_header3.png';
-import unOrderListImg from '../../assets/images/sub_unorder_list.png';
-import orderListImg from '../../assets/images/sub_order_list.png';
-import codeImg from '../../assets/images/sub_code.png';
-import quoteImg from '../../assets/images/sub_quote.png';
+import themes, { FlexColumn, FlexRow, PopupLine, PopupLineWrapper, PopupWrapper } from '@/styles/themes';
+import pragraphImg from '@/assets/images/sub_pragraph.png';
+import header1Img from '@/assets/images/sub_header1.png';
+import header2Img from '@/assets/images/sub_header2.png';
+import header3Img from '@/assets/images/sub_header3.png';
+import unOrderListImg from '@/assets/images/sub_unorder_list.png';
+import orderListImg from '@/assets/images/sub_order_list.png';
+import codeImg from '@/assets/images/sub_code.png';
+import quoteImg from '@/assets/images/sub_quote.png';
 import CustomPopupImage from './CustomPopupImage';
 import PreviewPopup from './PreviewPopup';
 import { useState } from 'react';
 
 const { WeakColor, BackgroudColor } = themes.Color;
 
-interface SubPopupProps {
+interface AddPopupProps {
   $left: number;
+  $isSlash: boolean;
 }
 export interface PopupContent {
   img: string;
@@ -38,7 +39,7 @@ export const subPopupContents: { [key: string]: PopupContent } = {
   quote: { img: quoteImg, optionTitle: '인용', description: '인용문을 작성하세요.' },
 };
 
-export default function AddPopup({ $left = 40 }) {
+export default function AddPopup({ $left = 40, isSlash = false }) {
   const [isShowPreviewPopup, setIsShowPreviewPopup] = useState<boolean>(false);
   const [previewType, setPreviewType] = useState<string>('');
   const [previewTop, setPreviewTop] = useState<number>(0);
@@ -54,36 +55,38 @@ export default function AddPopup({ $left = 40 }) {
     setIsShowPreviewPopup(false);
   };
 
+  const getAddPopupContents = () =>
+    Object.keys(subPopupContents).map((key) => {
+      const { img, optionTitle, description } = subPopupContents[key];
+      return (
+        <PopupLineWrapper key={key}>
+          <AddPopupLine onMouseEnter={(e) => handlePreview(key, e)} onMouseLeave={handleMouseLeave}>
+            <FlexRow>
+              <PopupImgWrapper>
+                <CustomPopupImage width={46} height={46} src={img} />
+              </PopupImgWrapper>
+              <PopupItemWrapper>
+                <ItemWrapper>
+                  <Item className="optionTitle">{optionTitle}</Item>
+                  <Item className="description">{description}</Item>
+                </ItemWrapper>
+              </PopupItemWrapper>
+            </FlexRow>
+          </AddPopupLine>
+        </PopupLineWrapper>
+      );
+    });
+
   return (
     <>
-      <SubPopupWrapper $left={$left}>
+      <AddPopupWrapper $left={$left} $isSlash={isSlash}>
         <Scroll>
           <PopupHeadLineWrapper>
             <span>기본 블록</span>
           </PopupHeadLineWrapper>
-
-          {Object.keys(subPopupContents).map((key) => {
-            const { img, optionTitle, description } = subPopupContents[key];
-            return (
-              <PopupLineWrapper key={key}>
-                <AddPopupLine onMouseEnter={(e) => handlePreview(key, e)} onMouseLeave={handleMouseLeave}>
-                  <FlexRow>
-                    <PopupImgWrapper>
-                      <CustomPopupImage width={46} height={46} src={img} />
-                    </PopupImgWrapper>
-                    <PopupItemWrapper>
-                      <ItemWrapper>
-                        <Item className="optionTitle">{optionTitle}</Item>
-                        <Item className="description">{description}</Item>
-                      </ItemWrapper>
-                    </PopupItemWrapper>
-                  </FlexRow>
-                </AddPopupLine>
-              </PopupLineWrapper>
-            );
-          })}
+          {getAddPopupContents()}
         </Scroll>
-      </SubPopupWrapper>
+      </AddPopupWrapper>
       {isShowPreviewPopup && previewType && <PreviewPopup $left={365} $top={previewTop} previewType={previewType} />}
     </>
   );
@@ -133,11 +136,11 @@ const PopupItemWrapper = styled(PopupImgWrapper)`
   }
 `;
 
-const SubPopupWrapper = styled(PopupWrapper)<SubPopupProps>`
+const AddPopupWrapper = styled(PopupWrapper)<AddPopupProps>`
   min-width: 350px;
   max-width: 350px;
   position: absolute;
-  top: 45px;
+  top: ${({ $isSlash }) => ($isSlash ? 0 : 45)}px;
   left: ${({ $left }) => $left}px;
   background-color: ${BackgroudColor};
   z-index: 2;

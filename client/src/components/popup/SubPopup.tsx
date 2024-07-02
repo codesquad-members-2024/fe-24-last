@@ -1,10 +1,10 @@
 import styled from 'styled-components';
 import { CheckOutlined } from '@ant-design/icons';
-import { FlexColumn, FlexRow, PopupLine, PopupLineWrapper, PopupWrapper, Position } from '../../styles/themes';
-import { themes } from '../../styles/themes';
+import { FlexColumn, FlexRow, PopupLine, PopupLineWrapper, PopupWrapper } from '@/styles/themes';
+import { themes } from '@/styles/themes';
 import { subPopupContents } from './AddPopup';
-import { useRef, useState } from 'react';
 import PreviewPopup from './PreviewPopup';
+import { useState } from 'react';
 
 const { BackgroudColor, WeakColor } = themes.Color;
 
@@ -17,10 +17,10 @@ export default function SubPopup({ $left = 10, usedType = 'paragraph' }) {
   const [previewType, setPreviewType] = useState<string>('');
   const [previewTop, setPreviewTop] = useState<number>(0);
 
-  const handlePreview = (key: string, { clientY }: React.MouseEvent) => {
+  const handlePreview = (key: string, index: number) => {
     setPreviewType(key);
     setIsShowPreviewPopup(true);
-    setPreviewTop(clientY - 55);
+    setPreviewTop(index * 36 + 36);
   };
 
   const handleMouseLeave = () => {
@@ -28,24 +28,25 @@ export default function SubPopup({ $left = 10, usedType = 'paragraph' }) {
     setIsShowPreviewPopup(false);
   };
 
+  const getSubPopupContents = () =>
+    Object.keys(subPopupContents).map((key, index) => {
+      const { img, optionTitle } = subPopupContents[key];
+      return (
+        <PopupLineWrapper key={`sub-popup-${key}`}>
+          <PopupLine onMouseEnter={() => handlePreview(key, index)} onMouseLeave={handleMouseLeave}>
+            <FlexRow>
+              <StyledImg src={img} />
+              <Item className="optionTitle">{optionTitle}</Item>
+            </FlexRow>
+            {key === usedType && <CheckOutlined />}
+          </PopupLine>
+        </PopupLineWrapper>
+      );
+    });
+
   return (
     <>
-      <SubPopupWrapper $left={$left}>
-        {Object.keys(subPopupContents).map((key) => {
-          const { img, optionTitle } = subPopupContents[key];
-          return (
-            <PopupLineWrapper key={`sub-popup-${key}`}>
-              <PopupLine onMouseEnter={(e) => handlePreview(key, e)} onMouseLeave={handleMouseLeave}>
-                <FlexRow>
-                  <StyledImg src={img} />
-                  <Item className="optionTitle">{optionTitle}</Item>
-                </FlexRow>
-                {key === usedType && <CheckOutlined />}
-              </PopupLine>
-            </PopupLineWrapper>
-          );
-        })}
-      </SubPopupWrapper>
+      <SubPopupWrapper $left={$left}>{getSubPopupContents()}</SubPopupWrapper>
       {isShowPreviewPopup && previewType && <PreviewPopup $left={500} $top={previewTop} previewType={previewType} />}
     </>
   );

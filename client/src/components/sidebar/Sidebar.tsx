@@ -1,12 +1,15 @@
 import { AppstoreOutlined, HomeOutlined, SettingOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
-import { themes, ColumnGap, SideMenu } from '../../styles/themes';
-import UserStatus from './UserStatus';
-import Teamspace from './Teamspace';
+import { themes, ColumnGap, SideMenu, RowGap } from '../../styles/themes';
 import { TeamspaceDescription, UserDescription } from '../../constants';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { sendTeamspaceRequestById } from '../../api/teamspaceAPI';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import Teamspace from './Teamspace';
+import { useEffect } from 'react';
+import { io } from 'socket.io-client';
+
+const SERVER = import.meta.env.VITE_SERVER;
 
 export interface SidebarProps {
   teamspace: TeamspaceDescription;
@@ -20,27 +23,47 @@ const {
 
 export default function Sidebar() {
   const { teamspaceId } = useParams();
+  const client = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: teamspace } = useSuspenseQuery<TeamspaceDescription>({
-    queryKey: [`teamspace-${teamspaceId}`],
+    queryKey: ['teamspace', `${teamspaceId}`],
     queryFn: () => sendTeamspaceRequestById(teamspaceId || ''),
     refetchOnWindowFocus: false,
   });
 
+  useEffect(() => {
+    const socket = io(SERVER);
+
+    socket.on(`teamspace-${teamspaceId}`, () =>
+      client.invalidateQueries({ queryKey: ['teamspace', `${teamspaceId}`] })
+    );
+
+    return () => {
+      socket.off(`teamspace-${teamspaceId}`);
+    };
+  }, [teamspaceId]);
+
   return (
     <Wrapper>
-      <SideMenu>
-        <HomeButton />
-        <span>홈</span>
+      <SideMenu onClick={() => navigate('/')}>
+        <RowGap>
+          <HomeButton />
+          <span>홈</span>
+        </RowGap>
       </SideMenu>
       <SideMenu>
-        <SettingButton />
-        <span>설정</span>
+        <RowGap>
+          <SettingButton />
+          <span>설정</span>
+        </RowGap>
       </SideMenu>
       {teamspace && <Teamspace {...teamspace} />}
       <SideMenu>
-        <TemplateButton />
-        <span>템플릿</span>
+        <RowGap>
+          <TemplateButton />
+          <span>템플릿</span>
+        </RowGap>
       </SideMenu>
       {/* <SideMenu>현재 접속한 유저</SideMenu>
       users.map((user, index) => (

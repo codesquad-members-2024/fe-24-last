@@ -69,8 +69,23 @@ export const SideMenu = styled(RowGap)`
   width: 100%;
   height: 30px;
   padding: 0 8px;
-  justify-content: flex-start;
+  justify-content: space-between;
   border-radius: 4px;
+  transition: all 1s;
+  cursor: pointer;
+
+  button {
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+  }
+
+  &:hover button {
+    opacity: 1;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
   &:hover {
     background-color: ${Color.SecondColor};
   }

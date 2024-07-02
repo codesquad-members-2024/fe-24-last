@@ -1,4 +1,4 @@
-import { updateArticleRequestById } from '@/api/articleAPI';
+import { postNewArticle, sendArticleDeleteRequest, updateArticleRequestById } from '@/api/articleAPI';
 import { postLogin, postNewTeamspace, postRegistration } from '@/api/mainAPI';
 import { sendTeamspaceDeleteRequest } from '@/api/teamspaceAPI';
 import { useMutation } from '@tanstack/react-query';
@@ -43,10 +43,32 @@ export const useTeamspaceDeleteMutation = ({ successFn }: { successFn: () => voi
   return { deleteTeamspace };
 };
 
-export const useUpdateArticleMutation = () => {
+export const useNewArticleMutation = ({ successFn }: { successFn: () => void }) => {
+  const { mutate: fetchNewArticle } = useMutation({
+    mutationFn: postNewArticle,
+    onSuccess: successFn,
+    onError: ({ message: errorMessage }) => message.warning(errorMessage),
+  });
+
+  return { fetchNewArticle };
+};
+
+export const useUpdateArticleMutation = ({ successFn }: { successFn: () => void }) => {
   const { mutate: updateArticle } = useMutation({
     mutationFn: updateArticleRequestById,
+    onSuccess: successFn,
+    onError: ({ message: errorMessage }) => message.warning(errorMessage),
   });
 
   return { updateArticle };
+};
+
+export const useDeleteArticleMutation = ({ successFn }: { successFn: () => void }) => {
+  const { mutate: deleteArticle } = useMutation({
+    mutationFn: sendArticleDeleteRequest,
+    onSuccess: successFn,
+    onError: ({ message: errorMessage }) => message.warning(errorMessage),
+  });
+
+  return { deleteArticle };
 };

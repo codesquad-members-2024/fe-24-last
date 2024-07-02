@@ -4,7 +4,7 @@ import useBlockController from '../../hooks/useBlockController';
 import { ColumnGap } from '../../styles/themes';
 
 export default function BlockController(props: BlockControllerProps) {
-  const { blocks } = props;
+  const { blocks = [] } = props;
   const { blockControllerRef, handleInput } = useBlockController(props);
   const showPopup = () => {};
 

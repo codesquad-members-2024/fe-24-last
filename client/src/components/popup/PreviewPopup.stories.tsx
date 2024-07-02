@@ -60,17 +60,24 @@ const Template: StoryFn<PreviewPopupProps> = (args) => <PreviewPopup {...args} /
 
 export const ParagraphEditPopup = Template.bind({});
 ParagraphEditPopup.args = mockPreviewParagraph;
+
 export const Header1Paragraph = Template.bind({});
 Header1Paragraph.args = mockHeader1Paragraph;
+
 export const Header2Paragraph = Template.bind({});
 Header2Paragraph.args = mockHeader2Paragraph;
+
 export const Header3Paragraph = Template.bind({});
 Header3Paragraph.args = mockHeader3Paragraph;
+
 export const UnOrderListParagraph = Template.bind({});
 UnOrderListParagraph.args = mockUnOrderListParagraph;
+
 export const OrderListParagraph = Template.bind({});
 OrderListParagraph.args = mockOrderListParagraph;
+
 export const CodeParagraph = Template.bind({});
 CodeParagraph.args = mockCodeParagraph;
+
 export const QuoteParagraph = Template.bind({});
 QuoteParagraph.args = mockQuoteParagraph;

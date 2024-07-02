@@ -1,23 +1,47 @@
 import { HolderOutlined, PlusOutlined } from '@ant-design/icons';
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { MutableRefObject, ReactNode, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { FlexRow } from '../../styles/themes';
+import { FlexRow, Position } from '../../styles/themes';
 import AddPopup from '../popup/AddPopup';
 import EditPopup from '../popup/EditPopup';
 
-export default function BlockTag({ contentTag }: { contentTag: ReactNode }) {
+export default function BlockTag({
+  contentTagRef,
+  plusIconRef,
+  contentTag,
+}: {
+  contentTagRef: MutableRefObject<HTMLDivElement | null>;
+  plusIconRef: MutableRefObject<HTMLDivElement | null>;
+  contentTag: ReactNode;
+}) {
+  const eventRef = useRef<KeyboardEvent | null>(null);
   const [isShowSubPopup, setIsShowSubPopup] = useState({ edit: false, plus: false });
+  const [isSlash, setIsSlash] = useState<boolean>(false);
   const showEditPopup = () => setIsShowSubPopup((prev) => ({ ...prev, edit: !prev.edit }));
-  const showPlusPopup = () => setIsShowSubPopup((prev) => ({ ...prev, plus: !prev.plus }));
+  const showPlusPopup = () => {
+    setIsShowSubPopup((prev) => ({ ...prev, plus: !prev.plus }));
+    setIsSlash(false);
+
+    if (eventRef.current?.key === '/' && !eventRef.current.shiftKey) {
+      setIsSlash(true);
+      eventRef.current = null;
+      return;
+    }
+
+    if (contentTagRef.current) {
+      const event = new KeyboardEvent('keyup', {
+        key: 'Enter',
+        bubbles: true,
+        cancelable: true,
+      });
+      contentTagRef.current.dispatchEvent(event);
+    }
+  };
   const popupRef = useRef<HTMLDivElement | null>(null);
 
   const popupType: { [key: string]: () => void } = {
-    edit: () => {
-      showEditPopup();
-    },
-    plus: () => {
-      showPlusPopup();
-    },
+    edit: showEditPopup,
+    plus: showPlusPopup,
   };
 
   type PopupTypeKey = keyof typeof popupType;
@@ -25,6 +49,7 @@ export default function BlockTag({ contentTag }: { contentTag: ReactNode }) {
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const target = e.currentTarget as HTMLElement;
     const type = target.getAttribute('data-attr-type');
+
     if (!type || !(type in popupType)) return;
     popupType[type as PopupTypeKey]();
   };
@@ -41,6 +66,19 @@ export default function BlockTag({ contentTag }: { contentTag: ReactNode }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleEventByType = (e: KeyboardEvent) => (eventRef.current = e);
+
+  useEffect(() => {
+    const currentContentTag = contentTagRef.current;
+    if (currentContentTag) {
+      currentContentTag.addEventListener('keyup', handleEventByType);
+
+      return () => {
+        currentContentTag.removeEventListener('keyup', handleEventByType);
+      };
+    }
+  }, []);
+
   return (
     <>
       <BlockWrapper>
@@ -48,21 +86,21 @@ export default function BlockTag({ contentTag }: { contentTag: ReactNode }) {
           <IconWrapper data-attr-type="edit" onClick={handleClick}>
             <HolderOutlined />
           </IconWrapper>
-          <IconWrapper data-attr-type="plus" onClick={handleClick}>
+          <IconWrapper data-attr-type="plus" onClick={handleClick} ref={plusIconRef}>
             <PlusOutlined />
           </IconWrapper>
         </Icons>
         {contentTag}
       </BlockWrapper>
       {isShowSubPopup.plus && (
-        <div ref={popupRef}>
-          <AddPopup />
-        </div>
+        <Position ref={popupRef}>
+          <AddPopup isSlash={isSlash} />
+        </Position>
       )}
       {isShowSubPopup.edit && (
-        <div ref={popupRef}>
-          <EditPopup />
-        </div>
+        <Position ref={popupRef}>
+          <EditPopup {...{ contentTagRef }} />
+        </Position>
       )}
     </>
   );
@@ -77,7 +115,6 @@ const Icons = styled(FlexRow)`
   cursor: pointer;
   position: relative;
   transition: all;
-  position: relative;
 `;
 
 const IconWrapper = styled.div`

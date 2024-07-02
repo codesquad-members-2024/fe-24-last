@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { Block } from '../constants';
-import { sendArticleRequestById, updateArticleRequestById } from '../api/articleAPI';
+import { Article, Block } from '../constants';
+import { sendArticleRequestById } from '../api/articleAPI';
 import { io } from 'socket.io-client';
 import { debounce } from '../utils/timeoutUtils';
 import { useParams } from 'react-router-dom';
@@ -12,26 +12,28 @@ const SERVER = import.meta.env.VITE_SERVER;
 export default function useArticle() {
   const clientBlocksRef = useRef<Block[]>([]);
   const { teamspaceId, articleId } = useParams();
-  const queryClient = useQueryClient();
+  const client = useQueryClient();
 
-  const { data: blocks = [] } = useSuspenseQuery<Block[]>({
-    queryKey: [`article-${articleId}`],
+  const { data: article } = useSuspenseQuery<Article>({
+    queryKey: ['article', `${articleId}`],
     queryFn: async () => {
       const response = await sendArticleRequestById({ teamspaceId, articleId });
-      return response.content;
+      const { content } = response;
+      clientBlocksRef.current = content;
+
+      return response;
     },
     refetchOnWindowFocus: false,
   });
 
-  const { updateArticle } = useUpdateArticleMutation();
+  const successFn = () => {};
+
+  const { updateArticle } = useUpdateArticleMutation({ successFn });
 
   useEffect(() => {
     const socket = io(SERVER);
 
-    socket.on(`article-${articleId}`, ({ content }) => {
-      clientBlocksRef.current = content;
-      queryClient.setQueryData([`article-${articleId}`], content);
-    });
+    socket.on(`article-${articleId}`, () => client.invalidateQueries({ queryKey: ['article', `${articleId}`] }));
 
     return () => {
       socket.off(`article-${articleId}`);
@@ -40,18 +42,19 @@ export default function useArticle() {
 
   const debouncedFetch = useCallback(
     debounce((updatedBlocks: Block[]) => {
-      updateArticleRequestById({
+      updateArticle({
         teamspaceId,
         articleId,
         blocks: updatedBlocks,
       });
     }, 1000),
-    []
+    [teamspaceId, articleId]
   );
 
   return {
+    title: article.title,
     clientBlocksRef,
-    blocks,
+    blocks: article.content,
     setBlocks: (newBlocks: Block[]) => (clientBlocksRef.current = newBlocks),
     debouncedFetch,
   };

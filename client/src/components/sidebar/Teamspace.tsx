@@ -1,5 +1,8 @@
-import styled from 'styled-components';
-import { SideMenu } from '../../styles/themes';
+import { RowGap, SideMenu } from '../../styles/themes';
+import { useQueryClient } from '@tanstack/react-query';
+import { useDeleteArticleMutation, useNewArticleMutation } from '@/hooks/mutationHooks';
+import { useNavigate } from 'react-router-dom';
+import { CopyFilled, DatabaseFilled } from '@ant-design/icons';
 
 interface ArticleDescription {
   _id: string;
@@ -13,23 +16,34 @@ export interface TeamspaceProps {
   articles: ArticleDescription[];
 }
 
-export default function Teamspace({ title, articles }: TeamspaceProps) {
+export default function Teamspace({ _id: teamspaceId, title, articles }: TeamspaceProps) {
+  const client = useQueryClient();
+  const navigate = useNavigate();
+  const successFn = () => client.invalidateQueries({ queryKey: ['teamspace', `${teamspaceId}`] });
+  const { fetchNewArticle } = useNewArticleMutation({ successFn });
+  const { deleteArticle } = useDeleteArticleMutation({ successFn });
+
   return (
     <>
       <SideMenu>
-        <div></div>
-        <span>{title}</span>
+        <RowGap>
+          <DatabaseFilled />
+          <span>{title}</span>
+        </RowGap>
+        <button onClick={() => fetchNewArticle({ teamspaceId })}>+</button>
       </SideMenu>
-      {articles.map(({ title: articleTitle, icon }, index) => (
-        <SideMenu key={`sidemenu-article-${index}`}>
-          <IconImage src={icon} />
-          <span>{articleTitle}</span>
+      {articles.map(({ _id: articleId, title: articleTitle }, index) => (
+        <SideMenu
+          key={`sidemenu-article-${index}`}
+          onClick={() => navigate(`/teamspace/${teamspaceId}/article/${articleId}`)}
+        >
+          <RowGap>
+            <CopyFilled />
+            <span>{articleTitle}</span>
+          </RowGap>
+          <button onClick={() => deleteArticle({ teamspaceId, articleId })}>x</button>
         </SideMenu>
       ))}
     </>
   );
 }
-
-const IconImage = styled.img`
-  margin-left: 24px;
-`;

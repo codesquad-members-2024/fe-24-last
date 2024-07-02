@@ -1,6 +1,6 @@
 import { Meta, StoryFn } from '@storybook/react';
 import BlockTag from './BlockTag';
-import { ReactNode } from 'react';
+import { MutableRefObject, ReactNode, useRef } from 'react';
 import { OrderedListIndex, StyledBlockTag } from './EditableBlock';
 import { Flex } from '../../styles/themes';
 
@@ -44,21 +44,33 @@ export default {
   component: BlockTag,
 } as Meta;
 
-const Template: StoryFn<{ contentTag: ReactNode }> = (args) => <BlockTag {...args} />;
+const Template: StoryFn<{
+  contentTagRef: MutableRefObject<HTMLDivElement | null>;
+  plusIconRef: MutableRefObject<HTMLDivElement | null>;
+  contentTag: ReactNode;
+}> = (args) => <BlockTag {...args} />;
 
 export const HeaderBlockTag = Template.bind({});
 HeaderBlockTag.args = {
+  contentTagRef: useRef(null),
+  plusIconRef: useRef(null),
   contentTag: HeaderContentTag,
 };
 export const ParagraphBlockTag = Template.bind({});
 ParagraphBlockTag.args = {
+  contentTagRef: useRef(null),
+  plusIconRef: useRef(null),
   contentTag: ParagraphContentTag,
 };
 export const UnorderedListBlockTag = Template.bind({});
 UnorderedListBlockTag.args = {
+  contentTagRef: useRef(null),
+  plusIconRef: useRef(null),
   contentTag: UnorderedListContentTag,
 };
 export const OrderedListBlockTag = Template.bind({});
 OrderedListBlockTag.args = {
+  contentTagRef: useRef(null),
+  plusIconRef: useRef(null),
   contentTag: OrderedListContentTag,
 };

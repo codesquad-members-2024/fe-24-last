@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { PopupWrapper, PopupLineWrapper, PopupLine } from '../../styles/themes';
+import { PopupWrapper, PopupLineWrapper, PopupLine } from '@/styles/themes';
 import { CommentOutlined, DeleteOutlined } from '@ant-design/icons';
 
 export default function TeamSpaceEditPopup() {

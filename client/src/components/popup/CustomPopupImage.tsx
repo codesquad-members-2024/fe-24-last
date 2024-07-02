@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import themes from '../../styles/themes';
+import themes from '@/styles/themes';
 
 const { BackgroudColor: defaultBackGroundColor, ShadowColor } = themes.Color;
 

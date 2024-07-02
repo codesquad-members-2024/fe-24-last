@@ -1,0 +1,49 @@
+name: frontend deployment
+
+on:
+  push:
+    branches: ['main', 'dev']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code.
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: ./client/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+            ${{ runner.OS }}-
+
+      - name: Install Dependencies
+        run: npm install
+        working-directory: ./client
+
+      - name: Build
+        run: CI=false npm run build
+        working-directory: ./client
+        env:
+          VITE_SERVER: ${{ secrets.VITE_APP_SERVER }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.VITE_APP_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.VITE_APP_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.VITE_APP_REGION }}
+
+      - name: Deploy to S3
+        run: aws s3 sync ./client/dist/ s3://${{ secrets.VITE_APP_BUCKET_NAME }} --delete --exclude "public/*"
+
+      - name: Invalidate CloudFront Cache
+        run: aws cloudfront create-invalidation --distribution-id ${{secrets.CLOUDFRONT_DISTRIBUTION_ID}} --paths "/*"

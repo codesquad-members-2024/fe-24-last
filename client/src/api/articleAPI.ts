@@ -6,7 +6,8 @@ interface ArticleRequestProps {
 }
 
 interface UpdateArticleProps extends ArticleRequestProps {
-  blocks: Block[];
+  blocks?: Block[];
+  title?: string;
 }
 
 const SERVER = import.meta.env.VITE_SERVER;
@@ -25,10 +26,25 @@ export const sendArticleRequestById = async ({ teamspaceId = '', articleId = '' 
   }
 };
 
+export const postNewArticle = async ({ teamspaceId = '' }: { teamspaceId: string }) => {
+  try {
+    const response = await fetch(`${SERVER}${TEAMSPACE_PATH}/${teamspaceId}${ARTICLE_PATH}`, {
+      method: 'POST',
+    });
+
+    if (!response.ok) throw new Error(UNKNOWN_ERROR_MESSAGE);
+
+    return response;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export const updateArticleRequestById = async ({
   teamspaceId = '',
   articleId = '',
-  blocks = [],
+  blocks: content,
+  title,
 }: UpdateArticleProps) => {
   try {
     const response = await fetch(`${SERVER}${TEAMSPACE_PATH}/${teamspaceId}${ARTICLE_PATH}/${articleId}`, {
@@ -36,12 +52,26 @@ export const updateArticleRequestById = async ({
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ content: blocks }),
+      body: JSON.stringify({ title, content }),
     });
 
     if (!response.ok) throw new Error(UNKNOWN_ERROR_MESSAGE);
 
     return response.json();
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const sendArticleDeleteRequest = async ({ teamspaceId = '', articleId = '' }) => {
+  try {
+    const response = await fetch(`${SERVER}${TEAMSPACE_PATH}/${teamspaceId}${ARTICLE_PATH}/${articleId}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) throw new Error(UNKNOWN_ERROR_MESSAGE);
+
+    return response;
   } catch (error) {
     console.error(error);
   }

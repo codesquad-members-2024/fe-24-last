@@ -98,22 +98,21 @@ articleRouter.get('/:articleId', async (req: Request, res: Response) => {
 articleRouter.post('/', async (req: Request, res: Response) => {
   try {
     const { teamspaceId } = req.params;
-    const { title, content } = req.body;
-
-    if (!title || !content) {
-      return res.status(400).json({ message: 'Title and content are required' });
-    }
 
     const teamspace = await Teamspace.findOne({ _id: teamspaceId });
     if (!teamspace) {
       return res.status(404).json({ message: 'Teamspace not found' });
     }
 
-    const newArticle = new Article({ title, content });
+    const defaultBlock = { type: 'paragraph', content: '내용 없음' };
+    const newArticle = new Article({ title: '제목 없음', content: [defaultBlock] });
     await newArticle.save();
 
-    teamspace.articles.push(newArticle._id);
+    teamspace.articles.push(newArticle);
     await teamspace.save();
+
+    const io = (req as unknown as CustomRequest).io;
+    if (io) io.emit(`teamspace-${teamspaceId}`, teamspace);
 
     res.status(201).json(newArticle);
   } catch (error) {
@@ -163,7 +162,7 @@ articleRouter.post('/', async (req: Request, res: Response) => {
 articleRouter.patch('/:articleId', async (req: Request, res: Response) => {
   try {
     const { teamspaceId, articleId } = req.params;
-    const { content } = req.body;
+    const { title, content } = req.body;
 
     const teamspace = await Teamspace.findOne({ _id: teamspaceId }).populate('articles');
     if (!teamspace) {
@@ -176,6 +175,7 @@ articleRouter.patch('/:articleId', async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Article not found' });
     }
 
+    article.title = title || article.title;
     article.content = content || article.content;
     article.updatedAt = Date.now().toString();
     await teamspace.save();
@@ -183,6 +183,7 @@ articleRouter.patch('/:articleId', async (req: Request, res: Response) => {
     const io = (req as unknown as CustomRequest).io;
     if (io) {
       io.emit(`article-${article._id}`, article);
+      io.emit(`teamspace-${teamspaceId}`);
     }
 
     res.json(article);
@@ -232,9 +233,8 @@ articleRouter.delete('/:articleId', async (req: Request, res: Response) => {
 
     const articleIndex = teamspace.articles.findIndex((article) => article._id.toString() === articleId);
 
-    if (articleIndex === -1) {
-      return res.status(404).json({ message: 'Article not found' });
-    }
+    if (articleIndex === -1) return res.status(404).json({ message: 'Article not found' });
+    if (articleIndex === 0) return res.status(409).json({ message: 'Delete not allowed' });
 
     const article = teamspace.articles[articleIndex];
     await Article.findByIdAndDelete(article._id);
@@ -243,9 +243,7 @@ articleRouter.delete('/:articleId', async (req: Request, res: Response) => {
     await teamspace.save();
 
     const io = (req as unknown as CustomRequest).io;
-    if (io) {
-      io.emit('articleDeleted', articleId);
-    }
+    if (io) io.emit(`teamspace-${teamspaceId}`, teamspace);
 
     res.status(200).json({ message: 'Article successfully deleted' });
   } catch (error) {

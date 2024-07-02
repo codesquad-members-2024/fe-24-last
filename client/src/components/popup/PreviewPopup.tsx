@@ -1,15 +1,15 @@
 import styled from 'styled-components';
-import { FlexColumn, PopupWrapper } from '../../styles/themes';
+import { FlexColumn, PopupWrapper } from '@/styles/themes';
 import CustomPopupImage from './CustomPopupImage';
-import themes from '../../styles/themes';
-import pragraphImg from '../../assets/images/preview_pragraph.png';
-import header1Img from '../../assets/images/preview_header1.png';
-import header2Img from '../../assets/images/preview_header2.png';
-import header3Img from '../../assets/images/preview_header3.png';
-import unOrderListImg from '../../assets/images/preview_unorder_list.png';
-import orderListImg from '../../assets/images/preview_order_list.png';
-import codeImg from '../../assets/images/preview_code.png';
-import quoteImg from '../../assets/images/preview_quote.png';
+import themes from '@/styles/themes';
+import pragraphImg from '@/assets/images/preview_pragraph.png';
+import header1Img from '@/assets/images/preview_header1.png';
+import header2Img from '@/assets/images/preview_header2.png';
+import header3Img from '@/assets/images/preview_header3.png';
+import unOrderListImg from '@/assets/images/preview_unorder_list.png';
+import orderListImg from '@/assets/images/preview_order_list.png';
+import codeImg from '@/assets/images/preview_code.png';
+import quoteImg from '@/assets/images/preview_quote.png';
 
 const { BackgroudColor, PreviewBgColor } = themes.Color;
 

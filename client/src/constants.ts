@@ -45,6 +45,13 @@ export interface BlockControllerProps {
   handleFetch: (blocks: Block[], option?: boolean) => void;
 }
 
+export interface Article {
+  _id: string;
+  title: string;
+  content: Block[];
+  updatedAt: string;
+}
+
 export interface TeamspaceDescription {
   _id: string;
   title: string;
